@@ -12,15 +12,22 @@ let data;
 function updateTotal() {
   if (!data || !data.items.some((i) => i.price != null)) return;
   const cur = data.currency || 'USD';
-  let sum = 0;
+  // Undecided priced lines count as proposed, so the total starts at the full price
+  // and only drops when the client rejects a line.
+  let sum = 0, decided = 0;
   for (const it of data.items) {
+    if (it.price == null) continue;
     const r = document.querySelector(`input[name="d-${CSS.escape(it.id)}"]:checked`);
-    if (it.price != null && r && r.value === 'accepted') sum += Math.round(it.price * 100);
+    if (r) decided++;
+    if (!r || r.value === 'accepted') sum += Math.round(it.price * 100);
   }
   sum /= 100;
+  const priced = data.items.filter((i) => i.price != null).length;
+  $('#total-label').textContent = decided < priced ? 'Proposed total' : 'Total you are approving';
   const base = data.parent && data.parent.total != null ? data.parent.total : null;
   $('#total-amt').textContent = money(sum, cur);
-  $('#total-delta').textContent = base != null ? `Signed before: ${money(base, cur)} · change: ${sum - base >= 0 ? '+' : '−'}${money(Math.abs(Math.round((sum - base) * 100) / 100), cur)}` : 'Updates as you accept or reject priced lines.';
+  const delta = base != null ? Math.round((sum - base) * 100) / 100 : 0;
+  $('#total-delta').textContent = base != null ? `Signed before: ${money(base, cur)} · change: ${delta >= 0 ? '+' : '−'}${money(Math.abs(delta), cur)}` : 'Rejecting a priced line removes it from the total.';
   $('#total').classList.remove('hidden');
 }
 async function init() {

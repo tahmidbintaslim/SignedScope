@@ -77,3 +77,19 @@ test('draft falls back to rules without an API key', async () => {
   ]);
   assert.equal((await call(draft, { text: '' })).status, 400);
 });
+
+test('ref tags are validated and counted without storing the IP', async () => {
+  const hit = require('../api/hit');
+  assert.equal(hit.cleanRef('Outreach'), 'outreach');
+  assert.throws(() => hit.cleanRef('bad ref!'));
+  assert.throws(() => hit.cleanRef(''));
+  process.env.BLOB_READ_WRITE_TOKEN = 'test';
+  const keys = [];
+  require.cache[require.resolve('@vercel/blob')] = { exports: { put: async (k) => { keys.push(k); return {}; } }, loaded: true, id: 'blob' };
+  const r = await call(hit, { ref: 'hn' });
+  assert.equal(r.status, 200);
+  assert.match(keys[0], /^refs\/hn\/\d{4}-\d{2}-\d{2}\/[0-9a-f]{16}$/);
+  assert.ok(!keys.some((k) => k.includes('192.0.2.1')));
+  delete process.env.BLOB_READ_WRITE_TOKEN;
+  delete require.cache[require.resolve('@vercel/blob')];
+});

@@ -2,27 +2,31 @@
 const { chromium } = require('playwright');
 const out = require('path').join(__dirname, '..', 'docs', 'img');
 require('fs').mkdirSync(out, { recursive: true });
-const B = 'http://localhost:3000';
+const B = process.env.BASE || 'http://localhost:3000';
 (async () => {
   const b = await chromium.launch();
-  const ctx = await b.newContext({ viewport: { width: 1200, height: 820 }, deviceScaleFactor: 2, recordVideo: { dir: '/tmp/scopelock-video', size: { width: 1200, height: 820 } } });
+  const ctx = await b.newContext({ viewport: { width: 1200, height: 820 }, deviceScaleFactor: 2, recordVideo: { dir: '/tmp/signedscope-video', size: { width: 1200, height: 820 } } });
   const p = await ctx.newPage();
   const pause = (ms = 700) => p.waitForTimeout(ms);
   const shot = (n, full) => p.screenshot({ path: `${out}/${n}.png`, fullPage: !!full });
 
-  await p.goto(B + '/'); await pause(1200); await shot('01-landing');
+  await p.goto(B + '/'); await pause(3500); await shot('01-landing');
   // 1. Agency creates a sign-off
   await p.goto(B + '/new'); await pause();
   await p.fill('#title', 'Acme storefront: Phase 1');
   await p.fill('#client', 'Acme Co.');
   await p.fill('#agency', 'Northwind Studio');
   await p.fill('#agencyEmail', 'pm@northwind.studio');
-  const rows = p.locator('#items .item input');
+  const rows = p.locator('#items .item input:not(.amt-in)');
+  const textAt = (i) => p.locator('#items .item input:not(.amt-in)').nth(i);
+  const priceAt = (i) => p.locator('#items .item .amt-in').nth(i);
   await rows.nth(0).type('Home, product and cart pages (responsive)', { delay: 15 });
-  await p.click('#add-scope'); await p.locator('#items .item input').nth(3).type('Stripe checkout with Apple Pay', { delay: 15 });
+  await p.click('#add-scope'); await textAt(3).type('Stripe checkout with Apple Pay', { delay: 15 });
   await rows.nth(1).type('Guest checkout completes in under 60 seconds', { delay: 15 });
-  await p.click('#add-uat'); await p.locator('#items .item input').nth(4).type('Lighthouse performance score 90+ on mobile', { delay: 15 });
+  await p.click('#add-uat'); await textAt(4).type('Lighthouse performance score 90+ on mobile', { delay: 15 });
   await rows.nth(2).type('Blog and SEO content', { delay: 15 });
+  await priceAt(0).fill('4200'); await priceAt(3).fill('900');
+  await p.fill('#payLink', 'https://buy.stripe.com/test_example');
   await p.fill('#notes', 'Please review each item. Anything you reject comes back to us as a change.');
   await pause(); await shot('02-create', true);
   await p.click('button[type=submit]'); await p.waitForSelector('#done:not(.hidden)'); await pause(1000); await shot('03-link-ready');
@@ -51,10 +55,10 @@ const B = 'http://localhost:3000';
   await p.click('#cr'); await p.waitForSelector('#cr-banner:not(.hidden)'); await pause(800);
   const items = p.locator('#items .item');
   for (let i = 0; i < await items.count(); i++) {
-    const inp = items.nth(i).locator('input');
+    const inp = items.nth(i).locator('input:not(.amt-in)');
     if ((await inp.inputValue()).includes('Apple Pay')) await inp.fill('Stripe checkout (cards only)');
   }
-  await p.click('#add-scope'); await p.locator('#items .item input').last().type('Wishlist page', { delay: 15 });
+  await p.click('#add-scope'); await textAt(await items.count() - 1).type('Wishlist page', { delay: 15 }); await priceAt(await items.count() - 1).fill('480');
   await pause(); await shot('06-change-request', true);
   await p.click('#f button[type=submit]'); await p.waitForSelector('#done:not(.hidden)');
   const crUrl = await p.inputValue('#link');

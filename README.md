@@ -7,7 +7,7 @@ No database and no client login. Formerly ScopeLock.</p>
 
 <p align="center"><a href="https://scopelock-sable.vercel.app"><b>Try the live demo</b></a> &nbsp;·&nbsp; free, no signup</p>
 
-<p align="center"><img src="docs/img/demo.gif" width="760" alt="Demo: an agency creates a sign-off, the client accepts and rejects items and signs, then a change request shows the diff"></p>
+<p align="center"><img src="docs/img/demo.gif" width="760" alt="Demo: a client request is dragged onto the signed scope, priced, approved by the client and signed, and the total updates"></p>
 
 ## Why
 
@@ -65,7 +65,7 @@ No framework and no build step: static files in `public/` plus six Node function
 SIGNING_SECRET=$(openssl rand -base64 32) npm run dev   # http://localhost:3000, no Vercel CLI needed
 ```
 
-`scripts/capture-screenshots.js` regenerates everything in `docs/img/` from a real run against the dev server.
+`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`, and `scripts/capture-demo.js` records `docs/img/demo.gif` and `public/og.png`, both from a real run against the dev server (`BASE=http://localhost:3000`).
 
 Payments: Pro and Agency are not built yet, so the landing page links to the waitlist. The `/api/checkout` route and the Stripe test-mode links stay in place for when live mode is approved.
 

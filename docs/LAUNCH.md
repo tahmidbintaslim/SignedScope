@@ -7,7 +7,7 @@ ScopeLock is now **SignedScope**, because scopelock.app is an unrelated live pro
 - [ ] Trademark search for "SignedScope" (USPTO TESS, EUIPO TMview, DIP Thailand), then buy `signedscope.com` and `signedscope.app`. Both were unregistered on 2026-11-03.
 - [ ] Add both domains to the Vercel project. Make `signedscope.com` primary, and redirect `scopelock-sable.vercel.app/*` to the same path on `signedscope.com`. Existing `/sign#`, `/receipt#` and `/new#cr=` links keep working, because the fragment survives a redirect and the signing secret is unchanged.
 - [ ] Optional: set `ANTHROPIC_API_KEY` in Vercel for AI drafts. Without it, drafting uses the rule-based splitter.
-- [ ] Regenerate `docs/img/` with `scripts/capture-screenshots.js`, and record a 20-second GIF of the home page demo for Product Hunt and the README.
+- [x] `docs/img/` regenerated (`scripts/capture-screenshots.js`), demo GIF and `public/og.png` recorded (`scripts/capture-demo.js`). Rerun both after the domain moves, and update `og:image` in `public/index.html` to the new domain.
 - [ ] Optional: rename the GitHub repo to `signedscope`. GitHub redirects the old URL.
 - Stripe live mode and Stripe Connect stay a separate decision, after the build gate (50 waitlist sign-ups or 10 paid).
 
@@ -42,7 +42,7 @@ Sources: the Shopify Partner directory and Clutch (web and Shopify agencies with
 
 > Hi {name}, I build tools for agencies. Quick question: when a client asks for "one small change" after sign-off, how do you usually handle the price? I made a free tool that turns their message into a priced change request they sign: {link}?ref=outreach. There's a 30-second demo on the home page. Would it fit how you work? Blunt feedback welcome.
 
-Note: `?ref=` counting is not built. Today, only waitlist sign-ups are counted, in Blob. Add server-side ref counts before the outreach batch if you want attribution.
+Attribution: any link with `?ref=<tag>` (for example `?ref=outreach`, `?ref=hn`, `?ref=ph`, `?ref=linkedin`) is counted once per visit, anonymously, and the tag is saved with a waitlist sign-up. Run `BLOB_READ_WRITE_TOKEN=... node scripts/ref-report.js` for visits and sign-ups by tag.
 
 ## Measure for 2 weeks
 
