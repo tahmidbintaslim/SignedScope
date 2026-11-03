@@ -18,10 +18,21 @@ async function init() {
       const dec = r.decisions[it.id] || {};
       list.append(el('div', { class: 'decide' },
         el('span', { class: 'pill ' + (dec.status === 'rejected' ? 'warn' : 'ok'), text: dec.status || '?' }),
-        el('div', { text: it.text, style: 'white-space:pre-wrap;margin-top:4px' }),
+        el('div', { class: 'head' }, el('div', { text: it.text, style: 'white-space:pre-wrap;margin-top:4px' }),
+          it.price != null ? el('span', { class: 'amt', style: dec.status === 'rejected' ? 'text-decoration:line-through;opacity:.6' : '', text: money(it.price, d.currency) }) : null),
         dec.note ? el('div', { class: 'muted small', text: 'Comment: ' + dec.note }) : null));
     }
   }
+  if (r.totals) {
+    const cur = r.totals.currency;
+    $('#total-amt').textContent = money(r.totals.accepted, cur);
+    if (r.totals.baseline != null) {
+      const delta = Math.round((r.totals.accepted - r.totals.baseline) * 100) / 100;
+      $('#total-delta').textContent = `Signed baseline ${money(r.totals.baseline, cur)} ${delta >= 0 ? '+' : '−'} approved changes ${money(Math.abs(delta), cur)} = ${money(r.totals.accepted, cur)}`;
+    }
+    $('#total').classList.remove('hidden');
+  }
+  if (d.payLink) { $('#pay').href = d.payLink; $('#pay').classList.remove('hidden'); $('#pay').title = 'Opens ' + new URL(d.payLink).hostname; }
   $('#dh').textContent = r.docHash;
   $('#rh').textContent = res.hash;
   $('#ev').textContent = `Country: ${r.evidence.country || 'n/a'} · UA fingerprint: ${r.evidence.uaHash}` + (d.parent ? ` · Supersedes baseline receipt ${d.parent.receiptHash.slice(0, 16)}…` : '');

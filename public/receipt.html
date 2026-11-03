@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>Sign-off receipt · ScopeLock</title><meta name="robots" content="noindex"></head><body>
-<header class="top wrap"><a class="logo" href="/">Scope<span>Lock</span></a><nav><a href="/#how">How it works</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>Sign-off receipt · SignedScope</title><meta name="robots" content="noindex"></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
 <main class="wrap" style="max-width:760px">
 <p class="err" id="err"></p>
 <div id="r" class="hidden">
@@ -7,7 +7,9 @@
 <h1 style="font-size:34px;margin-top:8px" id="title"></h1>
 <p class="muted" id="meta"></p>
 <div id="list"></div>
+<div id="total" class="total hidden"><span>Approved total</span><span class="amt" id="total-amt"></span></div>
+<p class="muted small" id="total-delta"></p>
 <div class="card small" style="margin-top:24px"><b>Evidence</b><br>
 Document hash: <span class="mono" id="dh"></span><br>Receipt hash: <span class="mono" id="rh"></span><br><span id="ev"></span></div>
-<div class="row noprint" style="margin-top:20px"><button class="btn ghost" type="button" id="print">Print / save as PDF</button><a class="btn" id="cr">Start a change request</a></div>
-</div></main><footer><div class="wrap row" style="justify-content:space-between"><span>ScopeLock · tamper-evident sign-off links</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/receipt.js"></script></body></html>
+<div class="row noprint" style="margin-top:20px"><a class="btn pay hidden" id="pay" rel="noopener noreferrer" target="_blank">Pay approved amount</a><button class="btn ghost" type="button" id="print">Print / save as PDF</button><a class="btn" id="cr">Start a change request</a></div>
+</div></main><footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/receipt.js"></script></body></html>

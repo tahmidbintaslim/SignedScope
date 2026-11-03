@@ -12,7 +12,7 @@ web
 - **The client (signer):** opens one link in any browser, with no account, decides on each item and signs.
 
 ## Product Purpose
-Turn a scope or UAT checklist into a link the client accepts or rejects item by item and signs, producing a tamper-evident receipt. New asks become change requests shown as a diff against the signed version. Success: the agency gets the final milestone signed and paid, and every change paid for.
+Turn a scope or UAT checklist into a priced link the client accepts or rejects item by item and signs, producing a tamper-evident receipt. New asks become change requests shown as a priced diff against the signed version, with the agency's own Pay link. Success: the agency gets the final milestone signed and paid, and every change paid for.
 
 ## Positioning
 Item-level decisions (every rejection needs a reason) plus change requests linked by hash to the signed revision, with a receipt anyone can verify, and no stored documents on the free tier. Email approval has no structure; PDF plus e-signature signs a whole file and cannot diff changes.
@@ -25,18 +25,20 @@ Used at three moments: kickoff scope, UAT handover, change requests. Agencies pa
 - App URLs `/new`, `/sign`, `/receipt`, `/verify`, `/privacy`, `/thanks` must not change (links already sent).
 - Limits: up to 100 items of 600 characters, one link of about 60,000 characters.
 - CSP: `script-src 'self'`, no inline scripts, no third-party scripts or analytics.
-- Marketing site: Astro static at repo root, deployed on Vercel.
-- Pricing: Free $0 (works today); Pro $19/month and Agency $49/month are planned, waitlist only.
+- Marketing site: static HTML/CSS/vanilla JS in `public/` (no build step), deployed on Vercel.
+- Pricing: Free $0 (works today, unlimited); Pro $19/month flat and Agency $49/month flat are planned, waitlist only.
+- Payments: free tier shows the agency's own Pay link (Stripe, Wise, Omise, PayPal, Payoneer). Pro adds invoices and tax through Stripe Connect.
 - Not a legally binding e-signature; signer identity is self-declared.
 
 ## Brand Commitments
-- Name: ScopeLock (binding). Logo, colors and type are open for redesign.
+- Name: SignedScope (decided 2026-11-03; scopelock.app is an unrelated live product). Formerly ScopeLock.
 - Voice: plain, first person from the builder (Tahmid Rafi, Bangkok), concrete, no hype, no em-dashes in body copy, US spelling.
 - Open source, MIT license.
-- Visual direction (owner, 2026-11-02): the category-standard SaaS look, played straight. Craft bar: Cal.com and Loom (friendly, light, simple product demos for small teams).
+- Visual direction (2026-11-03): bold, editorial, paper-and-ink receipt motif. The home page is a playable demo of the "one small change" moment. The earlier category-standard SaaS direction was rejected by the owner and is an anti-reference.
 
 ## Evidence on Hand
-- Real product screens and demo GIF: `public/img/demo.gif`, `public/img/04-client-review.jpg`, `public/img/05-receipt.jpg`, `public/img/07-client-diff.jpg`.
+- The interactive demo on the home page and real screens in `docs/img/`.
+- Strategy and research: the "ScopeLock product strategy" doc (competitors, voice of customer, decisions).
 - No testimonials, customer logos, user counts or case studies exist. Never fabricate them; the product itself is the proof.
 
 ## Product Principles

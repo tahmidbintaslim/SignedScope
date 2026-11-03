@@ -1,10 +1,13 @@
 'use strict';
 let parentToken = null;
 const box = $('#items');
-function addItem(kind = 'scope', text = '', id = '') {
+function addItem(kind = 'scope', text = '', id = '', price = '') {
   const sel = el('select', { 'aria-label': 'Type' }, ...Object.entries(KIND).map(([k, v]) => el('option', { value: k, text: v, selected: k === kind })));
   const inp = el('input', { value: text, maxlength: 600, placeholder: 'Describe the item', 'aria-label': 'Item text' });
-  const row = el('div', { class: 'item', 'data-id': id }, sel, inp, el('button', { type: 'button', 'aria-label': 'Remove', text: '×', onclick: () => row.remove() }));
+  const amt = el('input', { value: price ?? '', inputmode: 'decimal', placeholder: 'Price', 'aria-label': 'Price (optional)', class: 'amt-in' });
+  const syncKind = () => { amt.disabled = sel.value === 'out'; if (amt.disabled) amt.value = ''; };
+  sel.addEventListener('change', syncKind); syncKind();
+  const row = el('div', { class: 'item', 'data-id': id }, sel, inp, amt, el('button', { type: 'button', 'aria-label': 'Remove', text: '×', onclick: () => row.remove() }));
   inp.addEventListener('paste', (e) => {
     const t = (e.clipboardData || window.clipboardData).getData('text');
     const lines = t.split(/\r?\n/).map((l) => l.replace(/^\s*([-*•]|\d+[.)])\s*/, '').trim()).filter(Boolean);
@@ -14,6 +17,23 @@ function addItem(kind = 'scope', text = '', id = '') {
   return inp;
 }
 ['scope', 'uat', 'out'].forEach((k) => $('#add-' + k).addEventListener('click', () => addItem(k).focus()));
+CURRENCIES.forEach((c) => $('#currency').append(el('option', { value: c, text: c })));
+
+// Draft items from a pasted message. Empty rows are replaced; filled rows are kept.
+$('#draft').addEventListener('click', async () => {
+  const text = $('#paste').value.trim();
+  if (!text) { $('#paste').focus(); return; }
+  const btn = $('#draft'); btn.disabled = true; $('#draft-note').textContent = 'Drafting…';
+  try {
+    const { items, source } = await api('draft', { text });
+    [...box.children].forEach((r) => { if (!r.querySelector('input').value.trim()) r.remove(); });
+    items.forEach((it) => addItem(it.kind, it.text));
+    $('#draft-note').textContent = items.length
+      ? `Added ${items.length} line${items.length > 1 ? 's' : ''}${source === 'ai' ? ' (drafted by AI)' : ''}. Check the wording and add prices.`
+      : 'Nothing to add from that text.';
+  } catch (err) { $('#draft-note').textContent = err.message; }
+  btn.disabled = false;
+});
 
 async function init() {
   const h = tokenFromHash();
@@ -27,9 +47,10 @@ async function init() {
       const b = $('#cr-banner');
       b.textContent = `Baseline: "${d.title}", signed by ${data.signer.name} on ${fmt(data.signedAt)}. Edit the items below. Your client will see a diff against this baseline.`;
       b.classList.remove('hidden');
-      ['title', 'client', 'agency', 'agencyEmail', 'notes'].forEach((k) => { $('#' + k).value = d[k] || ''; });
+      ['title', 'client', 'agency', 'agencyEmail', 'notes', 'payLink'].forEach((k) => { $('#' + k).value = d[k] || ''; });
+      $('#currency').value = d.currency || 'USD';
       $('#notes').value = '';
-      d.items.forEach((it) => addItem(it.kind, it.text, it.id));
+      d.items.forEach((it) => addItem(it.kind, it.text, it.id, it.price));
       return;
     } catch (e) { $('#err').textContent = 'Could not load the baseline receipt: ' + e.message; parentToken = null; }
   }
@@ -40,11 +61,11 @@ init();
 $('#f').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#err').textContent = '';
-  const items = [...box.children].map((r) => ({ id: r.dataset.id || undefined, kind: r.querySelector('select').value, text: r.querySelector('input').value.trim() })).filter((i) => i.text);
+  const items = [...box.children].map((r) => ({ id: r.dataset.id || undefined, kind: r.querySelector('select').value, text: r.querySelector('input').value.trim(), price: r.querySelector('.amt-in').value.trim() || undefined })).filter((i) => i.text);
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   try {
-    const body = { title: $('#title').value, client: $('#client').value, agency: $('#agency').value, agencyEmail: $('#agencyEmail').value, notes: $('#notes').value, items };
+    const body = { title: $('#title').value, client: $('#client').value, agency: $('#agency').value, agencyEmail: $('#agencyEmail').value, notes: $('#notes').value, currency: $('#currency').value, payLink: $('#payLink').value.trim(), items };
     if (parentToken) body.parent = parentToken;
     const { token } = await api('seal', body);
     const url = `${location.origin}/sign#${token}`;

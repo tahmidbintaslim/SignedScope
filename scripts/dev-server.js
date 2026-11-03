@@ -7,7 +7,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const port = Number(process.env.PORT) || 3000;
-const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.gif': 'image/gif' };
+const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.gif': 'image/gif', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
 
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
@@ -34,4 +34,4 @@ http.createServer((req, res) => {
     if (err) { res.writeHead(404).end('Not found'); return; }
     res.writeHead(200, { 'content-type': types[path.extname(p)] || 'application/octet-stream' }).end(data);
   });
-}).listen(port, () => console.log(`ScopeLock on http://localhost:${port}`));
+}).listen(port, () => console.log(`SignedScope on http://localhost:${port}`));
