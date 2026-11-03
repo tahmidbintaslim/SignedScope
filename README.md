@@ -57,7 +57,7 @@ npm install && npm test
 npx vercel deploy
 ```
 
-No framework and no build step: static files in `public/` plus six Node functions in `api/`. Fonts are self-hosted (OFL) under `public/fonts/`.
+No framework and no build step: static files in `public/` plus six Node functions in `api/`. Fonts (Plus Jakarta Sans, JetBrains Mono; OFL) are self-hosted under `public/fonts/`.
 
 ### Run it locally
 

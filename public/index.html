@@ -1,192 +1,255 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="preload" href="/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/home.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script>
-<title>SignedScope</title>
-<meta name="description" content="Your client signs off scope line by line. Every change after that arrives with its price, for them to approve and pay. No signup for your client.">
-<meta property="og:title" content="SignedScope: every line signed, every change priced">
-<meta property="og:description" content="Stop absorbing 'one small change'. The client sees the diff and the price, approves it line by line, and pays."></head><body class="home">
-<a class="sr" href="#demo">Skip to the demo</a>
-<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="#demo">Try the demo</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
+<title>SignedScope: get the scope signed, get the extras paid</title>
+<meta name="description" content="Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.">
+<meta name="theme-color" content="#3B0D8F">
+<meta property="og:title" content="SignedScope: get the scope signed, get the extras paid">
+<meta property="og:description" content="Scope approval and priced change requests your client signs on any phone. Free, no signup for your client."></head>
+<body class="home">
+<a class="sr" href="#demo">Skip to the live demo</a>
+
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="hero-h">
+  <div class="mesh" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
+  <header class="top wrap on-dark">
+    <a class="logo" href="/">SignedScope</a>
+    <nav aria-label="Main"><a href="#demo">Demo</a><a href="#how">How it works</a><a href="#pricing">Pricing</a></nav>
+    <a class="btn white sm" href="/new">Create a free scope</a>
+  </header>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow glass">Scope approval + change requests</p>
+      <h1 id="hero-h">Get the scope signed.<br><span class="hl">Get the extras paid.</span></h1>
+      <p class="hero-sub">Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.</p>
+      <div class="row cta"><a class="btn white lg" href="/new">Create a free scope</a><a class="btn outline lg" href="#demo"><span aria-hidden="true">▶</span> Try the live demo</a></div>
+      <p class="trust">Free plan, no card. Your client never signs up.</p>
+    </div>
+    <div class="hero-art" id="hero-art" aria-label="Example: the client's approval screen on a phone">
+      <div class="phone float" data-depth="10">
+        <div class="screen">
+          <p class="from">From Northwind Studio</p>
+          <p class="ttl">Acme Store: phase 1</p>
+          <p class="hint">Approve each line, then sign.</p>
+          <ul class="plist" id="plist">
+            <li><b class="ck"></b>Custom theme<span class="amt">$3,200</span></li>
+            <li><b class="ck"></b>Filters and search<span class="amt">$1,400</span></li>
+            <li><b class="ck"></b>Checkout<span class="amt">$1,400</span></li>
+            <li class="new"><b class="ck"></b>Apple Pay<span class="amt">+$480</span></li>
+          </ul>
+          <div class="ptotal"><span>Total</span><strong>$6,480</strong></div>
+          <span class="pbtn">Approve and sign</span>
+        </div>
+      </div>
+      <div class="chip change float" data-depth="24">
+        <span class="bubble">“Can we also add Apple Pay?”</span>
+        <span class="okline"><b class="ck"></b>Approved · +$480</span>
+      </div>
+      <div class="chip pay float" data-depth="34"><strong>Pay $480</strong><span>via your Stripe link</span></div>
+    </div>
+  </div>
+</section>
 
 <main>
-<!-- Hero: the moment every freelancer knows, with the cost of saying yes ticking up. -->
-<section class="hero wrap">
-  <div class="hero-copy">
-    <p class="eyebrow">For agencies and freelancers on fixed-price work</p>
-    <h1>“Can we also add one <em>small</em> thing?”</h1>
-    <p class="lede">Every small ask you absorb is a discount you never agreed to. SignedScope puts a price on the change and shows your client exactly what moved since they signed. They approve it line by line and pay. You never have to bring up money.</p>
-    <div class="row cta"><a class="btn big" href="/new">Create a free sign-off</a><a class="btn ghost big" href="#demo">Play the 30-second demo</a></div>
-    <p class="muted small">Free, no signup. Your client never makes an account.</p>
+<!-- ============ PROBLEM ============ -->
+<section class="sec wrap split" aria-labelledby="prob-h">
+  <div>
+    <p class="label coral">The problem</p>
+    <h2 id="prob-h">Small asks add up fast.</h2>
+    <p class="sub">Each one feels too small to charge for. Together, they eat your margin.</p>
+    <div class="stat"><b data-count="52">52%</b><span>of projects had scope creep.<br><a href="https://www.pmi.org/learning/library/scope-creep-rising-11308" rel="noopener">PMI Pulse of the Profession, 2018</a></span></div>
   </div>
-  <div class="hero-chat" aria-label="Example: a client's requests pile up after sign-off">
-    <div class="phone">
-      <div class="phone-top"><span class="dot"></span>Dana · Acme Store</div>
-      <ol class="msgs" id="msgs">
-        <li class="msg in" data-cost="0" data-hours="0">Looks great, signing off on phase 1!</li>
-        <li class="msg in" data-cost="240">Quick one, can the banner rotate?</li>
-        <li class="msg in" data-cost="480">Can we also add Apple Pay? Should be quick</li>
-        <li class="msg in" data-cost="360">Oh and a size guide popup on product pages</li>
-        <li class="msg out">Sure, I'll squeeze it in.</li>
-        <li class="msg in" data-cost="600">Also thinking the checkout needs a gift option</li>
-      </ol>
-    </div>
-    <div class="leak" aria-live="polite"><span class="leak-label">Work you did for free</span><span class="leak-amt" id="leak">$0</span></div>
+  <div class="asks" id="asks">
+    <p class="ask-row" data-cost="240">Quick one, can the banner rotate?<span class="tag">+$240 free</span></p>
+    <p class="ask-row" data-cost="480">Can we also add Apple Pay?<span class="tag">+$480 free</span></p>
+    <p class="ask-row" data-cost="360">Oh, and a size guide popup?<span class="tag">+$360 free</span></p>
+    <p class="ask-row" data-cost="600">Maybe a gift option at checkout?<span class="tag">+$600 free</span></p>
+    <p class="ask-sum">Given away on one project <strong id="leak">$1,680</strong></p>
   </div>
 </section>
 
-<!-- The interactive demo: the visitor plays both sides. -->
-<section id="demo" class="demo-sec">
+<!-- ============ LIVE DEMO ============ -->
+<section class="sec dark" id="demo" aria-labelledby="demo-h">
   <div class="wrap">
-    <p class="eyebrow">Interactive demo</p>
-    <h2>Now handle that request the other way.</h2>
-    <p class="lede">Example project, made-up numbers. Drag, price, decide and sign, just as you and your client would.</p>
-    <ol class="stepper" id="stepper" aria-label="Demo steps">
-      <li class="on">1 · Catch the ask</li><li>2 · Price it</li><li>3 · Client decides</li><li>4 · Client signs</li>
+    <p class="label sun">Live demo</p>
+    <h2 id="demo-h">Try it. It takes 30 seconds.</h2>
+    <p class="sub">Drag the ask in, set a price, sign as the client. Example data.</p>
+    <ol class="stepper" id="stepper" aria-label="Demo progress">
+      <li class="on"><i>1</i>Catch the ask</li><li><i>2</i>Price it</li><li><i>3</i>Client approves</li><li><i>4</i>Signed and paid</li>
     </ol>
     <div class="stage" id="stage">
-      <!-- Left: the signed baseline that every change is compared against. -->
       <div class="doc" id="doc">
-        <div class="doc-head"><div><span class="pill ok" id="doc-pill">Signed · revision 1</span><h3>Acme Store: Shopify build</h3><p class="muted small">Signed by Dana Lee on 12 Oct · $6,000 fixed price</p></div><div class="stamp-slot" id="stamp-slot"></div></div>
+        <div class="doc-head">
+          <div><span class="pill ok" id="doc-pill">Signed · revision 1</span><p class="doc-ttl">Acme Store: phase 1</p></div>
+          <div class="stamp-slot" id="stamp-slot" aria-hidden="true"></div>
+        </div>
         <ul class="lines" id="lines">
-          <li class="line"><span>Custom theme, 6 templates</span><span class="amt">$3,200</span></li>
-          <li class="line"><span>Product filters and search</span><span class="amt">$1,400</span></li>
-          <li class="line"><span>Checkout with cards and PayPal</span><span class="amt">$1,400</span></li>
-          <li class="line out"><span>Out of scope: SEO and copywriting</span><span class="amt">excluded</span></li>
+          <li><span>Custom theme</span><span class="amt">$3,200</span></li>
+          <li><span>Filters and search</span><span class="amt">$1,400</span></li>
+          <li><span>Checkout</span><span class="amt">$1,400</span></li>
         </ul>
-        <div class="drop" id="drop" aria-hidden="true">Drop the request here to make it a change request</div>
+        <div class="drop" id="drop">Drop the ask here</div>
         <div class="total"><span id="total-label">Signed total</span><span class="amt" id="d-total">$6,000</span></div>
-        <p class="muted small" id="d-delta">&nbsp;</p>
       </div>
-      <!-- Right: the step panel that changes as the visitor moves through the flow. -->
       <div class="panel" id="panel">
         <div class="pstep" data-step="1">
-          <p class="hint">A new message from the client, after they signed:</p>
-          <div class="ask" id="ask" tabindex="0" role="button" aria-describedby="ask-help"><span class="grip" aria-hidden="true">⠿</span>Can we also add Apple Pay at checkout? Should be quick.</div>
-          <p class="muted small" id="ask-help">Drag it onto the signed scope, or press Enter.</p>
-          <p class="aside">Most people reply “sure” here. That reply is the moment the margin goes.</p>
+          <p class="p-meta">New message from Dana</p>
+          <div class="ask" id="ask" tabindex="0" role="button" aria-describedby="ask-help"><span class="grip" aria-hidden="true">⠿</span>Can we also add Apple Pay? Should be quick.</div>
+          <p class="p-help" id="ask-help">Drag it onto the signed scope. Or press Enter.</p>
         </div>
         <div class="pstep" data-step="2" hidden>
-          <p class="hint">It's now a line in revision 2. What does it cost?</p>
-          <label for="price" class="price-label"><span>Apple Pay at checkout</span><output id="price-out" class="amt">$480</output></label>
+          <p class="p-q">It’s a line in revision 2. What does it cost?</p>
+          <label for="price" class="price-row"><span>Apple Pay at checkout</span><output id="price-out">$480</output></label>
           <input type="range" id="price" min="0" max="1500" step="20" value="480" aria-label="Price for Apple Pay at checkout">
-          <p class="muted small">About 6 hours at $80. Drag to set your own number.</p>
-          <button class="btn" type="button" id="send">Send the change request</button>
-          <p class="aside">You didn't write an awkward email. The link shows the price for you.</p>
+          <p class="p-help">About 6 hours at $80. Set your own number.</p>
+          <button class="btn primary block" type="button" id="send">Send the change request →</button>
         </div>
         <div class="pstep" data-step="3" hidden>
-          <p class="hint">This is what Dana sees. Only the change needs a decision.</p>
-          <div class="cline diff-add"><div class="head"><span><span class="pill ok">Added</span> Apple Pay at checkout</span><span class="amt" id="c-price">$480</span></div>
-            <div class="opts" role="radiogroup" aria-label="Decision"><button type="button" class="opt" data-v="accepted">Accept</button><button type="button" class="opt" data-v="rejected">Reject</button></div>
-            <input id="reason" class="hidden" placeholder="Why? A reason is required to reject" maxlength="120" aria-label="Reason for rejecting">
-          </div>
-          <p class="muted small">Everything else is unchanged from what Dana signed.</p>
-          <button class="btn" type="button" id="to-sign" disabled>Continue to sign</button>
+          <p class="p-q">You’re Dana now. Only the change needs a decision.</p>
+          <div class="cline"><span class="pill ok">Added</span> Apple Pay at checkout <span class="amt" id="c-price">+$480</span></div>
+          <div class="opts" role="radiogroup" aria-label="Your decision"><button type="button" class="opt" data-v="accepted" role="radio" aria-checked="false">Approve</button><button type="button" class="opt" data-v="rejected" role="radio" aria-checked="false">Reject</button></div>
+          <input id="reason" class="hidden" placeholder="Why? A reason is required" maxlength="120" aria-label="Reason for rejecting">
+          <button class="btn primary block" type="button" id="to-sign" disabled>Continue to sign →</button>
         </div>
         <div class="pstep" data-step="4" hidden>
-          <p class="hint">Sign as Dana. Use your mouse or finger.</p>
-          <canvas id="pad" width="560" height="180" aria-label="Signature pad"></canvas>
-          <div class="row"><button class="btn" type="button" id="sign" disabled>Sign revision 2</button><button class="btn ghost" type="button" id="clear">Clear</button></div>
+          <p class="p-q">Sign with your mouse or finger.</p>
+          <canvas id="pad" width="400" height="160" aria-label="Signature pad"></canvas>
+          <div class="row"><button class="btn primary" type="button" id="sign" disabled>Sign revision 2</button><button class="btn ghost" type="button" id="clear">Clear</button></div>
         </div>
         <div class="pstep" data-step="5" hidden>
-          <p class="hint done-h" id="done-h">Signed. Nobody argued about money.</p>
-          <div class="receipt-mini">
-            <div class="rm-row"><span>Signed baseline</span><span class="amt">$6,000</span></div>
-            <div class="rm-row"><span>Approved change</span><span class="amt" id="r-change">+ $480</span></div>
-            <div class="rm-row sum"><span>New total</span><span class="amt" id="r-total">$6,480</span></div>
-            <p class="mono small muted" id="r-hash">receipt sha256 · 9f3c…a71e</p>
-          </div>
-          <div class="row"><span class="btn pay" aria-disabled="true" id="r-pay">Pay $480</span><button class="btn ghost" type="button" id="replay">Play again</button></div>
-          <p class="muted small">In the real app, the Pay button opens your own Stripe, Wise, Omise, PayPal or Payoneer link.</p>
-          <div class="leak small-leak"><span class="leak-label">Work you did for free</span><span class="leak-amt zero">$0</span></div>
+          <p class="p-q ok" id="done-h">Signed. Nobody had to bring up money.</p>
+          <div class="rm"><span>Signed before</span><span class="amt">$6,000</span></div>
+          <div class="rm"><span>Approved change</span><span class="amt" id="r-change">+$480</span></div>
+          <div class="rm sum"><span>New total</span><span class="amt" id="r-total">$6,480</span></div>
+          <p class="mono p-help" id="r-hash">receipt sha256 · 9f3c…a71e</p>
+          <div class="row"><span class="btn pay" id="r-pay" aria-disabled="true">Pay $480</span><button class="btn ghost" type="button" id="replay">Play again</button></div>
         </div>
       </div>
     </div>
-    <div class="row" style="margin-top:44px"><a class="btn big" href="/new">Do this with a real client</a><span class="muted small">Takes about two minutes. Free.</span></div>
+    <div class="row demo-cta"><a class="btn white lg" href="/new">Do this with a real client</a><span class="trust">Two minutes. Free.</span></div>
   </div>
 </section>
 
-<!-- Two ways the same conversation can go. -->
-<section class="wrap convo">
-  <h2>The conversation you no longer have to start.</h2>
-  <div class="split">
-    <div class="card bad"><p class="tag">Without a signed record</p>
-      <ol class="thread"><li class="c">Can we also add Apple Pay?</li><li class="m">Happy to! It would be extra though…</li><li class="c">Oh, I assumed payments were included?</li><li class="m">The proposal said cards and PayPal.</li><li class="c">I thought that covered it. Can you do it this once?</li><li class="m">…sure.</li></ol>
-      <p class="muted small">Six messages, one bruised relationship, $480 gone.</p></div>
-    <div class="card good"><p class="tag">With SignedScope</p>
-      <ol class="thread"><li class="c">Can we also add Apple Pay?</li><li class="m">Sure, here's the change request: signedscope.com/sign#…</li><li class="sys">Dana accepted “Apple Pay at checkout” · $480 · signed 14:02</li></ol>
-      <p class="muted small">One link. The price was on the page before anyone had to say it.</p></div>
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec wrap" id="how" aria-labelledby="how-h">
+  <p class="label violet">How it works</p>
+  <h2 id="how-h">Three steps. One link.</h2>
+  <div class="steps3">
+    <article class="s3">
+      <div class="mini">
+        <p class="mrow"><span>Custom theme</span><span class="amt box">$3,200</span></p>
+        <p class="mrow"><span>Filters and search</span><span class="amt box">$1,400</span></p>
+        <p class="mrow"><span>Apple Pay</span><span class="amt box">$480</span></p>
+      </div>
+      <h3><i>1</i>Write the scope</h3><p>Paste a list or a client message. Add a price per line.</p>
+    </article>
+    <article class="s3">
+      <div class="mini">
+        <p class="mlink"><span class="mono">signedscope.com/sign#v1…</span><span class="copy">Copy</span></p>
+        <p class="mi"><b class="ck v"></b>Sent to Dana on WhatsApp</p>
+        <p class="mi muted small">No account needed to open it</p>
+      </div>
+      <h3><i>2</i>Send one link</h3><p>WhatsApp, email or Slack. It opens on any phone.</p>
+    </article>
+    <article class="s3">
+      <div class="mini">
+        <p class="mi"><b class="ck"></b>Custom theme</p>
+        <p class="mi"><b class="ck"></b>Filters and search</p>
+        <p class="mi"><b class="x"></b>Blog: “next phase, please”</p>
+        <svg class="sig" viewBox="0 0 200 44" aria-hidden="true"><path d="M6 30c14-22 22-24 24-10s-8 18 2 6 16-20 20-6 10 10 20-4 12 4 20 2 18-10 30-8 26 6 40 2"/></svg>
+      </div>
+      <h3><i>3</i>Client approves and signs</h3><p>Each line gets a yes, or a no with a reason. Then one signature.</p>
+    </article>
   </div>
 </section>
 
-<!-- Cited figures only. No invented social proof. -->
-<section class="wrap stats" aria-labelledby="stats-h">
-  <h2 id="stats-h">This isn't a you problem.</h2>
-  <div class="stat-grid">
-    <figure class="stat"><b data-count="52">52%</b><figcaption>of projects had scope creep, up from 43% five years earlier. <a href="https://www.pmi.org/learning/library/scope-creep-rising-11308" rel="noopener">PMI Pulse of the Profession, 2018</a></figcaption></figure>
-    <figure class="stat"><b data-count="71">71%</b><figcaption>of freelancers have had trouble collecting payment at some point. <a href="https://onlabor.org/wp-content/uploads/2017/05/FU_NonpaymentReport_r3.pdf" rel="noopener">Freelancers Union survey</a></figcaption></figure>
-    <figure class="stat"><b data-count="5968" data-prefix="$">$5,968</b><figcaption>lost to non-payment per freelancer in a year, about 13% of income. <a href="https://onlabor.org/wp-content/uploads/2017/05/FU_NonpaymentReport_r3.pdf" rel="noopener">Same survey, 2014 data</a></figcaption></figure>
-    <figure class="stat"><b data-count="29">29%</b><figcaption>of freelance invoices are paid late. <a href="https://www.hellobonsai.com/blog/late-freelance-payment" rel="noopener">Bonsai, 100,000+ freelancers</a></figcaption></figure>
+<!-- ============ WHY IT WORKS (bento) ============ -->
+<section class="sec mist" aria-labelledby="why-h">
+  <div class="wrap">
+    <p class="label violet">Why it works</p>
+    <h2 id="why-h">The price is already on the page.</h2>
+    <p class="sub">So you never have to bring it up.</p>
+    <div class="bento">
+      <article class="tile t-change">
+        <h3>Extras become priced changes</h3><p>Paste their message, set a price, send. They tap Approve.</p>
+        <div class="t-ui"><span class="bubble glass">“Can we also add Apple Pay?”</span>
+          <div class="t-card"><span><span class="pill ok solid">Added</span> Apple Pay at checkout</span><span class="t-btn">Approve +$480</span></div></div>
+      </article>
+      <article class="tile t-pay">
+        <h3>Paid on the same screen</h3><p>Add your own payment link. We never hold your money.</p>
+        <div class="t-ui"><span class="t-paybtn">Pay $480</span><p class="providers"><span>Stripe</span><span>Wise</span><span>PayPal</span><span>Payoneer</span><span>Omise</span></p></div>
+      </article>
+      <article class="tile t-lines">
+        <h3>Approved line by line</h3><p>Every item gets a yes or a no. Questions come up now, not at handover.</p>
+        <div class="t-ui"><p class="lr"><b class="ck"></b>Custom theme<span class="pill ok">Accepted</span></p><p class="lr"><b class="ck"></b>Filters and search<span class="pill ok">Accepted</span></p><p class="lr"><b class="x"></b>Blog: next phase<span class="pill warn">Rejected</span></p></div>
+      </article>
+      <article class="tile t-record">
+        <h3>A clear record for both sides</h3><p>What was approved, by whom, and when. Anyone can <a href="/verify">verify it</a>.</p>
+        <div class="t-ui"><div class="rec"><p><b class="ck"></b>Signed by Dana Lee · 3 Nov, 14:02</p><p class="mono">receipt sha256 9f3c…a71e · Verified</p></div><p class="fine">A sign-off record, not a legal e-signature.</p></div>
+      </article>
+    </div>
   </div>
 </section>
 
-<section id="how" class="wrap">
-  <h2>Three signatures that protect one project.</h2>
-  <div class="moments">
-    <article class="card"><span class="num">1</span><h3>Kickoff scope</h3><p class="muted">List what's in, what's out, and the price per line. The client accepts or rejects each one. A rejection needs a reason, so “I thought that was included” has an answer.</p></article>
-    <article class="card"><span class="num">2</span><h3>UAT handover</h3><p class="muted">Turn the acceptance checks into lines the client ticks off and signs. Signed UAT is proof the final milestone is due, and the final milestone is where payments stall.</p></article>
-    <article class="card"><span class="num">3</span><h3>Every change after</h3><p class="muted">Paste their WhatsApp or Slack message and it becomes priced lines. The client sees added, changed and removed against what they signed, approves, and gets a Pay button.</p></article>
-  </div>
-  <div class="facts">
-    <p><b>Receipts anyone can check.</b> Every link and receipt is signed with HMAC-SHA256. Change one character and <a href="/verify">verification</a> fails.</p>
-    <p><b>No client account.</b> One link, any browser, works on a phone.</p>
-    <p><b>Your payment provider.</b> Stripe, Wise, Omise, PayPal or Payoneer. SignedScope never holds the money.</p>
-  </div>
-</section>
-
-<section class="wrap compare" aria-labelledby="cmp-h">
-  <h2 id="cmp-h">Why not the tools you already have?</h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th></th><th>E-sign (DocuSign, PandaDoc)</th><th>Suites (HoneyBook, Bonsai)</th><th>AI creep detectors</th><th>SignedScope</th></tr></thead>
-    <tbody>
-      <tr><th>Client decides line by line, with reasons</th><td>No, signs the whole file</td><td>Picks add-ons</td><td>No</td><td class="yes">Yes</td></tr>
-      <tr><th>Change shown as a diff against what was signed</th><td>No</td><td>Resend the contract</td><td>No</td><td class="yes">Yes, with the price</td></tr>
-      <tr><th>UAT handover sign-off</th><td>No</td><td>No</td><td>No</td><td class="yes">Yes</td></tr>
-      <tr><th>Client needs an account</th><td>No</td><td>Portal login on some plans</td><td>n/a</td><td class="yes">Never</td></tr>
-      <tr><th>Price</th><td>$11 to $49 per seat</td><td>$15 to $109 a month</td><td>$6 to $59 a month</td><td class="yes">Free core, $19 flat for Pro</td></tr>
-    </tbody></table></div>
-  <p class="muted small">Prices from each vendor's pricing page, November 2026. It is a sign-off record, not a regulated e-signature, and works alongside your contract.</p>
-</section>
-
-<section id="pricing" class="wrap">
-  <h2>Flat pricing. No per-seat math.</h2>
-  <div class="grid plans">
-    <div class="card"><h3>Free</h3><div class="price">$0</div><ul class="ticks"><li>Unlimited sign-offs, receipts and change requests</li><li>Prices per line and running totals</li><li>Your own Pay link on every receipt</li><li>Paste a message, get draft lines</li><li>Public verification</li></ul><a class="btn ghost" href="/new">Start now</a></div>
-    <div class="card hl"><h3>Pro <span class="pill">Early access</span></h3><div class="price">$19<small>/month</small></div><p class="muted small">Not built yet. Planned:</p><ul class="ticks"><li>Saved workspace and history</li><li>Email when a client signs, rejects or stalls</li><li>Invoices, pay links and tax through SignedScope's Stripe</li><li>Your logo, no SignedScope branding</li><li>PDF receipts</li></ul><a class="btn" href="/?plan=pro#waitlist">Join the Pro waitlist</a></div>
-    <div class="card"><h3>Agency <span class="pill">Early access</span></h3><div class="price">$49<small>/month</small></div><p class="muted small">Not built yet. Planned:</p><ul class="ticks"><li>Everything in Pro</li><li>5 seats included</li><li>Your own domain for client links</li><li>API and webhooks</li></ul><a class="btn ghost" href="/?plan=agency#waitlist">Join the Agency waitlist</a></div>
+<!-- ============ FOR YOUR CLIENT ============ -->
+<section class="sec phones-sec" aria-labelledby="ph-h">
+  <div class="wrap center">
+    <p class="label sun">For your client</p>
+    <h2 id="ph-h">No account. No app. Just a link.</h2>
+    <div class="phones">
+      <div class="mphone r1"><div class="screen"><p class="ttl">Approve each line</p><p class="lr"><b class="ck"></b>Custom theme</p><p class="lr"><b class="ck"></b>Filters and search</p><p class="lr"><b class="ck"></b>Checkout</p></div></div>
+      <div class="mphone"><div class="screen"><p class="ttl">Change request</p><p class="lr dim">Checkout<span class="amt">$1,400</span></p><p class="lr add"><span class="pill ok solid">New</span> Apple Pay<span class="amt">+$480</span></p><p class="ptotal"><span>New total</span><strong>$6,480</strong></p><span class="pbtn">Approve change</span></div></div>
+      <div class="mphone r2"><div class="screen"><p class="ttl">Signed</p><b class="ck big"></b><p class="who">Dana Lee · 14:02</p><p class="muted small">Receipt saved. Anyone can verify it.</p><span class="pbtn mint">Pay $480</span></div></div>
+    </div>
   </div>
 </section>
 
-<section id="waitlist" class="wrap">
-  <h2>Get told when Pro opens.</h2>
-  <form id="wl" class="card" style="max-width:560px">
-    <label for="wl-email" style="margin-top:0">Work email</label><input id="wl-email" type="email" required autocomplete="email">
-    <label for="wl-plan">Interested in</label><select id="wl-plan"><option value="free">Free</option><option value="pro">Pro</option><option value="agency">Agency</option></select>
-    <label for="wl-note">What do clients keep asking for “quickly”? (optional)</label><input id="wl-note" maxlength="300">
+<!-- ============ PRICING ============ -->
+<section class="sec wrap" id="pricing" aria-labelledby="pr-h">
+  <p class="label violet">Pricing</p>
+  <h2 id="pr-h">Free to start. Flat after that.</h2>
+  <p class="sub">No per-seat fees. Pro and Agency are waitlist only for now.</p>
+  <div class="plans">
+    <article class="plan"><h3>Free</h3><p class="pp">$0 <small>forever</small></p><ul><li>Unlimited scopes and changes</li><li>Prices and totals</li><li>Your own Pay link</li></ul><a class="btn block" href="/new">Create a free scope</a></article>
+    <article class="plan hl"><h3>Pro <span class="pill sunp">Waitlist</span></h3><p class="pp">$19 <small>/month</small></p><ul><li>Saved history</li><li>Email when a client signs</li><li>Invoices and tax via Stripe</li></ul><a class="btn white block" href="/?plan=pro#waitlist">Join the waitlist</a></article>
+    <article class="plan"><h3>Agency <span class="pill">Waitlist</span></h3><p class="pp">$49 <small>/month</small></p><ul><li>Everything in Pro</li><li>5 seats</li><li>Your own domain</li></ul><a class="btn block" href="/?plan=agency#waitlist">Join the waitlist</a></article>
+  </div>
+  <form id="wl" class="waitlist" aria-labelledby="wl-h">
+    <p id="wl-h" class="wl-h" tabindex="-1"><strong>Get an email when Pro opens.</strong> One email, no spam.</p>
+    <span id="waitlist"></span>
+    <div class="wl-row">
+      <label class="sr" for="wl-email">Work email</label><input id="wl-email" type="email" required autocomplete="email" placeholder="you@studio.com">
+      <label class="sr" for="wl-plan">Plan</label><select id="wl-plan"><option value="pro">Pro</option><option value="agency">Agency</option><option value="free">Free updates</option></select>
+      <button class="btn primary" type="submit">Join the waitlist</button>
+    </div>
+    <input id="wl-note" type="hidden" value="">
     <input name="company" id="wl-hp" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-    <p class="err" id="wl-err"></p><button class="btn" type="submit">Join the waitlist</button>
-    <p id="wl-ok" class="hidden banner">You are on the list.</p>
+    <p class="err" id="wl-err"></p><p id="wl-ok" class="hidden ok-msg">You are on the list.</p>
   </form>
 </section>
 
-<section class="wrap faq">
-  <h2>Questions</h2>
-  <details><summary>Is this a legally binding e-signature?</summary><p>No. It is a signed record of what the client approved, rejected and when. Use it next to your contract, not instead of a regulated e-signature service. The signer's identity is what they type in.</p></details>
-  <details><summary>Does it work for Upwork or Fiverr projects?</summary><p>Yes, for the record and the diff. Leave the Pay link empty and add the approved amount as a new milestone on the platform, because platform work has to be paid there.</p></details>
-  <details><summary>Where is my data?</summary><p>On the free tier, inside the link. The server signs it and keeps no copy, so save your receipt links. Pasted messages are sent to the server to draft lines and are not stored.</p></details>
-  <details><summary>Does SignedScope take a cut of payments?</summary><p>No. Free links open your own payment page. Pro will add invoices through SignedScope's Stripe; any fee will be shown before it opens.</p></details>
-  <details><summary>Wasn't this called ScopeLock?</summary><p>Yes. Another company already sells a product called ScopeLock, so this one is now SignedScope. Links you already sent still work.</p></details>
+<!-- ============ FAQ ============ -->
+<section class="sec mist" aria-labelledby="faq-h">
+  <div class="wrap faq">
+    <div><p class="label violet">FAQ</p><h2 id="faq-h">Good questions.</h2></div>
+    <div class="qa">
+      <details><summary>Is this a legal e-signature?</summary><p>No. It is a clear record of what your client approved and when.</p></details>
+      <details><summary>Does my client need an account?</summary><p>No. They open the link on any device and approve.</p></details>
+      <details><summary>How do I get paid?</summary><p>The Pay button opens your own Stripe, Wise, PayPal, Payoneer or Omise link.</p></details>
+      <details><summary>Are Pro and Agency live?</summary><p>Not yet. Join the waitlist and we will email you when they open.</p></details>
+      <details><summary>Wasn’t this called ScopeLock?</summary><p>Yes. We renamed it. Links you already sent still work.</p></details>
+    </div>
+  </div>
 </section>
-<p class="wrap muted small">Built by Tahmid Rafi, Lead Full Stack Software Engineer &amp; Solutions Architect, Bangkok. Open source, MIT.</p>
+
+<!-- ============ CTA ============ -->
+<section class="sec wrap">
+  <div class="cta-band">
+    <h2>Send your next scope with a price.</h2>
+    <a class="btn white lg" href="/new">Create a free scope</a>
+    <p class="trust">Free plan, no card. Your client never signs up.</p>
+  </div>
+</section>
 </main>
-<footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a> · <a href="https://github.com/tahmidbintaslim/scopelock">Source</a></span></div></footer>
+<footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · open source, MIT · built in Bangkok by Tahmid Rafi</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a> · <a href="https://github.com/tahmidbintaslim/scopelock">Source</a></span></div></footer>
 <script src="/landing.js"></script><script src="/demo.js"></script></body></html>

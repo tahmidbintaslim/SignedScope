@@ -1,5 +1,6 @@
 'use strict';
 const PLAN_NAMES = { free: 'Free', pro: 'Pro', agency: 'Agency' };
+if (/^#waitlist/.test(location.hash)) setTimeout(() => { const h = document.getElementById('wl-h'); if (h) h.focus(); }, 300);
 $('#wl').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#wl-err').textContent = '';

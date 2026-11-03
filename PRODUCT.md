@@ -34,7 +34,7 @@ Used at three moments: kickoff scope, UAT handover, change requests. Agencies pa
 - Name: SignedScope (decided 2026-11-03; scopelock.app is an unrelated live product). Formerly ScopeLock.
 - Voice: plain, first person from the builder (Tahmid Rafi, Bangkok), concrete, no hype, no em-dashes in body copy, US spelling.
 - Open source, MIT license.
-- Visual direction (2026-11-03): bold, editorial, paper-and-ink receipt motif. The home page is a playable demo of the "one small change" moment. The earlier category-standard SaaS direction was rejected by the owner and is an anti-reference.
+- Visual direction (v4, 2026-11-03, approved): bold and colorful. Deep violet mesh gradient (violet #7C3AED, pink, coral, sun, sky) with navy ink #0B1230, product UI as the hero, short copy (H1 7 words or fewer, section lines 14 words or fewer). Type: Plus Jakarta Sans for all text, JetBrains Mono for prices and hashes (both OFL, self-hosted). White text only over violet; body text only on white or navy (WCAG). Design file: Figma page "SignedScope v4 · Product-led". Rejected directions: paper-and-ink (v2), Geist + serif (v3).
 
 ## Evidence on Hand
 - The interactive demo on the home page and real screens in `docs/img/`.
