@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>Review & sign · ScopeLock</title><meta name="robots" content="noindex"></head><body>
-<header class="top wrap"><a class="logo" href="/">Scope<span>Lock</span></a><nav><a href="/#how">How it works</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>Review & sign · SignedScope</title><meta name="robots" content="noindex"></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
 <main class="wrap" style="max-width:760px">
 <p class="err" id="err"></p>
 <div id="doc" class="hidden">
@@ -10,6 +10,8 @@
 <form id="f">
 <div id="list"></div>
 <div id="removed"></div>
+<div id="total" class="total hidden" aria-live="polite"><span id="total-label">Proposed total</span><span class="amt" id="total-amt"></span></div>
+<p class="muted small" id="total-delta"></p>
 <div class="card" style="margin-top:20px">
 <div class="grid"><div><label for="name">Your full name</label><input id="name" required maxlength="120" autocomplete="name"></div>
 <div><label for="email">Your email</label><input id="email" type="email" maxlength="254" autocomplete="email"></div></div>
@@ -17,5 +19,5 @@
 <p class="err" id="ferr"></p>
 <button class="btn" type="submit">Sign off</button>
 </div></form></div>
-<div id="done" class="hidden card"><h3 id="done-h"></h3><p class="muted">Save this receipt link, and send a copy to your agency. It's the signed record of your decisions.</p><div class="share"><input id="rlink" readonly></div><p style="margin-top:12px"><a class="btn ghost" id="ropen">Open receipt</a></p></div>
-</main><footer><div class="wrap row" style="justify-content:space-between"><span>ScopeLock · tamper-evident sign-off links</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/sign.js"></script></body></html>
+<div id="done" class="hidden card"><h3 id="done-h"></h3><p class="muted">Save this receipt link, and send a copy to your agency. It's the signed record of your decisions.</p><div class="share"><input id="rlink" readonly></div><p class="row" style="margin-top:12px"><a class="btn pay hidden" id="pay" rel="noopener noreferrer" target="_blank">Pay now</a><a class="btn ghost" id="ropen">Open receipt</a></p><p class="muted small" id="pay-host"></p></div>
+</main><footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/sign.js"></script></body></html>

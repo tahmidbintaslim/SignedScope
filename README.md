@@ -1,17 +1,17 @@
 <p align="center"><img src="public/favicon.svg" width="56" alt=""></p>
-<h1 align="center">ScopeLock</h1>
-<p align="center"><b>Scope and UAT sign-off links with signed receipts.</b><br>
-The client accepts or rejects each item and signs, and the client gets an HMAC-signed receipt link to keep and send to the agency. A later request becomes a change request that shows a diff.<br>
-No database and no client login.</p>
+<h1 align="center">SignedScope</h1>
+<p align="center"><b>Every line signed. Every change priced.</b><br>
+The client accepts or rejects each scope item and UAT check, with a price on each line, and signs. They get an HMAC-signed receipt. A later request becomes a change request shown as a priced diff against what they signed, with your own Pay link.<br>
+No database and no client login. Formerly ScopeLock.</p>
 <p align="center"><a href="https://scopelock-sable.vercel.app">Live app</a> · <a href="#how-it-works">How it works</a> · <a href="#self-host">Self-host</a></p>
 
 <p align="center"><a href="https://scopelock-sable.vercel.app"><b>Try the live demo</b></a> &nbsp;·&nbsp; free, no signup</p>
 
-<p align="center"><img src="docs/img/demo.gif" width="760" alt="Demo: an agency creates a sign-off, the client accepts and rejects items and signs, then a change request shows the diff"></p>
+<p align="center"><img src="docs/img/demo.gif" width="760" alt="Demo: a client request is dragged onto the signed scope, priced, approved by the client and signed, and the total updates"></p>
 
 ## Why
 
-Scope disputes usually come down to one sentence: "I thought that was included." A PDF and an email that says "looks good" do not settle it. ScopeLock records what was shown, what was approved or rejected, who signed and when, in a form neither side can edit without verification failing.
+Scope disputes usually come down to one sentence: "I thought that was included." A PDF and an email that says "looks good" do not settle it, and every "one small change" after that is a discount nobody agreed to. SignedScope records what was shown, what was approved or rejected, who signed and when, in a form neither side can edit without verification failing.
 
 ## Screenshots
 
@@ -31,12 +31,14 @@ Scope disputes usually come down to one sentence: "I thought that was included."
 2. **Sign.** The client opens `/sign#<token>`. The data sits in the URL fragment, so it is not part of the page request. The page then sends it in the body of an API call that checks the signature and stores nothing. They accept or reject each item (a rejection needs a comment), acknowledge the exclusions and sign. `POST /api/sign` checks the token and returns a signed **receipt** that embeds the document, its SHA-256, the decisions, the signer, a timestamp, the country and a UA hash.
 3. **Verify.** `/verify` (or `POST /api/verify`) recomputes the HMAC. If the document changed, verification fails.
 4. **Change request.** "Start a change request" on a receipt seals revision *n+1* linked to the baseline receipt's hash. The client sees added, changed and removed items compared with what they approved.
+5. **Prices and payment.** Any in-scope or UAT line can carry a price, in one of 15 currencies. The receipt records the accepted total and, on a change request, the signed baseline it is compared with. An optional Pay link (Stripe, Wise, Omise, PayPal or Payoneer hosts only) is shown to the client after signing. SignedScope never handles the money.
+6. **Draft from a message.** `POST /api/draft` turns a pasted client message or brief into draft lines. With `ANTHROPIC_API_KEY` set it uses Claude; otherwise a rule-based splitter. Nothing is sealed until the agency reviews it.
 
-| | Free (this repo) | Pro, planned, $19/mo | Agency, planned, $49/mo |
+| | Free (this repo) | Pro, planned, $19/mo flat | Agency, planned, $49/mo flat |
 |---|---|---|---|
-| Unlimited sign-off links, receipts, change requests | Yes | Yes | Yes |
-| Saved workspace, email notifications, branding, PDF | No | Yes | Yes |
-| Seats, white-label domain, API/webhooks | No | No | Yes |
+| Unlimited sign-offs, receipts, priced change requests, your own Pay link | Yes | Yes | Yes |
+| Saved workspace, email notifications, branding, PDF, invoices and tax via Stripe Connect | No | Yes | Yes |
+| 5 seats, custom domain, API/webhooks | No | No | Yes |
 
 ## Security model
 
@@ -50,12 +52,12 @@ Scope disputes usually come down to one sentence: "I thought that was included."
 ```bash
 git clone https://github.com/tahmidbintaslim/scopelock && cd scopelock
 npm install && npm test
-# Vercel: set SIGNING_SECRET (32+ random chars); optional BLOB_READ_WRITE_TOKEN for the waitlist,
+# Vercel: set SIGNING_SECRET (32+ random chars); optional ANTHROPIC_API_KEY for AI drafts, BLOB_READ_WRITE_TOKEN for the waitlist,
 # STRIPE_LINK_PRO / STRIPE_LINK_AGENCY for checkout redirects
 npx vercel deploy
 ```
 
-No framework and no build step: static files in `public/` plus five Node functions in `api/`.
+No framework and no build step: static files in `public/` plus six Node functions in `api/`. Fonts (Plus Jakarta Sans, JetBrains Mono; OFL) are self-hosted under `public/fonts/`.
 
 ### Run it locally
 
@@ -63,7 +65,7 @@ No framework and no build step: static files in `public/` plus five Node functio
 SIGNING_SECRET=$(openssl rand -base64 32) npm run dev   # http://localhost:3000, no Vercel CLI needed
 ```
 
-`scripts/capture-screenshots.js` regenerates everything in `docs/img/` from a real run against the dev server.
+`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`, and `scripts/capture-demo.js` records `docs/img/demo.gif` and `public/og.png`, both from a real run against the dev server (`BASE=http://localhost:3000`).
 
 Payments: Pro and Agency are not built yet, so the landing page links to the waitlist. The `/api/checkout` route and the Stripe test-mode links stay in place for when live mode is approved.
 
@@ -71,6 +73,7 @@ Payments: Pro and Agency are not built yet, so the landing page links to the wai
 
 - [ ] Key IDs and secret rotation
 - [ ] Pro: accounts and a workspace (Postgres), email on sign/reject, logo and colors, server-rendered PDF
+- [ ] Pro: invoices, pay links and tax through Stripe Connect (each agency a connected account)
 - [ ] Email OTP to confirm signer identity (optional per document)
 - [ ] Import from Markdown, Notion or Google Docs checklists
 - [ ] Agency: webhooks, seats, custom domain

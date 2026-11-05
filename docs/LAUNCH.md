@@ -1,3 +1,57 @@
+# SignedScope launch update (2026-11-03)
+
+ScopeLock is now **SignedScope**, because scopelock.app is an unrelated live product ($59/month) sold to the same buyers. The ScopeLock sections further down are the earlier plan. Where they disagree, this section wins.
+
+## Before any public post (owner)
+
+- [ ] Trademark search for "SignedScope" (USPTO TESS, EUIPO TMview, DIP Thailand), then buy `signedscope.com` and `signedscope.app`. Both were unregistered on 2026-11-03.
+- [ ] Add both domains to the Vercel project. Make `signedscope.com` primary, and redirect `scopelock-sable.vercel.app/*` to the same path on `signedscope.com`. Existing `/sign#`, `/receipt#` and `/new#cr=` links keep working, because the fragment survives a redirect and the signing secret is unchanged.
+- [ ] Optional: set `ANTHROPIC_API_KEY` in Vercel for AI drafts. Without it, drafting uses the rule-based splitter.
+- [x] `docs/img/` regenerated (`scripts/capture-screenshots.js`), demo GIF and `public/og.png` recorded (`scripts/capture-demo.js`). Rerun both after the domain moves, and update `og:image` in `public/index.html` to the new domain.
+- [ ] Optional: rename the GitHub repo to `signedscope`. GitHub redirects the old URL.
+- Stripe live mode and Stripe Connect stay a separate decision, after the build gate (50 waitlist sign-ups or 10 paid).
+
+## Positioning in one line
+
+"Your client signs what they said yes and no to. Every change after that shows up with its price."
+
+## Product Hunt
+
+- Tagline (60 characters max): Every line signed, every change priced
+- Description: SignedScope turns scope and UAT checklists into a link your client approves line by line, with prices. Later asks become change requests shown as a priced diff against what they signed, with your own Pay link. No signup for the client.
+- Maker comment:
+
+> I'm Tahmid Rafi, an engineer in Bangkok. Every freelancer knows the message: "Can we also add one small thing?" Saying yes is a discount you never agreed to. Saying no feels like risking the client.
+>
+> SignedScope takes the conversation off your plate. The client signs the scope line by line, with a price on each line. When the next ask comes in, you paste their message, set a price, and send a change request. They see exactly what moved since they signed, accept or reject each change (a rejection needs a reason), sign, and get a Pay button that opens your own Stripe, Wise, Omise, PayPal or Payoneer link.
+>
+> It is free and open source, with no database: the document lives in the signed link. Pro ($19 flat) is not built yet. The home page has a 30-second demo you can play without signing up.
+>
+> What is the last "quick change" a client asked you for?
+
+## Show HN
+
+- Title: Show HN: SignedScope, priced change requests your client signs, with no database
+- Body: keep the technical body from the ScopeLock draft below, and add one paragraph:
+
+> New in this version: per-line prices, a running total, change requests that show the signed baseline next to the new total, an allow-listed Pay link, and a draft endpoint that turns a pasted client message into lines (Claude if a key is set, rule-based otherwise). I renamed it from ScopeLock after finding an unrelated product with that name.
+
+## Founder-led outreach (first 50 agencies)
+
+Sources: the Shopify Partner directory and Clutch (web and Shopify agencies with 3 to 30 people), plus offshore teams in Bangladesh, Vietnam, the Philippines and Thailand. Send one message per agency, personalized to the agency, and never automated.
+
+> Hi {name}, I build tools for agencies. Quick question: when a client asks for "one small change" after sign-off, how do you usually handle the price? I made a free tool that turns their message into a priced change request they sign: {link}?ref=outreach. There's a 30-second demo on the home page. Would it fit how you work? Blunt feedback welcome.
+
+Attribution: any link with `?ref=<tag>` (for example `?ref=outreach`, `?ref=hn`, `?ref=ph`, `?ref=linkedin`) is counted once per visit, anonymously, and the tag is saved with a waitlist sign-up. Run `BLOB_READ_WRITE_TOKEN=... node scripts/ref-report.js` for visits and sign-ups by tag.
+
+## Measure for 2 weeks
+
+- Waitlist sign-ups by plan (Blob `waitlist/`)
+- Replies to outreach, and the number of agencies that send one real link
+- Build gate for Pro: 50 waitlist sign-ups or 10 paid
+
+---
+
 # Launch plan: ScopeLock, checkout-sentinel, Thai BOI tech jobs
 
 Prepared 2026-10-26. Stripe is in **test mode** (account "Devsaround"). Nothing has been posted publicly.

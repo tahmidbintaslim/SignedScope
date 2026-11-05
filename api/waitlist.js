@@ -52,8 +52,9 @@ module.exports = handler(async (body, req) => {
   if (!addr) throw httpError(400, 'Email is required');
   const plan = ['free', 'pro', 'agency'].includes(body.plan) ? body.plan : 'free';
   const note = str(body.note, 300, 'Note', false);
+  const ref = typeof body.ref === 'string' && /^[a-z0-9][a-z0-9-]{0,31}$/.test(body.ref) ? body.ref : undefined;
   await blob.put(`waitlist/${sha256(addr).slice(0, 24)}.json`,
-    JSON.stringify({ email: addr, plan, note, at: new Date().toISOString() }),
+    JSON.stringify({ email: addr, plan, note, ref, at: new Date().toISOString() }),
     { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
   return { ok: true };
 });

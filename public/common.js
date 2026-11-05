@@ -26,3 +26,9 @@ function copyBtn(input) {
   }, text: 'Copy' });
 }
 function fmt(iso) { try { return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); } catch { return iso; } }
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'SGD', 'THB', 'BDT', 'VND', 'PHP', 'INR', 'MYR', 'IDR', 'JPY'];
+// Formats an amount in the document's currency, e.g. money(480, 'USD') -> "$480".
+function money(n, cur = 'USD') {
+  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: Number.isInteger(n) ? 0 : 2 }).format(n); }
+  catch { return `${cur} ${n}`; }
+}
