@@ -1,4 +1,4 @@
-// Prints visit counts per ?ref= tag and day, plus waitlist sign-ups per ref.
+// Prints visit counts per ?ref= tag and day, waitlist sign-ups per ref, and estimator feedback.
 // Usage: BLOB_READ_WRITE_TOKEN=... node scripts/ref-report.js
 const { list, get } = require('@vercel/blob');
 
@@ -29,4 +29,18 @@ async function all(prefix) {
   }
   console.log('Waitlist sign-ups by ref');
   for (const [ref, n] of Object.entries(signups)) console.log(`  ${ref.padEnd(20)} ${String(n).padStart(5)}`);
+  // Estimator test: "Would you send this estimate to a real client?" (sample runs excluded).
+  const fb = { as_is: 0, with_edits: 0, no: 0 }; const notes = [];
+  for (const b of await all('feedback/estimate/')) {
+    try {
+      const res = await get(b.pathname, { access: 'private' });
+      const j = JSON.parse(await new Response(res.stream).text());
+      if (j.sample || !(j.answer in fb)) continue;
+      fb[j.answer]++; if (j.note) notes.push(`[${j.answer}/${j.lang || '?'}] ${j.note}`);
+    } catch { /* skip unreadable entries */ }
+  }
+  const total = fb.as_is + fb.with_edits + fb.no;
+  console.log('Estimator feedback (would send to a real client)');
+  for (const [k, n] of Object.entries(fb)) console.log(`  ${k.padEnd(20)} ${String(n).padStart(5)}   ${total ? Math.round((n / total) * 100) : 0}%`);
+  for (const n of notes) console.log('  - ' + n);
 })().catch((e) => { console.error(e.message); process.exit(1); });

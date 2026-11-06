@@ -136,3 +136,64 @@ test('AI drafting needs an IP and stays within the daily cap', async () => {
   delete process.env.ANTHROPIC_API_KEY;
   assert.equal(res.body.source, 'rules');
 });
+
+test('estimate: hours are cleaned and prices come only from the freelancer rate', () => {
+  const estimate = require('../api/estimate');
+  const est = estimate.normalize({
+    summary: 's', projectType: 'Site',
+    features: [
+      { name: 'Booking', kind: 'functional', stories: [{ title: 'Pick a time', hoursLow: 10, hoursHigh: 4 }, { title: '', hoursLow: 1, hoursHigh: 2 }] },
+      { name: 'QA', kind: 'weird', stories: [{ title: 'Test', hoursLow: -5, hoursHigh: 9999 }] },
+      { name: 'Empty', kind: 'functional', stories: [] },
+    ],
+    milestones: [{ name: 'M1', featureIndexes: [0, 0, 7, -1], weeks: 0 }],
+    assumptions: ['a'], openQuestions: [], risks: [], outOfScope: ['x'],
+  });
+  assert.deepEqual(est.features[0].stories, [{ title: 'Pick a time', hoursLow: 4, hoursHigh: 10 }], 'low/high swapped, empty dropped');
+  assert.equal(est.features[1].kind, 'functional');
+  assert.deepEqual(est.features[1].stories[0], { title: 'Test', hoursLow: 0, hoursHigh: 400 }, 'clamped');
+  assert.equal(est.features.length, 2, 'features without stories dropped');
+  assert.deepEqual(est.milestones[0], { name: 'M1', featureIndexes: [0], weeks: 0.5 });
+  assert.deepEqual(estimate.totals(est, 20, 10), { hoursLow: 4, hoursHigh: 410, priceLow: 88, priceHigh: 9020, weeks: 0.5 });
+});
+
+test('estimate: validates input and reports when AI is off', async () => {
+  const estimate = require('../api/estimate');
+  assert.equal((await call(estimate, { brief: 'short', rate: 20 })).status, 400);
+  assert.equal((await call(estimate, { brief: 'We need a website for our café with booking.', rate: -1 })).status, 400);
+  const off = await call(estimate, { brief: 'We need a website for our café with booking.', rate: 20 });
+  assert.equal(off.status, 503);
+});
+
+test('feedback: answers are validated; nothing stored without Blob', async () => {
+  const feedback = require('../api/feedback');
+  assert.equal((await call(feedback, { answer: 'maybe' })).status, 400);
+  const ok = await call(feedback, { answer: 'with_edits', note: 'hours too low', lang: 'th', features: 5 });
+  assert.deepEqual(ok.body, { ok: true, stored: false });
+});
+
+test('estimate: AI request uses the right model settings and the brief is fenced', async () => {
+  const sdkPath = require.resolve('@anthropic-ai/sdk');
+  const saved = require.cache[sdkPath];
+  let sent;
+  class Fake { constructor(o) { this.opts = o; this.beta = { messages: { parse: async (req) => { sent = { req, opts: this.opts }; return { stop_reason: 'end_turn', parsed_output: {
+    summary: 'Café site', projectType: 'Website', features: [{ name: 'Menu', kind: 'functional', stories: [{ title: 'Menu page', hoursLow: 4, hoursHigh: 6 }] }],
+    milestones: [{ name: 'Launch', featureIndexes: [0], weeks: 1 }], assumptions: [], openQuestions: [], risks: [], outOfScope: [] } }; } } }; } }
+  require.cache[sdkPath] = { exports: { default: Fake }, loaded: true, id: sdkPath };
+  process.env.ANTHROPIC_API_KEY = 'test';
+  delete require.cache[require.resolve('../api/estimate')];
+  try {
+    const r = await call(require('../api/estimate'), { brief: 'We need a website for our café with a menu.', rate: 500, buffer: 0, currency: 'THB', lang: 'th' });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body.totals, { hoursLow: 4, hoursHigh: 6, priceLow: 2000, priceHigh: 3000, weeks: 1 });
+    assert.equal(sent.req.model, 'claude-opus-5-5');
+    assert.equal(sent.req.output_config.effort, 'medium');
+    assert.equal(sent.req.fallbacks, 'default');
+    assert.ok(sent.opts.timeout < 60_000 && sent.opts.maxRetries === 0, 'fits in the 60s function limit');
+    assert.match(sent.req.system, /Thai/);
+    assert.match(sent.req.messages[0].content, /<client_brief>\nWe need a website/);
+  } finally {
+    delete process.env.ANTHROPIC_API_KEY;
+    if (saved) require.cache[sdkPath] = saved; else delete require.cache[sdkPath];
+  }
+});

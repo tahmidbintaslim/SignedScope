@@ -27,6 +27,9 @@
   "functions": {
     "api/draft.js": {
       "maxDuration": 30
+    },
+    "api/estimate.js": {
+      "maxDuration": 60
     }
   }
 }
