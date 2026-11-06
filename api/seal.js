@@ -19,7 +19,12 @@ module.exports = handler(async (body) => {
     // Change request: link to the previously signed receipt (baseline).
     const { obj: r, hash } = open(body.parent, 'receipt');
     doc.parent = { receiptHash: hash, docHash: r.docHash, title: r.doc.title, signedAt: r.signedAt, signer: r.signer.name, items: r.doc.items };
-    if (r.totals) doc.parent.total = r.totals.accepted;
+    if (r.totals) {
+      // Totals are only comparable in one currency, so a change request keeps the baseline's.
+      if (r.totals.currency !== doc.currency) throw httpError(400, `Use ${r.totals.currency}, the currency of the signed scope this change builds on`);
+      doc.parent.total = r.totals.accepted;
+      doc.parent.currency = r.totals.currency;
+    }
     doc.revision = (r.doc.revision || 1) + 1;
   } else {
     doc.revision = 1;

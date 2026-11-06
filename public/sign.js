@@ -30,10 +30,12 @@ function updateTotal() {
   $('#total-delta').textContent = base != null ? `Signed before: ${money(base, cur)} · change: ${delta >= 0 ? '+' : '−'}${money(Math.abs(delta), cur)}` : 'Rejecting a priced line removes it from the total.';
   $('#total').classList.remove('hidden');
 }
+// Shows the empty state (with a heading and a way forward) instead of a bare error line.
+function fail(msg) { $('#err').textContent = msg; $('#empty').classList.remove('hidden'); }
 async function init() {
-  if (!token) { $('#err').textContent = 'This sign-off link is incomplete. Ask your agency to resend it.'; return; }
+  if (!token) { fail('Part of this sign-off link is missing.'); return; }
   try { ({ data } = await api('verify', { token })); if (data.type !== 'doc') throw new Error('This is not a sign-off link'); }
-  catch (e) { $('#err').textContent = e.message; return; }
+  catch (e) { fail(e.message); return; }
   $('#meta').textContent = `From ${data.agency}${data.agencyEmail ? ' <' + data.agencyEmail + '>' : ''} to ${data.client} · revision ${data.revision || 1}`;
   $('#title').textContent = data.title;
   $('#notes').textContent = data.notes || '';
@@ -79,12 +81,13 @@ $('#f').addEventListener('submit', async (e) => {
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   try {
-    const { receipt, outcome } = await api('sign', { token, name: $('#name').value, email: $('#email').value, agree: $('#agree').checked, decisions });
+    const { receipt, outcome, payable } = await api('sign', { token, name: $('#name').value, email: $('#email').value, agree: $('#agree').checked, decisions });
     const url = `${location.origin}/receipt#${receipt}`;
     $('#rlink').value = url; $('#rlink').parentElement.append(copyBtn($('#rlink')));
     $('#ropen').href = url;
     $('#done-h').textContent = outcome === 'approved' ? 'Signed: everything approved' : 'Signed with requested changes';
-    if (data.payLink) { const pay = $('#pay'); pay.href = data.payLink; pay.classList.remove('hidden'); $('#pay-host').textContent = 'Opens ' + new URL(data.payLink).hostname; }
+    // Only offer payment when something payable was approved.
+    if (payable) { const pay = $('#pay'); pay.href = data.payLink; pay.classList.remove('hidden'); $('#pay-host').textContent = payNote(data.agency, data.payLink); }
     $('#doc').classList.add('hidden'); $('#done').classList.remove('hidden');
   } catch (err) { $('#ferr').textContent = err.message; btn.disabled = false; }
 });

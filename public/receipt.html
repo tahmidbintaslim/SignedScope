@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>Sign-off receipt · SignedScope</title><meta name="robots" content="noindex"></head><body>
-<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New scope</a></nav></header>
 <main class="wrap" style="max-width:760px">
-<p class="err" id="err"></p>
+<section id="empty" class="hidden" aria-live="polite"><h1 style="font-size:34px">This receipt can’t be opened</h1><p class="err" id="err"></p><p class="muted">Receipt links are long. If part of it was cut off when it was copied, ask the sender to share it again.</p><p class="row" style="margin-top:16px"><a class="btn" href="/#demo">See how SignedScope works</a><a class="btn ghost" href="/verify">Check a link</a></p></section>
 <div id="r" class="hidden">
 <p><span class="pill ok" id="valid">Signature verified</span> <span class="pill" id="outcome"></span></p>
 <h1 style="font-size:34px;margin-top:8px" id="title"></h1>
@@ -11,5 +11,5 @@
 <p class="muted small" id="total-delta"></p>
 <div class="card small" style="margin-top:24px"><b>Evidence</b><br>
 Document hash: <span class="mono" id="dh"></span><br>Receipt hash: <span class="mono" id="rh"></span><br><span id="ev"></span></div>
-<div class="row noprint" style="margin-top:20px"><a class="btn pay hidden" id="pay" rel="noopener noreferrer" target="_blank">Pay approved amount</a><button class="btn ghost" type="button" id="print">Print / save as PDF</button><a class="btn" id="cr">Start a change request</a></div>
+<div class="row noprint" style="margin-top:20px"><a class="btn pay hidden" id="pay" rel="noopener noreferrer" target="_blank">Pay approved amount</a><button class="btn ghost" type="button" id="print">Print / save as PDF</button><a class="btn" id="cr">Start a change request</a></div><p class="muted small noprint" id="pay-note"></p>
 </div></main><footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/receipt.js"></script></body></html>

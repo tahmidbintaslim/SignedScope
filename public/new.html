@@ -1,7 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>New sign-off · SignedScope</title></head><body>
-<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New sign-off</a></nav></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>New scope · SignedScope</title></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New scope</a></nav></header>
 <main class="wrap" style="max-width:760px">
-<h1 style="font-size:36px" id="h">New sign-off</h1>
+<h1 style="font-size:36px" id="h">New scope</h1>
 <div id="cr-banner" class="banner hidden"></div>
 <form id="f">
 <div class="grid"><div><label for="title">Project / milestone</label><input id="title" required maxlength="160" placeholder="Acme storefront: Phase 1"></div>
@@ -16,13 +16,13 @@
 <label>Items</label>
 <p class="muted small" style="margin-top:0">Add a price to any line you want the client to approve with its cost. Paste a list into a box and each line becomes an item.</p>
 <div id="items"></div>
-<div class="row"><button type="button" class="btn ghost" id="add-scope">+ In scope</button><button type="button" class="btn ghost" id="add-uat">+ UAT check</button><button type="button" class="btn ghost" id="add-out">+ Out of scope</button></div>
+<div class="row"><button type="button" class="btn ghost" id="add-scope">+ In scope</button><button type="button" class="btn ghost" id="add-uat">+ Test to pass</button><button type="button" class="btn ghost" id="add-out">+ Out of scope</button></div>
 <div class="grid"><div><label for="currency">Currency</label><select id="currency"></select></div>
 <div><label for="payLink">Payment link (optional)</label><input id="payLink" type="url" maxlength="500" placeholder="https://buy.stripe.com/… or wise.com, paypal.me, payoneer, omise"></div></div>
 <p class="muted small">After signing, your client sees a Pay button that opens this link. SignedScope never touches the money.</p>
 <label for="notes">Notes for the client (optional)</label><textarea id="notes" maxlength="2000"></textarea>
 <p class="err" id="err"></p>
-<button class="btn" type="submit">Create sign-off link</button>
+<button class="btn" type="submit">Create scope link</button>
 </form>
 <div id="done" class="hidden card" style="margin-top:24px">
 <h3>Your link is ready</h3><p class="muted small">Send it to your client. This page keeps no copy, so don't lose the link.</p>
