@@ -244,3 +244,4 @@ input[type=range]{width:100%;min-height:36px;padding:0;border:0;background:trans
 
 /* Pull periods closer to the last letter in big headings (Jakarta sets them loose) */
 .kp{margin-left:-.07em}
+.new-link{color:#fff;font-weight:700;text-decoration:none;display:inline-flex;gap:8px;align-items:center}.new-link:hover{text-decoration:underline}

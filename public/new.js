@@ -56,6 +56,19 @@ async function init() {
       return;
     } catch (e) { $('#err').textContent = 'Could not load the baseline receipt: ' + e.message; parentToken = null; }
   }
+  // Draft handed over from the AI estimator (/estimate), used once.
+  let draft = null;
+  try { draft = JSON.parse(sessionStorage.getItem('ss-draft') || 'null'); sessionStorage.removeItem('ss-draft'); } catch { /* ignore */ }
+  if (draft && Array.isArray(draft.items) && draft.items.length) {
+    $('#title').value = String(draft.title || '').slice(0, 160);
+    $('#notes').value = String(draft.notes || '').slice(0, 2000);
+    if (CURRENCIES.includes(draft.currency)) $('#currency').value = draft.currency;
+    const b = $('#cr-banner');
+    b.textContent = 'Filled in from your AI estimate. Check every line and price before you send it.';
+    b.classList.remove('hidden');
+    draft.items.slice(0, 100).forEach((it) => addItem(['scope', 'uat', 'out'].includes(it.kind) ? it.kind : 'scope', String(it.text || ''), undefined, it.price));
+    return;
+  }
   addItem('scope'); addItem('uat'); addItem('out');
 }
 init();

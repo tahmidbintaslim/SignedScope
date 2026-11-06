@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><script src="/estimate-i18n.js"></script><script src="/estimate.js" defer></script><title>AI project estimate · SignedScope</title><meta name="description" content="Paste a client brief. Get features, user stories, milestones, a timeline and a price range from your own hourly rate. Free while in beta."></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/estimate" aria-current="page" data-t="navEstimate">AI estimate</a><a href="/new" data-t="navScope">New scope</a><a href="/#pricing" data-t="navPricing">Pricing</a></nav></header>
+<main class="wrap est">
+<div class="row est-top">
+  <span class="pill" data-t="beta">Free beta</span>
+  <label class="sr" for="ui-lang">Language</label>
+  <select id="ui-lang" class="lang"><option value="en">English</option><option value="bn">বাংলা</option><option value="th">ไทย</option></select>
+</div>
+<h1 data-t="h1">Paste a brief. Get a quote you can defend.</h1>
+<p class="lede" data-t="lede">Features, user stories, milestones, timeline and a price range from your own rate. You edit everything before your client sees it.</p>
+
+<form id="f" class="card">
+  <label for="brief" style="margin-top:0" data-t="briefLabel">Client brief, email or chat</label>
+  <textarea id="brief" required minlength="20" maxlength="12000" rows="8" data-tp="briefPh"></textarea>
+  <p class="row small"><button type="button" class="btn ghost" id="sample" data-t="sample">Use a sample brief</button><span class="muted" data-t="privacy">Not stored. Sent to Claude (Anthropic) to estimate.</span></p>
+  <div class="grid3">
+    <div><label for="rate" data-t="rate">Your hourly rate</label><input id="rate" type="number" min="0" max="100000" step="any" required value="25" inputmode="decimal"></div>
+    <div><label for="currency" data-t="currency">Currency</label><select id="currency"></select></div>
+    <div><label for="buffer" data-t="buffer">Buffer for surprises (%)</label><input id="buffer" type="number" min="0" max="100" step="1" value="15" inputmode="numeric"></div>
+  </div>
+  <p class="err" id="err" role="alert"></p>
+  <button class="btn" type="submit" id="go" data-t="go">Estimate my project</button>
+  <span class="muted small" id="wait" hidden data-t="wait">Reading the brief and breaking it down… about 20–40 seconds.</span>
+</form>
+
+<section id="out" hidden aria-live="polite">
+  <p class="banner hidden" id="sample-note" data-t="sampleNote">Sample estimate for the sample brief. The AI estimator isn't switched on yet.</p>
+  <div class="total est-total" id="sum">
+    <div><span class="muted small" data-t="priceRange">Price range</span><b id="t-price"></b></div>
+    <div><span class="muted small" data-t="hours">Hours</span><b id="t-hours"></b></div>
+    <div><span class="muted small" data-t="timeline">Timeline</span><b id="t-weeks"></b></div>
+  </div>
+  <p class="muted small" id="t-formula"></p>
+  <p id="summary"></p>
+
+  <h2 data-t="features">Features and user stories</h2>
+  <p class="muted small" data-t="editHint">Change any hours or remove a line. Totals update as you go.</p>
+  <div id="features"></div>
+
+  <h2 data-t="milestones">Milestones</h2>
+  <ol id="milestones" class="est-ms"></ol>
+
+  <div class="grid">
+    <div><h3 data-t="questions">Ask your client</h3><ul id="questions"></ul></div>
+    <div><h3 data-t="assumptions">Assumptions</h3><ul id="assumptions"></ul></div>
+  </div>
+  <div class="grid">
+    <div><h3 data-t="risks">Risks</h3><ul id="risks"></ul></div>
+    <div><h3 data-t="outOfScope">Not included</h3><ul id="outOfScope"></ul></div>
+  </div>
+
+  <div class="card est-next">
+    <h3 data-t="nextH">Send it for approval</h3>
+    <p class="muted" data-t="nextP">Turn this into a scope your client approves line by line and signs. Each feature becomes a priced line.</p>
+    <p class="row"><button class="btn" type="button" id="to-scope" data-t="toScope">Turn into a scope link</button><button class="btn ghost" type="button" id="copy" data-t="copy">Copy as text</button></p>
+  </div>
+
+  <form class="card" id="fb">
+    <h3 style="margin-top:0" id="fb-h" data-t="fbH">Would you send this estimate to a real client?</h3>
+    <div class="row" role="radiogroup" aria-labelledby="fb-h">
+      <label class="opt-r"><input type="radio" name="answer" value="as_is"> <span data-t="fbYes">Yes, as it is</span></label>
+      <label class="opt-r"><input type="radio" name="answer" value="with_edits"> <span data-t="fbEdits">Yes, after edits</span></label>
+      <label class="opt-r"><input type="radio" name="answer" value="no"> <span data-t="fbNo">No</span></label>
+    </div>
+    <label for="fb-note" data-t="fbNote">What's wrong or missing? (optional)</label>
+    <textarea id="fb-note" maxlength="500" rows="2"></textarea>
+    <p class="row"><button class="btn ghost" type="submit" data-t="fbSend">Send feedback</button><span class="muted small" id="fb-ok" role="status"></span></p>
+  </form>
+  <p class="muted small" data-t="disclaimer">Estimates are AI-generated starting points, not guarantees. Check them against your own experience before quoting.</p>
+</section>
+</main>
+<footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer>
+</body></html>
