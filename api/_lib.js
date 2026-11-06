@@ -85,6 +85,28 @@ function items(list) {
   });
 }
 
+// Written parts of a proposal or agreement: [{heading, body}], plain text only.
+const MAX_SECTIONS = 24;
+function sections(list) {
+  if (list == null) return [];
+  if (!Array.isArray(list) || list.length > MAX_SECTIONS) throw httpError(400, `Up to ${MAX_SECTIONS} sections`);
+  const out = list.map((x, i) => ({ heading: str(x && x.heading, 120, `Section ${i + 1} heading`), body: str(x && x.body, 6000, `Section ${i + 1} text`) }));
+  if (out.reduce((t, x) => t + x.heading.length + x.body.length, 0) > 40000) throw httpError(413, 'The written sections are too long for a link; shorten them');
+  return out;
+}
+
+// Payment schedule: [{label, amount, due?}] in the document's currency, e.g. deposit and final payment.
+function schedule(list) {
+  if (list == null) return [];
+  if (!Array.isArray(list) || list.length > 12) throw httpError(400, 'Up to 12 payments in the schedule');
+  return list.map((x, i) => {
+    const amount = price(x && x.amount, `Payment ${i + 1} amount`);
+    if (!amount) throw httpError(400, `Payment ${i + 1} needs an amount above 0`);
+    const due = str(x.due, 60, `Payment ${i + 1} due`, false);
+    return { label: str(x.label, 120, `Payment ${i + 1} label`), amount, ...(due ? { due } : {}) };
+  });
+}
+
 // Optional money amount; stored as a number with at most 2 decimals.
 // Strings accept "6000", "6,000", "6,000.50" or "750.5". Commas are only allowed as
 // thousands separators in groups of 3, so a decimal comma like "1.234,50" or "12,5"
@@ -169,4 +191,4 @@ function handler(fn) {
   };
 }
 
-module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, payable, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES, REF_RE };
+module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, payable, sections, schedule, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES, REF_RE };

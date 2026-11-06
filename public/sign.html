@@ -7,6 +7,8 @@
 <h1 style="font-size:34px;margin-top:8px" id="title"></h1>
 <div id="cr" class="banner hidden"></div>
 <p id="notes" class="muted" style="white-space:pre-wrap"></p>
+<p class="noprint"><button class="btn ghost" id="print" type="button">Download PDF</button></p>
+<div id="parts"></div>
 <form id="f">
 <div id="list"></div>
 <div id="removed"></div>
@@ -15,7 +17,7 @@
 <div class="card" style="margin-top:20px">
 <div class="grid"><div><label for="name">Your full name</label><input id="name" required maxlength="120" autocomplete="name"></div>
 <div><label for="email">Your email</label><input id="email" type="email" maxlength="254" autocomplete="email"></div></div>
-<label style="display:flex;gap:8px;align-items:flex-start;font-weight:500"><input type="checkbox" id="agree" style="width:auto;margin-top:5px"> <span>I've reviewed every item above. My decisions are a record of what I approve for this project, and I understand out-of-scope items aren't included.</span></label>
+<label style="display:flex;gap:8px;align-items:flex-start;font-weight:500"><input type="checkbox" id="agree" style="width:auto;margin-top:5px"> <span id="agree-t">I've reviewed every item above. My decisions are a record of what I approve for this project, and I understand out-of-scope items aren't included.</span></label>
 <p class="err" id="ferr"></p>
 <button class="btn" type="submit">Sign off</button>
 </div></form></div>

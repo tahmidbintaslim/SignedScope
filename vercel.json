@@ -30,6 +30,9 @@
     },
     "api/estimate.js": {
       "maxDuration": 60
+    },
+    "api/proposal.js": {
+      "maxDuration": 60
     }
   }
 }

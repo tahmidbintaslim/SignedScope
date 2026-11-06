@@ -59,3 +59,44 @@ test('sent → viewed → signed updates the document, project and activity', as
   assert.deepEqual(store.tables.activity.map((a) => a.kind), ['document_sent', 'document_viewed', 'document_signed']);
   assert.ok(store.tables.activity.every((a) => a.owner === A.id && a.project_id === P));
 });
+
+test('agreement: sections and schedule are sealed; signing creates the payment requests once', async () => {
+  const body = { ...base, kind: 'agreement', title: 'Café site agreement',
+    sections: [{ heading: 'Summary', body: 'A bilingual café website.' }, { heading: 'Revisions', body: 'Two rounds included.' }],
+    schedule: [{ label: 'Deposit 50%', amount: 4500, due: 'On signing' }, { label: 'Final 50%', amount: '4,500', due: 'At launch' }] };
+  assert.equal((await call(seal, { ...body, schedule: [{ label: 'x', amount: 0 }] })).status, 400, 'zero amount refused');
+  assert.equal((await call(seal, { ...body, sections: [{ heading: '', body: 'x' }] })).status, 400, 'heading required');
+  const s = await call(seal, { ...body, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+  assert.equal(s.status, 200, JSON.stringify(s.body));
+  const doc = store.tables.documents.find((d) => d.id === s.body.documentId);
+  assert.equal(doc.kind, 'agreement');
+  const d = (await call(verify, { token: s.body.token })).body.data;
+  assert.deepEqual(d.schedule, [{ label: 'Deposit 50%', amount: 4500, due: 'On signing' }, { label: 'Final 50%', amount: 4500, due: 'At launch' }]);
+  assert.equal(d.sections[1].heading, 'Revisions');
+  const decisions = { [d.items[0].id]: { status: 'accepted' } };
+  for (let i = 0; i < 2; i++) await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions });
+  const pays = store.tables.payments.filter((p) => p.document_id === doc.id);
+  assert.deepEqual(pays.map((p) => [p.label, p.amount, p.currency, p.owner, p.project_id]), [
+    ['Deposit 50%', 4500, 'THB', A.id, P], ['Final 50%', 4500, 'THB', A.id, P]], 'created once, even if signed twice');
+});
+
+test('proposal writer: signed-in only, never asked for prices, input fenced', async () => {
+  const proposal = require('../api/proposal');
+  const body = { project: 'Café site', client: 'Café Lumi', features: ['Menu', 'Booking'], milestones: ['1. Design (1 week)'], lang: 'th' };
+  assert.equal((await call(proposal, body)).status, 401);
+  assert.equal((await call(proposal, body, { authorization: 'Bearer fake-token-' + A.id })).status, 503, 'no AI key');
+  const sdkPath = require.resolve('@anthropic-ai/sdk');
+  let sent;
+  require.cache[sdkPath] = { exports: { default: class { constructor(o) { this.beta = { messages: { parse: async (req) => { sent = { req, o }; return { stop_reason: 'end_turn', parsed_output: { intro: 'สวัสดี', approach: 'ขั้นตอน', nextSteps: 'ลงนาม' } }; } } }; } } }, loaded: true, id: sdkPath };
+  process.env.ANTHROPIC_API_KEY = 'test';
+  try {
+    const r = await call(proposal, body, { authorization: 'Bearer fake-token-' + A.id });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body, { intro: 'สวัสดี', approach: 'ขั้นตอน', nextSteps: 'ลงนาม' });
+    assert.equal(sent.req.model, 'claude-opus-5-5');
+    assert.match(sent.req.system, /Never state prices/);
+    assert.match(sent.req.system, /Thai/);
+    assert.match(sent.req.messages[0].content, /^<proposal_input>/);
+    assert.ok(sent.o.timeout < 60000);
+  } finally { delete process.env.ANTHROPIC_API_KEY; delete require.cache[sdkPath]; }
+});

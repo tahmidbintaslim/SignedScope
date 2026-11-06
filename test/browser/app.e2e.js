@@ -77,6 +77,25 @@ async function setup(ctx) {
     await p.click('#f button[type=submit]'); await p.waitForSelector('#done:not(.hidden)');
     ok(await p.isVisible('#filed'), 'scope filed to the project');
 
+    // Agreement from the composer: outline from the estimate, terms, schedule; the client sees it all.
+    await p.goto(B + '/app#/projects/' + projectId);
+    await p.click('text=Proposal or agreement'); await p.waitForSelector('text=Written sections');
+    await p.selectOption('[aria-label="Document type"]', 'agreement');
+    ok(await p.isChecked('#terms-on'), 'agreement turns terms on');
+    ok((await p.inputValue('.comp-sec input >> nth=0')) === 'Parties', 'agreement outline');
+    ok(await p.locator('.comp-pay').count() === 2, '50/50 schedule from the estimate total');
+    await p.click('text=Preview'); await p.waitForSelector('.comp-preview');
+    ok((await p.textContent('.comp-preview')).includes('Governing law'), 'preview shows the terms');
+    let sealed;
+    p.on('request', (r) => { if (r.url().endsWith('/api/seal')) sealed = r.postDataJSON(); });
+    await p.click('text=Create link for client'); await p.waitForSelector('text=Your link is ready');
+    ok(sealed.kind === 'agreement' && sealed.schedule.length === 2 && sealed.sections.some((x) => x.heading === 'Terms'), 'sealed as an agreement');
+    const signUrl = await p.inputValue('.share input');
+    const cp = await ctx.newPage(); await cp.goto(signUrl); await cp.waitForSelector('#doc:not(.hidden)');
+    ok((await cp.textContent('#parts')).includes('Payment schedule') && (await cp.textContent('#parts')).includes('Electronic signature'), 'client sees sections, schedule and terms');
+    ok((await cp.textContent('#agree-t')).includes('I agree to the terms'), 'agreement wording on the signature checkbox');
+    await cp.close();
+
     // Payments: request a deposit, mark it paid.
     await p.goto(B + '/app#/projects/' + projectId);
     await p.waitForSelector('text=Copy client link');
