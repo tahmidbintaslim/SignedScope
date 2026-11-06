@@ -3,6 +3,7 @@
 // Bangla and Thai are first drafts: have a native speaker review before a wide launch.
 const T = {
   en: {
+    navApp: 'Workspace', saveH: 'Save to your workspace', saveProject: 'Project', saveNew: 'New project name', save: 'Save estimate', openProject: 'Open project', signInToSave: 'Sign in to save estimates and track clients', saved: 'Saved', newProjectOpt: '+ New project', loadedSaved: 'Saved estimate loaded. Edit it and save again as a new version.',
     navEstimate: 'AI estimate', navScope: 'New scope', navPricing: 'Pricing', beta: 'Free beta',
     h1: 'Paste a brief. Get a quote you can defend.',
     lede: 'Features, user stories, milestones, timeline and a price range from your own rate. You edit everything before your client sees it.',
@@ -26,6 +27,7 @@ const T = {
     delivers: 'Delivers', notesAssumptions: 'Assumptions',
   },
   bn: {
+    navApp: 'ওয়ার্কস্পেস', saveH: 'ওয়ার্কস্পেসে সংরক্ষণ করুন', saveProject: 'প্রজেক্ট', saveNew: 'নতুন প্রজেক্টের নাম', save: 'এস্টিমেট সংরক্ষণ', openProject: 'প্রজেক্ট খুলুন', signInToSave: 'এস্টিমেট সংরক্ষণ ও ক্লায়েন্ট ট্র্যাক করতে সাইন ইন করুন', saved: 'সংরক্ষিত', newProjectOpt: '+ নতুন প্রজেক্ট', loadedSaved: 'সংরক্ষিত এস্টিমেট খোলা হয়েছে। এডিট করে নতুন ভার্সন হিসেবে সংরক্ষণ করুন।',
     navEstimate: 'AI এস্টিমেট', navScope: 'নতুন স্কোপ', navPricing: 'মূল্য', beta: 'ফ্রি বেটা',
     h1: 'ব্রিফ পেস্ট করুন। যুক্তিসঙ্গত কোট পান।',
     lede: 'আপনার নিজের রেট থেকে ফিচার, ইউজার স্টোরি, মাইলস্টোন, টাইমলাইন এবং মূল্যের পরিসর। ক্লায়েন্ট দেখার আগে আপনি সব এডিট করতে পারবেন।',
@@ -49,6 +51,7 @@ const T = {
     delivers: 'ডেলিভার করে', notesAssumptions: 'অনুমান',
   },
   th: {
+    navApp: 'เวิร์กสเปซ', saveH: 'บันทึกลงเวิร์กสเปซ', saveProject: 'โปรเจกต์', saveNew: 'ชื่อโปรเจกต์ใหม่', save: 'บันทึกผลประเมิน', openProject: 'เปิดโปรเจกต์', signInToSave: 'เข้าสู่ระบบเพื่อบันทึกผลประเมินและติดตามลูกค้า', saved: 'บันทึกแล้ว', newProjectOpt: '+ โปรเจกต์ใหม่', loadedSaved: 'เปิดผลประเมินที่บันทึกไว้แล้ว แก้ไขแล้วบันทึกเป็นเวอร์ชันใหม่ได้',
     navEstimate: 'ประเมินด้วย AI', navScope: 'สร้างขอบเขตงาน', navPricing: 'ราคา', beta: 'เบต้าฟรี',
     h1: 'วางบรีฟ แล้วได้ใบเสนอราคาที่อธิบายได้',
     lede: 'ฟีเจอร์ ยูสเซอร์สตอรี่ ไมล์สโตน ไทม์ไลน์ และช่วงราคาจากเรตของคุณเอง แก้ไขได้ทุกอย่างก่อนลูกค้าเห็น',

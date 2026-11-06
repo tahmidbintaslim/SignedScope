@@ -1,8 +1,9 @@
 'use strict';
-const { seal, open, str, email, items, currency, payLink, handler, httpError } = require('./_lib');
+const { seal, open, str, email, items, currency, payLink, handler, httpError, sha256 } = require('./_lib');
+const db = require('./_supabase');
 
 // Agency creates a scope document. Returns a signed share token for the client.
-module.exports = handler(async (body) => {
+module.exports = handler(async (body, req) => {
   const doc = {
     type: 'doc',
     title: str(body.title, 160, 'Project title'),
@@ -13,6 +14,8 @@ module.exports = handler(async (body) => {
     items: items(body.items),
     currency: currency(body.currency),
     payLink: payLink(body.payLink),
+    // Plain-text payment details such as bank transfer or PromptPay, shown after approval.
+    payInstructions: str(body.payInstructions, 800, 'Payment instructions', false),
     createdAt: new Date().toISOString(),
   };
   if (body.parent) {
@@ -29,7 +32,29 @@ module.exports = handler(async (body) => {
   } else {
     doc.revision = 1;
   }
+  // Filing into a project needs a signed-in owner; check before sealing so nothing half-saves.
+  let user = null, project = null;
+  if (body.projectId) {
+    if (!db.configured()) throw httpError(503, 'Accounts are not set up yet');
+    user = await db.userFrom(req);
+    if (!user) throw httpError(401, 'Please sign in again');
+    if (typeof body.projectId !== 'string' || !/^[0-9a-f-]{36}$/.test(body.projectId)) throw httpError(400, 'Invalid project');
+    const { data } = await db.admin().from('projects').select('id, status').eq('id', body.projectId).eq('owner', user.id).maybeSingle();
+    if (!data) throw httpError(404, 'Project not found');
+    project = data;
+  }
   const token = seal(doc);
   if (token.length > 60_000) throw httpError(413, 'Document too large for a link; trim item text');
-  return { token };
+  if (!project) return { token };
+
+  const priced = doc.items.filter((it) => it.price != null);
+  const { data: row, error } = await db.admin().from('documents').insert({
+    owner: user.id, project_id: project.id, kind: doc.parent ? 'change_request' : 'scope', title: doc.title, revision: doc.revision,
+    token, doc_hash: sha256(token.split('.')[1]), currency: doc.currency,
+    total: priced.length ? priced.reduce((t, it) => t + it.price, 0) : null,
+  }).select('id').single();
+  if (error) { console.error('documents insert', error.message); throw httpError(500, 'Could not save to the project'); }
+  if (['lead', 'estimating'].includes(project.status)) await db.admin().from('projects').update({ status: 'proposal_sent' }).eq('id', project.id);
+  await db.logActivity(user.id, project.id, 'document_sent', { title: doc.title, revision: doc.revision });
+  return { token, documentId: row.id };
 });

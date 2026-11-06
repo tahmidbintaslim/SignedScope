@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><script src="/estimate-i18n.js"></script><script src="/estimate.js" defer></script><title>AI project estimate · SignedScope</title><meta name="description" content="Paste a client brief. Get features, user stories, milestones, a timeline and a price range from your own hourly rate. Free while in beta."></head><body>
-<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/estimate" aria-current="page" data-t="navEstimate">AI estimate</a><a href="/new" data-t="navScope">New scope</a><a href="/#pricing" data-t="navPricing">Pricing</a></nav></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><script src="/vendor/supabase-2.119.0.js"></script><script src="/auth.js"></script><script src="/estimate-i18n.js"></script><script src="/estimate.js" defer></script><title>AI project estimate · SignedScope</title><meta name="description" content="Paste a client brief. Get features, user stories, milestones, a timeline and a price range from your own hourly rate. Free while in beta."></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/estimate" aria-current="page" data-t="navEstimate">AI estimate</a><a href="/new" data-t="navScope">New scope</a><a href="/#pricing" data-t="navPricing">Pricing</a><a href="/app" data-t="navApp">Workspace</a></nav></header>
 <main class="wrap est">
 <div class="row est-top">
   <span class="pill" data-t="beta">Free beta</span>
@@ -49,6 +49,15 @@
     <div><h3 data-t="outOfScope">Not included</h3><ul id="outOfScope"></ul></div>
   </div>
 
+  <div class="card est-next" id="save-box">
+    <h3 data-t="saveH">Save to your workspace</h3>
+    <div id="save-in" hidden>
+      <div class="grid"><div><label for="save-project" data-t="saveProject">Project</label><select id="save-project"></select></div>
+      <div id="save-new-wrap"><label for="save-new" data-t="saveNew">New project name</label><input id="save-new" maxlength="160"></div></div>
+      <p class="row"><button class="btn" type="button" id="save" data-t="save">Save estimate</button><a class="btn ghost hidden" id="saved-link" data-t="openProject">Open project</a><span class="muted small" id="save-ok" role="status"></span></p>
+    </div>
+    <p id="save-out" class="muted"><a href="/login?next=/estimate" data-t="signInToSave">Sign in to save estimates and track clients</a></p>
+  </div>
   <div class="card est-next">
     <h3 data-t="nextH">Send it for approval</h3>
     <p class="muted" data-t="nextP">Turn this into a scope your client approves line by line and signs. Each feature becomes a priced line.</p>

@@ -32,6 +32,11 @@ const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'SGD', 'THB', 'BDT
 function payNote(agency, link) {
   return `Payment goes straight to ${agency} through ${new URL(link).hostname}. SignedScope never handles the money.`;
 }
+// After approval: the agency's pay link and/or plain-text instructions (bank, PromptPay…).
+function showPayment(d, noteSel = '#pay-host') {
+  if (d.payLink) { const pay = $('#pay'); pay.href = d.payLink; pay.classList.remove('hidden'); $(noteSel).textContent = payNote(d.agency, d.payLink); }
+  if (d.payInstructions) { $('#pay-ins-t').textContent = d.payInstructions; $('#pay-ins').classList.remove('hidden'); }
+}
 function money(n, cur = 'USD') {
   const d = Number.isInteger(n) ? 0 : 2; // $750.50, never $750.5
   try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, minimumFractionDigits: d, maximumFractionDigits: d }).format(n); }
