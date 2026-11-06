@@ -38,3 +38,8 @@
   .side nav{max-width:100%}
 }
 #view h2{font-size:20px;letter-spacing:-.01em;margin:0 0 10px}
+.comp-sec{margin-top:12px}.comp-sec .row{flex-wrap:nowrap}.comp-sec input{font-weight:700}.comp-sec textarea{margin-top:8px}
+.comp-pay{margin-top:8px;grid-template-columns:2fr 1fr 1.4fr auto}.comp-group{border:0;padding:0;margin:14px 0 0}.comp-group legend{font-weight:700;margin-bottom:6px}
+.comp-clause{display:inline-flex;margin:4px 16px 4px 0;font-weight:500}.comp-preview{margin-top:20px}.comp-preview .doc-sec h2{font-size:17px}
+#view .tbl input{min-width:0}
+@media (max-width:640px){.comp-pay{grid-template-columns:1fr 1fr}}

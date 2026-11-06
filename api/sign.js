@@ -50,11 +50,24 @@ async function recordSigning(docHash, receipt, token) {
       status: receipt.outcome === 'approved' ? 'signed' : 'changes_requested',
       signed_at: receipt.signedAt, signer_name: receipt.signer.name, receipt_token: token,
       ...(receipt.totals ? { total: receipt.totals.accepted } : {}),
-    }).eq('doc_hash', docHash).select('owner, project_id').maybeSingle();
+    }).eq('doc_hash', docHash).select('id, owner, project_id').maybeSingle();
     if (!data) return;
     if (receipt.outcome === 'approved') {
       await db.admin().from('projects').update({ status: 'approved' }).eq('id', data.project_id).in('status', ['lead', 'estimating', 'proposal_sent']);
+      await scheduleToPayments(data, receipt);
     }
     await db.logActivity(data.owner, data.project_id, 'document_signed', { outcome: receipt.outcome, signer: receipt.signer.name, title: receipt.doc.title });
   } catch (e) { console.error('recordSigning', e.message); }
+}
+
+// An approved payment schedule becomes payment requests on the project, once per document.
+async function scheduleToPayments(row, receipt) {
+  const plan = receipt.doc.schedule || [];
+  if (!plan.length || !row.project_id) return;
+  const { data: existing } = await db.admin().from('payments').select('id').eq('document_id', row.id).limit(1);
+  if (existing && existing.length) return;
+  await db.admin().from('payments').insert(plan.map((p) => ({
+    owner: row.owner, project_id: row.project_id, document_id: row.id, label: p.label, amount: p.amount, currency: receipt.doc.currency,
+  })));
+  await db.logActivity(row.owner, row.project_id, 'payment_requested', { label: `${plan.length} payments from the signed schedule` });
 }

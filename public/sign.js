@@ -39,6 +39,9 @@ async function init() {
   $('#meta').textContent = `From ${data.agency}${data.agencyEmail ? ' <' + data.agencyEmail + '>' : ''} to ${data.client} · revision ${data.revision || 1}`;
   $('#title').textContent = data.title;
   $('#notes').textContent = data.notes || '';
+  renderParts(data, $('#parts'));
+  if (data.kind === 'agreement') $('#agree-t').textContent += ' I agree to the terms of this agreement.';
+  if (data.kind && data.kind !== 'scope') document.title = `${DOC_LABEL[data.kind]} · SignedScope`;
   if (data.parent) {
     const b = $('#cr');
     b.textContent = `This is a change request against "${data.parent.title}", signed by ${data.parent.signer} on ${fmt(data.parent.signedAt)}. Colored bars show added, changed and removed items.`;
@@ -69,6 +72,7 @@ async function init() {
   $('#doc').classList.remove('hidden');
 }
 init();
+$('#print').addEventListener('click', () => window.print());
 $('#f').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#ferr').textContent = '';

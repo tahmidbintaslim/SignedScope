@@ -1,8 +1,9 @@
 'use strict';
-const { seal, open, str, email, items, currency, payLink, handler, httpError, sha256 } = require('./_lib');
+const { seal, open, str, email, items, currency, payLink, sections, schedule, handler, httpError, sha256 } = require('./_lib');
 const db = require('./_supabase');
 
-// Agency creates a scope document. Returns a signed share token for the client.
+// Agency creates a scope, proposal or agreement. Returns a signed share token for the client.
+const KINDS = ['scope', 'proposal', 'agreement'];
 module.exports = handler(async (body, req) => {
   const doc = {
     type: 'doc',
@@ -11,8 +12,11 @@ module.exports = handler(async (body, req) => {
     agencyEmail: email(body.agencyEmail, 'Agency email'),
     client: str(body.client, 120, 'Client name'),
     notes: str(body.notes, 2000, 'Notes', false),
+    kind: KINDS.includes(body.kind) ? body.kind : 'scope',
+    sections: sections(body.sections),
     items: items(body.items),
     currency: currency(body.currency),
+    schedule: schedule(body.schedule),
     payLink: payLink(body.payLink),
     // Plain-text payment details such as bank transfer or PromptPay, shown after approval.
     payInstructions: str(body.payInstructions, 800, 'Payment instructions', false),
@@ -49,7 +53,7 @@ module.exports = handler(async (body, req) => {
 
   const priced = doc.items.filter((it) => it.price != null);
   const { data: row, error } = await db.admin().from('documents').insert({
-    owner: user.id, project_id: project.id, kind: doc.parent ? 'change_request' : 'scope', title: doc.title, revision: doc.revision,
+    owner: user.id, project_id: project.id, kind: doc.parent ? 'change_request' : doc.kind, title: doc.title, revision: doc.revision,
     token, doc_hash: sha256(token.split('.')[1]), currency: doc.currency,
     total: priced.length ? priced.reduce((t, it) => t + it.price, 0) : null,
   }).select('id').single();

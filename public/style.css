@@ -96,3 +96,13 @@ html:lang(th) body,html:lang(bn) body{font-family:"Plus Jakarta Sans","Noto Sans
 #wait{margin-left:12px}
 html:lang(th) :is(h1,h2,h3,.btn),html:lang(bn) :is(h1,h2,h3,.btn){letter-spacing:0}
 .pay-ins{margin-top:16px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--mist)}.pay-ins h3{margin:0 0 6px;font-size:16px}.pay-ins-t{white-space:pre-wrap;margin:0;font-variant-numeric:tabular-nums}
+/* Proposal and agreement sections; clean output when printed or saved as PDF. */
+.doc-sec{margin-top:28px}.doc-sec h2{font-size:20px;margin:0 0 8px}.doc-sec p{white-space:pre-wrap;margin:0;line-height:1.65}
+.sched{width:100%;border-collapse:collapse}.sched td{padding:8px 0;border-top:1px solid var(--line)}.sched td.amt{text-align:right}
+@media print{
+  @page{margin:18mm 16mm}
+  body{font-size:11pt}.wrap{max-width:none!important;padding:0!important}
+  .card{border:1px solid #ccc;box-shadow:none}.btn,.opts,#f .card,#f .grid,#f label:has(#agree),#ferr,.share{display:none!important}
+  .doc-sec,.decide{break-inside:avoid}.doc-sec h2{font-size:14pt}
+  a[href]{color:inherit;text-decoration:none}
+}

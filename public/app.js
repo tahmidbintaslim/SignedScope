@@ -36,14 +36,14 @@ function busy(btn, fn) { return async (e) => { e && e.preventDefault(); btn.disa
 
 // Router ---------------------------------------------------------------------------------------
 async function route() {
-  const [, rawSection = '', id] = (location.hash.replace(/^#/, '').split('?')[0] || '/').split('/');
-  const section = rawSection;
+  const [, section = '', id, sub] = (location.hash.replace(/^#/, '').split('?')[0] || '/').split('/');
   document.querySelectorAll('[data-nav]').forEach((a) => a.removeAttribute('aria-current'));
   const nav = { '': 'dash', projects: 'projects', clients: 'clients', settings: 'settings' }[section];
   const link = document.querySelector(`[data-nav="${nav}"]`); if (link) link.setAttribute('aria-current', 'page');
   view().replaceChildren(el('p', { class: 'muted', text: 'Loading…' }));
   try {
-    if (section === 'projects' && id) await projectPage(id);
+    if (section === 'projects' && id && sub === 'compose') await composePage(id);
+    else if (section === 'projects' && id) await projectPage(id);
     else if (section === 'projects') await projectsPage();
     else if (section === 'clients' && id) await clientPage(id);
     else if (section === 'clients') await clientsPage();
@@ -204,8 +204,9 @@ async function projectPage(id) {
         : el('p', { class: 'empty', text: 'No estimate yet. Paste the client brief into the AI estimator.' })),
 
     el('section', { class: 'sect' },
-      el('h2', {}, 'Scopes and signatures', el('span', { class: 'row' },
+      el('h2', {}, 'Documents and signatures', el('span', { class: 'row' },
         signed ? el('a', { class: 'btn sm ghost', href: `/new?project=${id}#cr=${encodeURIComponent(signed.receipt_token)}`, text: 'Change request' }) : null,
+        el('a', { class: 'btn sm ghost', href: `#/projects/${id}/compose`, text: 'Proposal or agreement' }),
         el('button', { class: 'btn sm', type: 'button', onclick: newScope, text: latest ? 'New scope from estimate' : 'New scope' }))),
       docs.length ? el('table', { class: 'tbl' }, el('tbody', {}, docs.map((d) => el('tr', {},
         el('td', {}, el('b', { text: d.title }), el('div', { class: 'muted small', text: `${DOC_KIND[d.kind]} · revision ${d.revision} · ${when(d.created_at)}` })),
@@ -388,3 +389,157 @@ async function exportData() {
   window.addEventListener('hashchange', route);
   route();
 })();
+
+// Proposal / agreement composer -----------------------------------------------------------------
+async function composePage(id) {
+  const p = await q(sb.from('projects').select('*').eq('id', id).maybeSingle());
+  if (!p) { view().replaceChildren(el('h1', { text: 'Project not found' })); return; }
+  const [client, estimates] = await Promise.all([
+    p.client_id ? q(sb.from('clients').select('*').eq('id', p.client_id).maybeSingle()) : null,
+    q(sb.from('estimates').select('*').eq('project_id', id).order('created_at', { ascending: false }).limit(1)),
+  ]);
+  const est = estimates[0];
+  const me = (profile && (profile.business_name || profile.name)) || '';
+  const clientName = (client && (client.company || client.name)) || '';
+  const cur = est ? est.currency : p.currency;
+
+  // Lines: one priced line per estimated feature, exclusions as "Out of scope".
+  const f = est ? 1 + Number(est.buffer_pct) / 100 : 1;
+  const lines = est ? (est.data.features || []).map((ft) => ({ kind: 'scope', text: `${ft.name}: ${ft.stories.map((x) => x.title).join('; ')}`.slice(0, 600),
+    price: Math.round(ft.stories.reduce((a, x) => a + (x.hoursLow + x.hoursHigh) / 2, 0) * Number(est.rate) * f) }))
+    .concat((est.data.outOfScope || []).map((x) => ({ kind: 'out', text: x.slice(0, 600) }))) : [];
+  const milestones = est ? (est.data.milestones || []).map((m, i) => `${i + 1}. ${m.name} (${m.weeks} ${m.weeks === 1 ? 'week' : 'weeks'})`) : [];
+
+  const kind = el('select', { 'aria-label': 'Document type' }, el('option', { value: 'proposal', text: 'Proposal' }), el('option', { value: 'agreement', text: 'Agreement' }));
+  const title = el('input', { maxlength: 160, value: `${p.title}: Proposal` });
+  kind.addEventListener('change', () => { title.value = `${p.title}: ${kind.value === 'agreement' ? 'Agreement' : 'Proposal'}`; terms.hidden = false; termsOn.checked = kind.value === 'agreement' || termsOn.checked; drawSections(); });
+
+  // Sections -----------------------------------------------------------------------------------
+  const outline = () => kind.value === 'agreement' ? [
+    { heading: 'Parties', body: `This agreement is between ${me || '[your business]'} and ${clientName || '[client]'} for the project "${p.title}".` },
+    { heading: 'Summary', body: est ? est.data.summary : '' },
+    ...(milestones.length ? [{ heading: 'Timeline', body: milestones.join('\n') }] : []),
+  ] : [
+    { heading: 'Introduction', body: est ? est.data.summary : '' },
+    ...(milestones.length ? [{ heading: 'Approach and timeline', body: milestones.join('\n') }] : []),
+    ...(est && est.data.assumptions && est.data.assumptions.length ? [{ heading: 'Assumptions', body: est.data.assumptions.map((a) => '- ' + a).join('\n') }] : []),
+    { heading: 'Next steps', body: 'Review each line below, approve or comment, and sign. Work starts once the deposit is received.' },
+  ];
+  let sections = outline();
+  const secBox = el('div');
+  function drawSections() {
+    if (!secBox.dataset.touched) sections = outline();
+    secBox.replaceChildren(...sections.map((x, i) => {
+      const h = el('input', { maxlength: 120, value: x.heading, 'aria-label': 'Section heading', oninput: (e) => { x.heading = e.target.value; secBox.dataset.touched = '1'; } });
+      const b = el('textarea', { maxlength: 6000, rows: Math.min(8, Math.max(3, x.body.split('\n').length + 1)), 'aria-label': 'Section text', oninput: (e) => { x.body = e.target.value; secBox.dataset.touched = '1'; } });
+      b.value = x.body;
+      return el('div', { class: 'card comp-sec' }, el('div', { class: 'row' }, h,
+        el('button', { class: 'x-btn', type: 'button', 'aria-label': 'Remove section', text: '×', onclick: () => { sections.splice(i, 1); secBox.dataset.touched = '1'; drawSections(); } })), b);
+    }));
+  }
+  drawSections();
+  const addSec = el('button', { class: 'btn ghost sm', type: 'button', text: '+ Section', onclick: () => { sections.push({ heading: '', body: '' }); secBox.dataset.touched = '1'; drawSections(); } });
+  const lang = el('select', { 'aria-label': 'Language for AI writing' }, ...[['en', 'English'], ['bn', 'বাংলা'], ['th', 'ไทย']].map(([v, t]) => el('option', { value: v, text: t, selected: v === ((profile && profile.lang) || 'en') })));
+  const ai = el('button', { class: 'btn ghost sm', type: 'button', text: 'Write with AI' });
+  ai.addEventListener('click', busy(ai, async () => {
+    const r = await Auth.api('proposal', { project: p.title, client: clientName, freelancer: me, lang: lang.value, summary: est ? est.data.summary : '',
+      features: est ? est.data.features.map((x) => x.name) : lines.map((l) => l.text), milestones, assumptions: est ? est.data.assumptions : [] });
+    const put = (heading, body) => { const x = sections.find((s) => s.heading === heading); if (x) x.body = body; else sections.unshift({ heading, body }); };
+    if (kind.value === 'agreement') put('Summary', r.intro); else { put('Introduction', r.intro); put('Approach and timeline', r.approach + (milestones.length ? '\n\n' + milestones.join('\n') : '')); put('Next steps', r.nextSteps); }
+    secBox.dataset.touched = '1'; drawSections(); toast('Draft written. Check it before sending.');
+  }));
+
+  // Lines --------------------------------------------------------------------------------------
+  const lineBox = el('div');
+  const total = () => lines.filter((l) => l.kind !== 'out').reduce((t, l) => t + (Number(l.price) || 0), 0);
+  function drawLines() {
+    lineBox.replaceChildren(lines.length ? el('table', { class: 'tbl' }, el('tbody', {}, lines.map((l, i) => el('tr', {},
+      el('td', {}, el('input', { value: l.text, maxlength: 600, 'aria-label': 'Line', oninput: (e) => { l.text = e.target.value; } }), el('div', { class: 'muted small', text: KIND[l.kind] })),
+      el('td', { class: 'num' }, l.kind === 'out' ? '' : el('input', { type: 'number', min: 0, step: 'any', value: l.price ?? '', class: 'amt-in', 'aria-label': 'Price', oninput: (e) => { l.price = e.target.value === '' ? undefined : Number(e.target.value); drawTotal(); } })),
+      el('td', {}, el('button', { class: 'x-btn', type: 'button', 'aria-label': 'Remove line', text: '×', onclick: () => { lines.splice(i, 1); drawLines(); } }))))))
+      : el('p', { class: 'empty', text: 'No estimate on this project yet. Add lines below, or run an AI estimate first.' }),
+    el('p', { class: 'row' }, el('button', { class: 'btn ghost sm', type: 'button', text: '+ Priced line', onclick: () => { lines.push({ kind: 'scope', text: '', price: undefined }); drawLines(); } }),
+      el('button', { class: 'btn ghost sm', type: 'button', text: '+ Not included', onclick: () => { lines.push({ kind: 'out', text: '' }); drawLines(); } }),
+      el('b', { id: 'c-total' })));
+    drawTotal();
+  }
+  function drawTotal() { const t = $('#c-total'); if (t) t.textContent = 'Total ' + money(total(), cur); }
+  drawLines();
+
+  // Payment schedule -----------------------------------------------------------------------------
+  const PRESETS = { '50-50': [['Deposit', 50, 'On signing'], ['Final payment', 50, 'At launch']], '30-40-30': [['Deposit', 30, 'On signing'], ['Milestone payment', 40, 'At design approval'], ['Final payment', 30, 'At launch']], '100': [['Full payment', 100, 'On signing']], none: [] };
+  const preset = el('select', { 'aria-label': 'Payment schedule' }, el('option', { value: '50-50', text: '50% deposit, 50% at launch' }), el('option', { value: '30-40-30', text: '30% / 40% / 30%' }), el('option', { value: '100', text: '100% upfront' }), el('option', { value: 'none', text: 'No schedule' }));
+  let plan = [];
+  const planBox = el('div');
+  function fromPreset() { const t = total(); plan = PRESETS[preset.value].map(([label, pct, due]) => ({ label: `${label} ${pct}%`, amount: Math.round((t * pct) / 100), due })); drawPlan(); }
+  function drawPlan() {
+    planBox.replaceChildren(...plan.map((x, i) => el('div', { class: 'inline comp-pay' },
+      field('Payment', el('input', { maxlength: 120, value: x.label, oninput: (e) => { x.label = e.target.value; } })),
+      field('Amount', el('input', { type: 'number', min: 0, step: 'any', value: x.amount, oninput: (e) => { x.amount = Number(e.target.value); } })),
+      field('When', el('input', { maxlength: 60, value: x.due || '', oninput: (e) => { x.due = e.target.value; } })),
+      el('button', { class: 'x-btn', type: 'button', 'aria-label': 'Remove payment', text: '×', onclick: () => { plan.splice(i, 1); drawPlan(); } }))));
+  }
+  preset.addEventListener('change', fromPreset);
+  fromPreset();
+
+  // Terms (clause library) ------------------------------------------------------------------------
+  const termsOn = el('input', { type: 'checkbox', id: 'terms-on' });
+  const vars = Object.fromEntries(Object.entries(CLAUSE_VARS).filter(([k]) => k !== 'rate').map(([k, v]) => [k, el('input', { type: 'number', min: 0, max: 365, value: v })]));
+  const VAR_LABEL = { days: 'Days to pay or reply', deposit: 'Deposit %', revisions: 'Revision rounds', notice: 'Notice days', warranty: 'Bug-fix days after launch' };
+  const country = el('select', { 'aria-label': 'Governing law' }, ...[['', 'Where I am based'], ['TH', 'Thailand'], ['BD', 'Bangladesh'], ['MY', 'Malaysia'], ['SG', 'Singapore']].map(([v, t]) => el('option', { value: v, text: t, selected: client && client.country === v })));
+  const checks = CLAUSES.map((c) => ({ c, box: el('input', { type: 'checkbox', checked: Boolean(c.on) }) }));
+  const groups = [...new Set(CLAUSES.map((c) => c.group))];
+  const terms = el('div', { class: 'card', hidden: false },
+    el('label', { class: 'opt-r', style: 'margin:0 0 10px' }, termsOn, ' Include terms'),
+    el('p', { class: 'banner', text: 'These are plain-language templates, not legal advice, and they have not been reviewed by a lawyer for your country. Read them, edit what doesn\'t fit, and have a local lawyer check them for larger projects.' }),
+    el('div', { class: 'inline' }, ...Object.entries(vars).map(([k, inp]) => field(VAR_LABEL[k], inp)), field('Governing law', country)),
+    ...groups.map((g) => el('fieldset', { class: 'comp-group' }, el('legend', { text: g }), ...checks.filter((x) => x.c.group === g).map(({ c, box }) => el('label', { class: 'opt-r comp-clause' }, box, ' ', c.title)))));
+  termsOn.checked = false;
+  const rateTxt = profile && profile.hourly_rate ? ` or billed at ${money(Number(profile.hourly_rate), cur)} per hour` : '';
+  function termsSection() {
+    if (!termsOn.checked) return null;
+    const v = { ...Object.fromEntries(Object.entries(vars).map(([k, i]) => [k, i.value])), freelancer: me || 'the freelancer', client: clientName || 'the client', rateText: rateTxt };
+    const picked = checks.filter((x) => x.box.checked).map((x) => x.c);
+    const body = [...picked.map((c, i) => `${i + 1}. ${c.title}. ${fillClause(c.text, v)}`), `${picked.length + 1}. Governing law. ${fillClause(LAW[country.value] + LAW_DISPUTES, v)}`].join('\n\n');
+    return { heading: 'Terms', body };
+  }
+
+  const payIns = el('textarea', { maxlength: 800, rows: 2 }); payIns.value = (profile && profile.pay_instructions) || '';
+  const payLink = el('input', { type: 'url', maxlength: 500, placeholder: 'https://buy.stripe.com/… (optional)' });
+  const out = el('div');
+  const send = el('button', { class: 'btn', type: 'button', text: 'Create link for client' });
+  const preview = el('button', { class: 'btn ghost', type: 'button', text: 'Preview' });
+  const doc = () => ({
+    kind: kind.value, title: title.value.trim(), client: clientName || 'Client', agency: me || (user.email || 'Freelancer'), agencyEmail: (profile && profile.email) || user.email || '',
+    currency: cur, sections: [...sections.filter((x) => x.heading.trim() && x.body.trim()), termsSection()].filter(Boolean),
+    items: lines.filter((l) => l.text.trim()).map((l) => ({ kind: l.kind, text: l.text.trim(), price: l.kind === 'out' ? undefined : l.price })),
+    schedule: plan.filter((x) => x.label.trim() && x.amount > 0), payInstructions: payIns.value.trim(), payLink: payLink.value.trim(), projectId: id,
+  });
+  preview.addEventListener('click', () => {
+    const d = doc(); const box = el('div', { class: 'card comp-preview' }, el('p', { class: 'muted small', text: `${DOC_LABEL[d.kind]} from ${d.agency} to ${d.client}` }), el('h2', { text: d.title }));
+    renderParts(d, box);
+    box.append(el('h2', { text: 'Lines to approve' }), el('ul', {}, d.items.map((it) => el('li', { text: `${it.text}${it.price != null ? ' · ' + money(it.price, cur) : ''}${it.kind === 'out' ? ' (not included)' : ''}` }))));
+    out.replaceChildren(box); box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  send.addEventListener('click', busy(send, async () => {
+    const d = doc();
+    if (!d.items.length) throw new Error('Add at least one line for your client to approve');
+    const r = await Auth.api('seal', d);
+    const url = `${location.origin}/sign#${r.token}`;
+    const linkIn = el('input', { readonly: true, value: url });
+    out.replaceChildren(el('div', { class: 'card' }, el('h2', { text: 'Your link is ready' }), el('p', { class: 'muted', text: 'Send it to your client. You will see here when they open and sign it, and the payment schedule becomes payment requests once they approve.' }),
+      el('div', { class: 'share' }, linkIn, copyBtn(linkIn)), el('p', { class: 'row' }, el('a', { class: 'btn ghost', href: url, target: '_blank', rel: 'noopener', text: 'Preview as client' }), el('a', { class: 'btn ghost', href: '#/projects/' + id, text: 'Back to the project' }))));
+    out.scrollIntoView({ behavior: 'smooth' });
+  }));
+
+  view().replaceChildren(
+    el('p', { class: 'small' }, el('a', { href: '#/projects/' + id, text: '← ' + p.title })),
+    el('div', { class: 'head' }, el('h1', { text: 'Proposal or agreement' }), el('div', { class: 'row' }, kind)),
+    field('Title', title),
+    el('section', { class: 'sect' }, el('h2', {}, 'Written sections', el('span', { class: 'row' }, lang, ai, addSec)), secBox),
+    el('section', { class: 'sect' }, el('h2', { text: 'Lines your client approves' }), lineBox),
+    el('section', { class: 'sect' }, el('h2', {}, 'Payment schedule', preset), planBox, el('p', { class: 'muted small', text: 'Becomes payment requests in this project when your client approves.' })),
+    el('section', { class: 'sect' }, el('h2', { text: 'Terms' }), terms),
+    el('section', { class: 'sect' }, el('h2', { text: 'How your client pays you' }), field('Payment instructions', payIns), field('Payment link', payLink)),
+    el('p', { class: 'row sect' }, preview, send), out);
+}

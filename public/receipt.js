@@ -11,6 +11,7 @@ async function init() {
   $('#outcome').textContent = r.outcome === 'approved' ? 'Approved' : 'Changes requested';
   $('#outcome').classList.add(r.outcome === 'approved' ? 'ok' : 'warn');
   $('#meta').textContent = `Signed by ${r.signer.name}${r.signer.email ? ' <' + r.signer.email + '>' : ''} (${d.client}) on ${fmt(r.signedAt)} · prepared by ${d.agency} · revision ${d.revision || 1}`;
+  renderParts(d, $('#parts'));
   const list = $('#list');
   for (const kind of ['scope', 'uat', 'out']) {
     const its = d.items.filter((i) => i.kind === kind);

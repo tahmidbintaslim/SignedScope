@@ -76,7 +76,7 @@ Payments: Pro and Agency are not built yet, so the landing page links to the wai
 
 - [ ] Key IDs and secret rotation
 - [x] Accounts and a workspace: clients, projects, saved AI estimates, document status (sent, viewed, signed), payments, activity, two-step sign-in
-- [ ] Proposals and agreements from templates, clause library, PDF export
+- [x] Proposals and agreements: written sections, AI-drafted text, clause library (templates, not legal advice), payment schedule that becomes payment requests on approval, print or save as PDF
 - [ ] Document vault, email on view/sign, payment reminders, logo and colors
 - [ ] Pro: invoices, pay links and tax through Stripe Connect (each agency a connected account)
 - [ ] Email OTP to confirm signer identity (optional per document)
