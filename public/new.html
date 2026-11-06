@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><title>New scope · SignedScope</title></head><body>
-<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/estimate">AI estimate</a><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New scope</a></nav></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script><script src="/vendor/supabase-2.119.0.js"></script><script src="/auth.js"></script><title>New scope · SignedScope</title></head><body>
+<header class="top wrap"><a class="logo" href="/">Signed<span>Scope</span></a><nav><a href="/estimate">AI estimate</a><a href="/#demo">Try the demo</a><a href="/#pricing">Pricing</a><a href="/new">New scope</a><a href="/app">Workspace</a></nav></header>
 <main class="wrap" style="max-width:760px">
 <h1 style="font-size:36px" id="h">New scope</h1>
 <div id="cr-banner" class="banner hidden"></div>
@@ -20,6 +20,8 @@
 <div class="grid"><div><label for="currency">Currency</label><select id="currency"></select></div>
 <div><label for="payLink">Payment link (optional)</label><input id="payLink" type="url" maxlength="500" placeholder="https://buy.stripe.com/… or wise.com, paypal.me, payoneer, omise"></div></div>
 <p class="muted small">After signing, your client sees a Pay button that opens this link. SignedScope never touches the money.</p>
+<label for="payInstructions">Payment instructions (optional)</label><textarea id="payInstructions" maxlength="800" rows="2" placeholder="PromptPay: 081-234-5678 (Your Name) · Bank transfer: KBank 123-4-56789-0 · bKash: 01XXXXXXXXX"></textarea>
+<p class="muted small">Shown to your client after they approve, for bank transfer, PromptPay, bKash and similar.</p>
 <label for="notes">Notes for the client (optional)</label><textarea id="notes" maxlength="2000"></textarea>
 <p class="err" id="err"></p>
 <button class="btn" type="submit">Create scope link</button>
@@ -27,6 +29,7 @@
 <div id="done" class="hidden card" style="margin-top:24px">
 <h3>Your link is ready</h3><p class="muted small">Send it to your client. This page keeps no copy, so don't lose the link.</p>
 <div class="share"><input id="link" readonly></div>
-<p class="row" style="margin-top:12px"><a class="btn ghost" id="preview" target="_blank" rel="noopener">Preview as client</a></p>
+<p class="row" style="margin-top:12px"><a class="btn ghost" id="preview" target="_blank" rel="noopener">Preview as client</a><a class="btn ghost hidden" id="to-project">Back to the project</a></p>
+<p class="muted small hidden" id="filed">Saved to your project. You will see when your client opens and signs it.</p>
 </div>
 </main><footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer><script src="/new.js"></script></body></html>

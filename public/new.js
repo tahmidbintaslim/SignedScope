@@ -47,7 +47,7 @@ async function init() {
       const b = $('#cr-banner');
       b.textContent = `Baseline: "${d.title}", signed by ${data.signer.name} on ${fmt(data.signedAt)}. Edit the items below. Your client will see a diff against this baseline.`;
       b.classList.remove('hidden');
-      ['title', 'client', 'agency', 'agencyEmail', 'notes', 'payLink'].forEach((k) => { $('#' + k).value = d[k] || ''; });
+      ['title', 'client', 'agency', 'agencyEmail', 'notes', 'payLink', 'payInstructions'].forEach((k) => { $('#' + k).value = d[k] || ''; });
       $('#currency').value = d.currency || 'USD';
       // Totals are compared with the signed scope, so the currency stays the same.
       $('#currency').disabled = true;
@@ -61,6 +61,7 @@ async function init() {
   try { draft = JSON.parse(sessionStorage.getItem('ss-draft') || 'null'); sessionStorage.removeItem('ss-draft'); } catch { /* ignore */ }
   if (draft && Array.isArray(draft.items) && draft.items.length) {
     $('#title').value = String(draft.title || '').slice(0, 160);
+    if (draft.client) $('#client').value = String(draft.client).slice(0, 120);
     $('#notes').value = String(draft.notes || '').slice(0, 2000);
     if (CURRENCIES.includes(draft.currency)) $('#currency').value = draft.currency;
     const b = $('#cr-banner');
@@ -71,7 +72,20 @@ async function init() {
   }
   addItem('scope'); addItem('uat'); addItem('out');
 }
-init();
+// Signed in and coming from a project: file the link there and fill in your details.
+const projectId = new URLSearchParams(location.search).get('project');
+async function accountDefaults() {
+  if (!projectId) return;
+  const s = await Auth.fullySignedIn();
+  if (!s) { $('#err').textContent = 'Sign in to save this scope to your project.'; return; }
+  const { sb } = await Auth.init();
+  const { data: p } = await sb.from('profiles').select('*').eq('id', s.user.id).maybeSingle();
+  if (!p) return;
+  if (!$('#agency').value) $('#agency').value = p.business_name || p.name || '';
+  if (!$('#agencyEmail').value) $('#agencyEmail').value = p.email || s.user.email || '';
+  if (!$('#payInstructions').value) $('#payInstructions').value = p.pay_instructions || '';
+}
+init().then(accountDefaults);
 
 $('#f').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -80,9 +94,11 @@ $('#f').addEventListener('submit', async (e) => {
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   try {
-    const body = { title: $('#title').value, client: $('#client').value, agency: $('#agency').value, agencyEmail: $('#agencyEmail').value, notes: $('#notes').value, currency: $('#currency').value, payLink: $('#payLink').value.trim(), items };
+    const body = { title: $('#title').value, client: $('#client').value, agency: $('#agency').value, agencyEmail: $('#agencyEmail').value, notes: $('#notes').value, currency: $('#currency').value, payLink: $('#payLink').value.trim(), payInstructions: $('#payInstructions').value.trim(), items };
     if (parentToken) body.parent = parentToken;
-    const { token } = await api('seal', body);
+    if (projectId) body.projectId = projectId;
+    const { token, documentId } = await (projectId ? Auth.api('seal', body) : api('seal', body));
+    if (documentId) { $('#filed').classList.remove('hidden'); const b = $('#to-project'); b.href = '/app#/projects/' + projectId; b.classList.remove('hidden'); }
     const url = `${location.origin}/sign#${token}`;
     const link = $('#link');
     link.value = url;

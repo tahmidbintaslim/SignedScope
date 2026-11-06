@@ -83,6 +83,7 @@ $('#f').addEventListener('submit', async (e) => {
   const btn = $('#go'); btn.disabled = true; $('#wait').hidden = false;
   try {
     const r = await api('estimate', { brief: $('#brief').value, lang, rate: rate(), buffer: buffer(), currency: cur() });
+    briefText = $('#brief').value;
     show(r.estimate, false);
   } catch (err) {
     // When AI is off, the sample brief still shows a labelled sample result.
@@ -106,6 +107,59 @@ $('#to-scope').addEventListener('click', () => {
   try { sessionStorage.setItem('ss-draft', JSON.stringify({ title: (est.projectType || est.summary).slice(0, 160), currency: cur(), notes, items })); } catch { /* ignore */ }
   location.href = '/new';
 });
+
+// Workspace: save the edited estimate to a project, or reopen a saved one (?estimate=id).
+const params = new URLSearchParams(location.search);
+let briefText = '';
+async function workspace() {
+  const s = await Auth.fullySignedIn().catch(() => null);
+  if (!s) return;
+  const { sb } = await Auth.init();
+  $('#save-in').hidden = false; $('#save-out').hidden = true;
+  const { data: prof } = await sb.from('profiles').select('currency, hourly_rate, lang').eq('id', s.user.id).maybeSingle();
+  if (prof && !params.get('estimate')) {
+    if (prof.hourly_rate != null) $('#rate').value = prof.hourly_rate;
+    if (prof.currency) $('#currency').value = prof.currency;
+  }
+  const { data: projects } = await sb.from('projects').select('id, title').order('updated_at', { ascending: false });
+  const sel = $('#save-project');
+  sel.replaceChildren(el('option', { value: '', text: t('newProjectOpt') }), ...(projects || []).map((p) => el('option', { value: p.id, text: p.title })));
+  if (params.get('project')) sel.value = params.get('project');
+  const toggleNew = () => { $('#save-new-wrap').hidden = Boolean(sel.value); };
+  sel.addEventListener('change', toggleNew); toggleNew();
+  if (params.get('estimate')) {
+    const { data: e } = await sb.from('estimates').select('*').eq('id', params.get('estimate')).maybeSingle();
+    if (e) {
+      $('#brief').value = e.brief || ''; $('#rate').value = e.rate; $('#buffer').value = e.buffer_pct; $('#currency').value = e.currency;
+      if (T[e.lang]) setLang(e.lang);
+      sel.value = e.project_id; toggleNew();
+      show(e.data, false);
+      $('#sample-note').textContent = t('loadedSaved'); $('#sample-note').classList.remove('hidden');
+    }
+  }
+  $('#save').addEventListener('click', async () => {
+    const btn = $('#save'); btn.disabled = true; $('#save-ok').textContent = '';
+    try {
+      let projectId = sel.value;
+      if (!projectId) {
+        const title = $('#save-new').value.trim() || (est.projectType || est.summary || 'New project').slice(0, 160);
+        const { data, error } = await sb.from('projects').insert({ title, currency: cur(), status: 'estimating' }).select('id').single();
+        if (error) throw new Error(error.message);
+        projectId = data.id;
+        await sb.from('activity').insert({ project_id: projectId, kind: 'project_created', detail: { title } });
+      }
+      const all = est.features.flatMap((f) => f.stories);
+      const lo = all.reduce((a, x) => a + x.hoursLow, 0), hi = all.reduce((a, x) => a + x.hoursHigh, 0);
+      const { error } = await sb.from('estimates').insert({ project_id: projectId, brief: (briefText || $('#brief').value).slice(0, 12000), lang, currency: cur(),
+        rate: rate(), buffer_pct: buffer(), data: est, hours_low: lo, hours_high: hi, price_low: priceOf(lo), price_high: priceOf(hi) });
+      if (error) throw new Error(error.message);
+      await sb.from('activity').insert({ project_id: projectId, kind: 'estimate_saved', detail: { range: $('#t-price').textContent } });
+      $('#save-ok').textContent = t('saved');
+      const link = $('#saved-link'); link.href = '/app#/projects/' + projectId; link.classList.remove('hidden');
+    } catch (err) { $('#save-ok').textContent = err.message; } finally { btn.disabled = false; }
+  });
+}
+workspace();
 
 $('#copy').addEventListener('click', async () => {
   const lines = [est.summary, ''];

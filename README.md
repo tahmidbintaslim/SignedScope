@@ -50,20 +50,23 @@ Scope disputes usually come down to one sentence: "I thought that was included."
 ## Self-host
 
 ```bash
-git clone https://github.com/tahmidbintaslim/scopelock && cd scopelock
+git clone https://github.com/tahmidbintaslim/signedscope && cd signedscope
 npm install && npm test
 # Vercel: set SIGNING_SECRET (32+ random chars); optional ANTHROPIC_API_KEY for AI drafts, BLOB_READ_WRITE_TOKEN for the waitlist,
 # STRIPE_LINK_PRO / STRIPE_LINK_AGENCY for checkout redirects
+# Accounts and the /app workspace: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (see docs/SETUP-ACCOUNTS.md)
 npx vercel deploy
 ```
 
-No framework and no build step: static files in `public/` plus six Node functions in `api/`. Fonts (Plus Jakarta Sans, JetBrains Mono; OFL) are self-hosted under `public/fonts/`.
+No framework and no build step: static files in `public/` plus Node functions in `api/`. Accounts use Supabase (Postgres with Row Level Security); the schema is in `supabase/migrations/`, and the browser client is vendored in `public/vendor/` so the CSP can stay `script-src 'self'`. Fonts (Plus Jakarta Sans, JetBrains Mono; OFL) are self-hosted under `public/fonts/`.
 
 ### Run it locally
 
 ```bash
 SIGNING_SECRET=$(openssl rand -base64 32) npm run dev   # http://localhost:3000, no Vercel CLI needed
 ```
+
+Tests: `npm test` runs unit and server tests; set `PGTEST_URL` to a Postgres URL to also run the Row Level Security tests (CI does). `node test/browser/app.e2e.js` drives the workspace in a browser against an in-memory Supabase.
 
 `scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`, and `scripts/capture-demo.js` records `docs/img/demo.gif` and `public/og.png`, both from a real run against the dev server (`BASE=http://localhost:3000`).
 
@@ -72,7 +75,9 @@ Payments: Pro and Agency are not built yet, so the landing page links to the wai
 ## Roadmap
 
 - [ ] Key IDs and secret rotation
-- [ ] Pro: accounts and a workspace (Postgres), email on sign/reject, logo and colors, server-rendered PDF
+- [x] Accounts and a workspace: clients, projects, saved AI estimates, document status (sent, viewed, signed), payments, activity, two-step sign-in
+- [ ] Proposals and agreements from templates, clause library, PDF export
+- [ ] Document vault, email on view/sign, payment reminders, logo and colors
 - [ ] Pro: invoices, pay links and tax through Stripe Connect (each agency a connected account)
 - [ ] Email OTP to confirm signer identity (optional per document)
 - [ ] Import from Markdown, Notion or Google Docs checklists

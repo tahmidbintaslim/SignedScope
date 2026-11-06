@@ -36,9 +36,7 @@ async function init() {
   }
   // Only offer payment when something payable was approved (mirrors payable() in api/_lib.js).
   const accepted = d.items.some((it) => (r.decisions[it.id] || {}).status === 'accepted');
-  if (d.payLink && accepted && (!r.totals || r.totals.accepted > 0)) {
-    $('#pay').href = d.payLink; $('#pay').classList.remove('hidden'); $('#pay-note').textContent = payNote(d.agency, d.payLink);
-  }
+  if ((d.payLink || d.payInstructions) && accepted && (!r.totals || r.totals.accepted > 0)) showPayment(d, '#pay-note');
   $('#dh').textContent = r.docHash;
   $('#rh').textContent = res.hash;
   $('#ev').textContent = `Country: ${r.evidence.country || 'n/a'} · UA fingerprint: ${r.evidence.uaHash}` + (d.parent ? ` · Supersedes baseline receipt ${d.parent.receiptHash.slice(0, 16)}…` : '');

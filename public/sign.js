@@ -34,7 +34,7 @@ function updateTotal() {
 function fail(msg) { $('#err').textContent = msg; $('#empty').classList.remove('hidden'); }
 async function init() {
   if (!token) { fail('Part of this sign-off link is missing.'); return; }
-  try { ({ data } = await api('verify', { token })); if (data.type !== 'doc') throw new Error('This is not a sign-off link'); }
+  try { ({ data } = await api('verify', { token, viewed: true })); if (data.type !== 'doc') throw new Error('This is not a sign-off link'); }
   catch (e) { fail(e.message); return; }
   $('#meta').textContent = `From ${data.agency}${data.agencyEmail ? ' <' + data.agencyEmail + '>' : ''} to ${data.client} · revision ${data.revision || 1}`;
   $('#title').textContent = data.title;
@@ -87,7 +87,7 @@ $('#f').addEventListener('submit', async (e) => {
     $('#ropen').href = url;
     $('#done-h').textContent = outcome === 'approved' ? 'Signed: everything approved' : 'Signed with requested changes';
     // Only offer payment when something payable was approved.
-    if (payable) { const pay = $('#pay'); pay.href = data.payLink; pay.classList.remove('hidden'); $('#pay-host').textContent = payNote(data.agency, data.payLink); }
+    if (payable) showPayment(data);
     $('#doc').classList.add('hidden'); $('#done').classList.remove('hidden');
   } catch (err) { $('#ferr').textContent = err.message; btn.disabled = false; }
 });
