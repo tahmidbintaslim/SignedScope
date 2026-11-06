@@ -85,6 +85,23 @@
     },
   };
 
-  const api = { createClient: () => ({ from: (t) => new Query(t), auth }), __store: store };
+  // Storage: file metadata only (no bytes), enough for the vault UI.
+  const storage = {
+    from: (bucket) => ({
+      async upload(path, file) {
+        store.files = store.files || [];
+        if (store.files.some((f) => f.bucket === bucket && f.path === path)) return { data: null, error: { message: 'The resource already exists' } };
+        store.files.push({ bucket, path, size: (file && file.size) || 0, mimetype: (file && file.type) || '', created_at: new Date().toISOString() }); persist();
+        return { data: { path }, error: null };
+      },
+      async list(prefix) {
+        const rows = (store.files || []).filter((f) => f.bucket === bucket && f.path.startsWith(prefix + '/'));
+        return { data: rows.map((f) => ({ name: f.path.slice(prefix.length + 1), created_at: f.created_at, metadata: { size: f.size, mimetype: f.mimetype } })), error: null };
+      },
+      async createSignedUrl(path, secs) { return { data: { signedUrl: `https://fake.storage/${bucket}/${path}?expires=${secs}` }, error: null }; },
+      async remove(paths) { store.files = (store.files || []).filter((f) => !(f.bucket === bucket && paths.includes(f.path))); persist(); return { data: [], error: null }; },
+    }),
+  };
+  const api = { createClient: () => ({ from: (t) => new Query(t), auth, storage }), __store: store };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.supabase = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
