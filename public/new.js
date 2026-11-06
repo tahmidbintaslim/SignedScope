@@ -49,6 +49,8 @@ async function init() {
       b.classList.remove('hidden');
       ['title', 'client', 'agency', 'agencyEmail', 'notes', 'payLink'].forEach((k) => { $('#' + k).value = d[k] || ''; });
       $('#currency').value = d.currency || 'USD';
+      // Totals are compared with the signed scope, so the currency stays the same.
+      $('#currency').disabled = true;
       $('#notes').value = '';
       d.items.forEach((it) => addItem(it.kind, it.text, it.id, it.price));
       return;

@@ -8,6 +8,8 @@ const KINDS = ['scope', 'uat', 'out'];
 const MAX_PRICE = 10_000_000;
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'SGD', 'THB', 'BDT', 'VND', 'PHP', 'INR', 'MYR', 'IDR', 'JPY'];
 // Pay links may only point at known payment providers, so a sealed link can't send a client to a lookalike site.
+// Visit/sign-up attribution tag, e.g. ?ref=outreach.
+const REF_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 const PAY_HOSTS = ['stripe.com', 'wise.com', 'paypal.com', 'paypal.me', 'payoneer.com', 'omise.co', 'opn.ooo'];
 
 function secret() {
@@ -84,9 +86,17 @@ function items(list) {
 }
 
 // Optional money amount; stored as a number with at most 2 decimals.
+// Strings accept "6000", "6,000", "6,000.50" or "750.5". Commas are only allowed as
+// thousands separators in groups of 3, so a decimal comma like "1.234,50" or "12,5"
+// is rejected instead of being misread.
 function price(v, field) {
   if (v == null || v === '') return null;
-  const n = typeof v === 'string' ? Number(v.replace(/[, ]/g, '')) : v;
+  let n = v;
+  if (typeof v === 'string') {
+    const t = v.replace(/\s/g, '');
+    if (!/^(\d+|\d{1,3}(,\d{3})+)(\.\d+)?$/.test(t)) throw httpError(400, `${field} must be a number like 6000 or 6,000.50`);
+    n = Number(t.replace(/,/g, ''));
+  }
   if (typeof n !== 'number' || !Number.isFinite(n) || n < 0 || n > MAX_PRICE) throw httpError(400, `${field} must be a number between 0 and ${MAX_PRICE}`);
   return Math.round(n * 100) / 100;
 }
@@ -108,6 +118,14 @@ function payLink(v) {
     throw httpError(400, `Payment link must be https and on ${PAY_HOSTS.join(', ')}`);
   }
   return u.toString();
+}
+
+// True when the client approved something payable: at least one accepted line and,
+// if the document is priced, an accepted total above zero.
+function payable(items, decisions) {
+  const accepted = items.some((it) => decisions[it.id] && decisions[it.id].status === 'accepted');
+  if (!accepted) return false;
+  return items.some((it) => it.price != null) ? acceptedTotal(items, decisions) > 0 : true;
 }
 
 // Sum of prices for items the client accepted (exclusions never carry a price).
@@ -151,4 +169,4 @@ function handler(fn) {
   };
 }
 
-module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES };
+module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, payable, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES, REF_RE };

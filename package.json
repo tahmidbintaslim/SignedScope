@@ -1,8 +1,8 @@
 {
-  "name": "scopelock",
+  "name": "signedscope",
   "version": "0.1.0",
   "private": true,
-  "description": "Tamper-evident scope & UAT sign-off links for agencies. No database, no client login.",
+  "description": "Client-approved scope and change requests for freelancers and small studios.",
   "license": "MIT",
   "type": "commonjs",
   "engines": {

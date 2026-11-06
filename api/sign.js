@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { seal, open, str, email, acceptedTotal, handler, httpError } = require('./_lib');
+const { seal, open, str, email, acceptedTotal, payable, handler, httpError } = require('./_lib');
 
 // Client signs off a document. Returns a signed receipt token.
 module.exports = handler(async (body, req) => {
@@ -27,7 +27,7 @@ module.exports = handler(async (body, req) => {
     signer: { name, email: signerEmail },
     decisions,
     totals: doc.items.some((it) => it.price != null)
-      ? { currency: doc.currency || 'USD', accepted: acceptedTotal(doc.items, decisions), baseline: doc.parent && doc.parent.total != null ? doc.parent.total : null }
+      ? { currency: doc.currency || 'USD', accepted: acceptedTotal(doc.items, decisions), baseline: doc.parent && doc.parent.total != null && (doc.parent.currency || 'USD') === (doc.currency || 'USD') ? doc.parent.total : null }
       : undefined,
     outcome: rejected ? 'changes_requested' : 'approved',
     signedAt: new Date().toISOString(),
@@ -36,5 +36,5 @@ module.exports = handler(async (body, req) => {
       uaHash: crypto.createHash('sha256').update(ua).digest('hex').slice(0, 16),
     },
   };
-  return { receipt: seal(receipt), outcome: receipt.outcome };
+  return { receipt: seal(receipt), outcome: receipt.outcome, payable: Boolean(doc.payLink) && payable(doc.items, decisions) };
 });

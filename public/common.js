@@ -18,7 +18,7 @@ async function api(path, body) {
   if (!r.ok) throw new Error(j.error || 'Request failed');
   return j;
 }
-const KIND = { scope: 'In scope', uat: 'UAT check', out: 'Out of scope' };
+const KIND = { scope: 'In scope', uat: 'Test to pass', out: 'Out of scope' };
 const tokenFromHash = () => decodeURIComponent(location.hash.slice(1));
 function copyBtn(input) {
   return el('button', { class: 'btn ghost', type: 'button', onclick: async () => {
@@ -28,7 +28,12 @@ function copyBtn(input) {
 function fmt(iso) { try { return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); } catch { return iso; } }
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'SGD', 'THB', 'BDT', 'VND', 'PHP', 'INR', 'MYR', 'IDR', 'JPY'];
 // Formats an amount in the document's currency, e.g. money(480, 'USD') -> "$480".
+// Says plainly where a pay link goes, so clients know SignedScope isn't taking the money.
+function payNote(agency, link) {
+  return `Payment goes straight to ${agency} through ${new URL(link).hostname}. SignedScope never handles the money.`;
+}
 function money(n, cur = 'USD') {
-  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, maximumFractionDigits: Number.isInteger(n) ? 0 : 2 }).format(n); }
+  const d = Number.isInteger(n) ? 0 : 2; // $750.50, never $750.5
+  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur, minimumFractionDigits: d, maximumFractionDigits: d }).format(n); }
   catch { return `${cur} ${n}`; }
 }

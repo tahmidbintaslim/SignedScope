@@ -1,9 +1,11 @@
 'use strict';
 const token = tokenFromHash();
+// Shows the empty state (with a heading and a way forward) instead of a bare error line.
+function fail(msg) { $('#err').textContent = msg; $('#empty').classList.remove('hidden'); }
 async function init() {
   let res;
   try { res = await api('verify', { token }); if (res.data.type !== 'receipt') throw new Error('This is not a receipt link'); }
-  catch (e) { $('#err').textContent = e.message || 'Invalid receipt'; return; }
+  catch (e) { fail(e.message || 'Invalid receipt'); return; }
   const r = res.data, d = r.doc;
   $('#title').textContent = d.title;
   $('#outcome').textContent = r.outcome === 'approved' ? 'Approved' : 'Changes requested';
@@ -32,7 +34,11 @@ async function init() {
     }
     $('#total').classList.remove('hidden');
   }
-  if (d.payLink) { $('#pay').href = d.payLink; $('#pay').classList.remove('hidden'); $('#pay').title = 'Opens ' + new URL(d.payLink).hostname; }
+  // Only offer payment when something payable was approved (mirrors payable() in api/_lib.js).
+  const accepted = d.items.some((it) => (r.decisions[it.id] || {}).status === 'accepted');
+  if (d.payLink && accepted && (!r.totals || r.totals.accepted > 0)) {
+    $('#pay').href = d.payLink; $('#pay').classList.remove('hidden'); $('#pay-note').textContent = payNote(d.agency, d.payLink);
+  }
   $('#dh').textContent = r.docHash;
   $('#rh').textContent = res.hash;
   $('#ev').textContent = `Country: ${r.evidence.country || 'n/a'} · UA fingerprint: ${r.evidence.uaHash}` + (d.parent ? ` · Supersedes baseline receipt ${d.parent.receiptHash.slice(0, 16)}…` : '');

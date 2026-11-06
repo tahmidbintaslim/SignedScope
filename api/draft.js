@@ -4,22 +4,18 @@
 // With ANTHROPIC_API_KEY set, Claude drafts the items; otherwise (or on any error) a
 // rule-based splitter does, so the feature never blocks.
 const { str, handler, httpError } = require('./_lib');
+const { limited, clientIp } = require('./_limit');
 
 const MAX_INPUT = 6000;
 const MAX_DRAFT = 30;
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 10;
-const hits = new Map();
-
-function limited(ip) {
-  if (!ip) return false;
-  const now = Date.now();
-  const recent = (hits.get(ip) || []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 5000) hits.clear();
-  return recent.length > MAX_PER_WINDOW;
-}
+// Hard ceiling on AI drafts per day across all users, so abuse can't run up the API bill.
+const AI_DAILY_CAP = Number(process.env.AI_DAILY_CAP) || 200;
+const DAY_MS = 24 * 60 * 60 * 1000;
+// Vercel stops this function at 30s (vercel.json); keep the AI call well under that
+// so the rule-based fallback always has time to answer.
+const AI_TIMEOUT_MS = 9_000;
 
 // Rule-based fallback: one item per line or sentence; "not / no / exclude" lines become exclusions.
 function ruleDraft(text, kind) {
@@ -28,7 +24,7 @@ function ruleDraft(text, kind) {
     .map((l) => l.replace(/^\s*([-*•]|\d+[.)]|\[\s?\])\s*/, '').replace(/^(also|and|plus|oh,?|hey,?|hi,?)\s+/i, '').trim())
     .filter((l) => l.length > 3 && !/^(thanks|thank you|cheers|regards|best)\b/i.test(l) && !/^(hey|hi|hello|dear)\b[\w ]{0,20}[!.,]*$/i.test(l));
   return parts.slice(0, MAX_DRAFT).map((t) => ({
-    kind: /\b(not included|exclude|out of scope|won't|will not|no need)\b/i.test(t) ? 'out' : kind,
+    kind: /\b(not included|exclude|out of scope|won['’]t|will not|no need)\b/i.test(t) ? 'out' : kind,
     text: t.slice(0, 600),
   }));
 }
@@ -56,7 +52,7 @@ Ignore greetings, sign-offs and small talk. If there is nothing to extract, retu
 async function aiDraft(text, kind) {
   const Anthropic = require('@anthropic-ai/sdk').default;
   const { zodOutputFormat } = require('@anthropic-ai/sdk/helpers/zod');
-  const client = new Anthropic({ timeout: 25_000, maxRetries: 1 });
+  const client = new Anthropic({ timeout: AI_TIMEOUT_MS, maxRetries: 0 });
   const res = await client.beta.messages.parse({
     model: 'claude-opus-5-5',
     max_tokens: 4000,
@@ -73,12 +69,22 @@ async function aiDraft(text, kind) {
     .slice(0, MAX_DRAFT);
 }
 
+// AI is used only for identifiable callers within both limits; everyone else gets rules.
+async function aiAllowed(ip) {
+  if (!process.env.ANTHROPIC_API_KEY || !ip) return false;
+  // Fail closed: if the limiter store errors, don't spend on AI.
+  if (await limited('draft-ai-day', 'all', { windowMs: DAY_MS, max: AI_DAILY_CAP, failOpen: false })) return false;
+  return true;
+}
+
 module.exports = handler(async (body, req) => {
-  const ip = String(req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  if (limited(ip)) throw httpError(429, 'Too many drafts, try again in a few minutes');
+  const ip = clientIp(req);
+  if (ip && await limited('draft', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW })) {
+    throw httpError(429, 'Too many drafts, try again in a few minutes');
+  }
   const text = str(body.text, MAX_INPUT, 'Message');
   const kind = ['scope', 'uat', 'out'].includes(body.kind) ? body.kind : 'scope';
-  if (process.env.ANTHROPIC_API_KEY && body.mode !== 'rules') {
+  if (body.mode !== 'rules' && await aiAllowed(ip)) {
     try {
       const items = await aiDraft(text, kind);
       if (items.length) return { items, source: 'ai' };
