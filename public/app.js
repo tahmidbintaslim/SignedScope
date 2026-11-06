@@ -218,11 +218,53 @@ async function projectPage(id) {
         : el('p', { class: 'empty', text: 'Send a scope for your client to approve line by line and sign.' })),
 
     el('section', { class: 'sect' }, el('h2', { text: 'Payments' }), paymentsBlock(p, pays, docs)),
+    el('section', { class: 'sect' }, el('h2', { text: 'Files' }), filesBlock(p)),
     el('section', { class: 'sect' }, el('h2', { text: 'Activity' }), activityFeed(acts)),
     el('section', { class: 'sect' }, el('button', { class: 'btn ghost sm', type: 'button', text: 'Delete project', onclick: async () => {
-      if (!confirm(`Delete "${p.title}" with its estimates, documents and payments? Sent links keep working for your client, but they won't show here.`)) return;
-      try { await q(sb.from('projects').delete().eq('id', id)); location.hash = '#/projects'; } catch (e) { toast(e.message); }
+      if (!confirm(`Delete "${p.title}" with its estimates, documents, payments and files? Sent links keep working for your client, but they won't show here.`)) return;
+      try {
+        // Files aren't rows, so remove them from the vault first.
+        const files = await q(sb.storage.from('vault').list(`${user.id}/${id}`));
+        if (files.length) await q(sb.storage.from('vault').remove(files.map((f) => `${user.id}/${id}/${f.name}`)));
+        await q(sb.from('projects').delete().eq('id', id)); location.hash = '#/projects';
+      } catch (e) { toast(e.message); }
     } })));
+}
+
+// Vault: private files per project under <user id>/<project id>/ in Supabase Storage.
+const MAX_FILE = 25 * 1024 * 1024;
+const fmtSize = (n) => (n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
+function filesBlock(p) {
+  const prefix = `${user.id}/${p.id}`;
+  const vault = sb.storage.from('vault');
+  const list = el('div', {}, el('p', { class: 'muted', text: 'Loading files…' }));
+  const input = el('input', { type: 'file', multiple: true, id: 'vault-file', class: 'sr' });
+  const pick = el('label', { for: 'vault-file', class: 'btn ghost sm', text: 'Upload files' });
+  async function draw() {
+    const files = await q(vault.list(prefix, { sortBy: { column: 'created_at', order: 'desc' } }));
+    const real = files.filter((f) => f.name && f.name !== '.emptyFolderPlaceholder');
+    list.replaceChildren(real.length ? el('table', { class: 'tbl' }, el('tbody', {}, real.map((f) => {
+      const path = `${prefix}/${f.name}`;
+      const shown = f.name.replace(/^\d+-/, '');
+      return el('tr', {},
+        el('td', {}, el('b', { text: shown }), el('div', { class: 'muted small', text: `${fmtSize((f.metadata && f.metadata.size) || 0)} · ${when(f.created_at)}` })),
+        el('td', { class: 'num' },
+          el('button', { class: 'btn sm ghost', type: 'button', text: 'Open', onclick: async () => { try { const u = await q(vault.createSignedUrl(path, 60)); window.open(u.signedUrl, '_blank', 'noopener'); } catch (e) { toast(e.message); } } }),
+          el('button', { class: 'btn sm ghost', type: 'button', text: 'Share link (7 days)', onclick: async () => { try { const u = await q(vault.createSignedUrl(path, 7 * 86400)); copy(u.signedUrl); } catch (e) { toast(e.message); } } }),
+          el('button', { class: 'btn sm ghost', type: 'button', text: 'Delete', onclick: async () => { if (!confirm(`Delete ${shown}?`)) return; try { await q(vault.remove([path])); draw(); } catch (e) { toast(e.message); } } })));
+    }))) : el('p', { class: 'empty', text: 'Keep briefs, contracts, designs and invoices for this project here. Only you can see them unless you share a link.' }));
+  }
+  input.addEventListener('change', async () => {
+    for (const file of input.files) {
+      if (file.size > MAX_FILE) { toast(`${file.name} is over 25 MB`); continue; }
+      const safe = file.name.normalize('NFKD').replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '').slice(-100) || 'file';
+      try { await q(vault.upload(`${prefix}/${Date.now()}-${safe}`, file, { contentType: file.type || 'application/octet-stream', upsert: false })); }
+      catch (e) { toast(`${file.name}: ${e.message}`); }
+    }
+    input.value = ''; toast('Uploaded'); draw();
+  });
+  draw().catch((e) => list.replaceChildren(el('p', { class: 'err', text: e.message })));
+  return el('div', {}, el('p', { class: 'row' }, pick, input, el('span', { class: 'muted small', text: 'Private. Up to 25 MB each.' })), list);
 }
 
 async function copy(text) { try { await navigator.clipboard.writeText(text); toast('Link copied'); } catch { prompt('Copy this link', text); } }
@@ -321,13 +363,18 @@ async function settingsPage() {
   const cur = currencySelect(pr.currency || 'USD');
   const lang = el('select', {}, ...[['en', 'English'], ['bn', 'বাংলা'], ['th', 'ไทย']].map(([v, t]) => el('option', { value: v, text: t, selected: v === pr.lang })));
   const payIns = el('textarea', { maxlength: 800, rows: 3, placeholder: 'PromptPay: 081-234-5678 (Your Name)\nBank: KBank 123-4-56789-0' }); payIns.value = pr.pay_instructions || '';
+  const nt = (k, label) => { const b = el('input', { type: 'checkbox', checked: pr[k] !== false && (k !== 'notify_viewed' || pr[k] === true) }); nt.boxes[k] = b; return el('label', { class: 'opt-r', style: 'margin:6px 18px 6px 0' }, b, ' ', label); };
+  nt.boxes = {};
+  const notifs = el('fieldset', { class: 'comp-group' }, el('legend', { text: 'Email me when' }),
+    nt('notify_signed', 'a client signs or asks for changes'), nt('notify_viewed', 'a client opens a link'), nt('notify_overdue', 'a payment is overdue'));
   const btn = el('button', { class: 'btn', type: 'submit', text: 'Save settings' });
   const form = el('form', { class: 'card' },
     el('div', { class: 'inline' }, field('Your name', f.name), field('Business name', f.business_name), field('Default currency', cur), field('Hourly rate', f.hourly_rate), field('Language', lang)),
-    field('Default payment instructions (shown to clients after they approve)', payIns), el('p', {}, btn));
+    field('Default payment instructions (shown to clients after they approve)', payIns), notifs, el('p', {}, btn));
   form.addEventListener('submit', busy(btn, async () => {
     profile = await q(sb.from('profiles').upsert({ id: user.id, name: f.name.value.trim() || null, business_name: f.business_name.value.trim() || null, currency: cur.value,
-      hourly_rate: f.hourly_rate.value === '' ? null : Number(f.hourly_rate.value), lang: lang.value, pay_instructions: payIns.value.trim() || null }).select('*').single());
+      hourly_rate: f.hourly_rate.value === '' ? null : Number(f.hourly_rate.value), lang: lang.value, pay_instructions: payIns.value.trim() || null,
+      notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).select('*').single());
     toast('Settings saved');
   }));
 
@@ -372,6 +419,8 @@ async function mfaBlock() {
 async function exportData() {
   const out = { exportedAt: new Date().toISOString(), profile };
   for (const t of ['clients', 'projects', 'estimates', 'documents', 'payments', 'activity']) out[t] = await q(sb.from(t).select('*'));
+  out.files = [];
+  for (const pj of out.projects) out.files.push(...(await q(sb.storage.from('vault').list(`${user.id}/${pj.id}`))).map((f) => ({ project_id: pj.id, name: f.name, size: f.metadata && f.metadata.size })));
   const a = el('a', { href: URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })), download: `signedscope-export-${today()}.json` });
   document.body.append(a); a.click(); a.remove();
 }

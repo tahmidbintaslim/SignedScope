@@ -109,6 +109,19 @@ async function setup(ctx) {
     await p.waitForSelector('text=Marked paid by you');
     ok(true, 'payment marked paid manually');
 
+    // Vault: upload, see it listed, share a 7-day link, delete.
+    await p.setInputFiles('#vault-file', { name: 'Client brief (v2).pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') });
+    await p.waitForSelector('text=Client_brief_v2_.pdf');
+    ok(true, 'file uploaded with a safe name');
+    await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: B }).catch(() => {});
+    await p.click('text=Share link (7 days)');
+    await p.waitForSelector('#toast:not([hidden])');
+    ok(true, 'share link created');
+    p.once('dialog', (d) => d.accept());
+    await p.click('.sect:has(h2:text("Files")) >> text=Delete');
+    await p.waitForSelector('text=Keep briefs, contracts');
+    ok(true, 'file deleted');
+
     // Dashboard reflects it; activity recorded.
     await p.goto(B + '/app');
     await p.waitForSelector('.kpis');
@@ -118,7 +131,10 @@ async function setup(ctx) {
     // Settings: save profile, turn on two-step sign-in.
     await p.goto(B + '/app#/settings');
     await p.waitForSelector('text=Set up authenticator app');
-    await p.fill('textarea', 'PromptPay 081-234-5678'); await p.click('text=Save settings'); await p.waitForSelector('#toast:not([hidden])');
+    await p.fill('textarea', 'PromptPay 081-234-5678');
+    await p.check('text=a client opens a link');
+    await p.click('text=Save settings'); await p.waitForSelector('#toast:not([hidden])');
+    ok(await p.evaluate(() => { const pr = window.__fakeDb.tables.profiles[0]; return pr.notify_viewed === true && pr.notify_signed === true; }), 'notification settings saved');
     await p.click('text=Set up authenticator app'); await p.waitForSelector('img.qr');
     await p.fill('input[autocomplete=one-time-code]', '123456'); await p.click('text=Verify and turn on');
     await p.waitForSelector('text=An authenticator app code is required');

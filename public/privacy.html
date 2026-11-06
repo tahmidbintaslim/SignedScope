@@ -11,7 +11,9 @@
 
 <p>In the workspace, “Write with AI” sends the project title, client and business names, the estimate summary, feature and milestone names and assumptions to Anthropic to draft proposal text. Prices, payment terms and legal terms are never sent for writing, and nothing is stored by the AI step.</p>
 
-<p>Services that process data for SignedScope: Vercel (hosting and Blob storage for the waitlist and anonymous counters), Supabase (accounts and workspace data) and Anthropic (AI drafting, estimates and proposal text, only for text you send it).</p>
+<p>Files you upload to a project are stored privately in Supabase Storage, and only you can open them. A share link you create works for 7 days for anyone who has it. If email notifications are on, SignedScope emails you (never your client) through Resend when a client signs or opens a link, or a payment is overdue. You can turn each one off in Settings.</p>
+
+<p>Services that process data for SignedScope: Vercel (hosting and Blob storage for the waitlist and anonymous counters), Supabase (accounts, workspace data and files), Resend (notification emails to you) and Anthropic (AI drafting, estimates and proposal text, only for text you send it).</p>
 
 <p>When a client signs, the receipt records the name and email they enter, the time, their country (from the IP address) and a truncated hash of their browser's user agent. The IP address is not stored.</p>
 <p>To remove your waitlist entry, use the <a href="https://tahmid.space/#contact">contact form</a> and ask me to delete it.</p></main><footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · every line signed, every change priced</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a></span></div></footer></body></html>

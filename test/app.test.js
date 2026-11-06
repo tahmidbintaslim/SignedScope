@@ -100,3 +100,44 @@ test('proposal writer: signed-in only, never asked for prices, input fenced', as
     assert.ok(sent.o.timeout < 60000);
   } finally { delete process.env.ANTHROPIC_API_KEY; delete require.cache[sdkPath]; }
 });
+
+test('emails: signed by default, viewed only if asked, overdue digest from the daily job', async () => {
+  process.env.RESEND_API_KEY = 're_test'; process.env.EMAIL_FROM = 'SignedScope <hi@signedscope.app>'; process.env.APP_URL = 'https://app.example';
+  process.env.CRON_SECRET = 'cron-secret-123';
+  const mails = [];
+  const realFetch = global.fetch;
+  global.fetch = async (url, opts) => { mails.push({ url, body: JSON.parse(opts.body) }); return { ok: true, text: async () => '' }; };
+  try {
+    store.tables.profiles = [{ id: A.id, email: 'a@x.co', notify_signed: true, notify_viewed: false, notify_overdue: true }];
+    const s = await call(seal, { ...base, title: 'Mail test', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+    await call(verify, { token: s.body.token, viewed: true });
+    assert.equal(mails.length, 0, 'no email for views by default');
+    const d = (await call(verify, { token: s.body.token })).body.data;
+    await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions: { [d.items[0].id]: { status: 'accepted' } } });
+    assert.equal(mails.length, 1);
+    assert.equal(mails[0].url, 'https://api.resend.com/emails');
+    assert.deepEqual(mails[0].body.to, ['a@x.co']);
+    assert.match(mails[0].body.subject, /^Signed: "Mail test"/);
+    assert.match(mails[0].body.text, /THB\s?9,000[\s\S]*app\.example\/app#\/projects\//);
+
+    const reminders = require('../api/reminders');
+    const day = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+    store.tables.payments = [
+      { id: 'p1', owner: A.id, project_id: P, label: 'Deposit', amount: 4500, currency: 'THB', status: 'requested', due_date: day(1) },
+      { id: 'p2', owner: A.id, project_id: P, label: 'Midway', amount: 1000, currency: 'THB', status: 'requested', due_date: day(2) },
+      { id: 'p3', owner: A.id, project_id: P, label: 'Paid', amount: 1000, currency: 'THB', status: 'paid_manual', due_date: day(1) },
+    ];
+    const run = (auth) => new Promise((resolve) => reminders({ headers: auth ? { authorization: auth } : {} }, { setHeader() {}, status(c) { this.c = c; return this; }, json(j) { resolve({ status: this.c, body: j }); } }));
+    assert.equal((await run()).status, 401);
+    assert.equal((await run('Bearer wrong')).status, 401);
+    const r = await run('Bearer cron-secret-123');
+    assert.deepEqual(r.body, { ok: true, sent: 1 });
+    const digest = mails[mails.length - 1].body;
+    assert.match(digest.subject, /^1 client payment overdue/);
+    assert.match(digest.text, /Deposit: THB\s?4,500.00, 1 day overdue/);
+    assert.doesNotMatch(digest.text, /Midway|Paid/);
+  } finally {
+    global.fetch = realFetch;
+    for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'APP_URL', 'CRON_SECRET']) delete process.env[k];
+  }
+});

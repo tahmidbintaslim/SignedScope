@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const { seal, open, str, email, acceptedTotal, payable, handler, httpError } = require('./_lib');
 const db = require('./_supabase');
+const notify = require('./_notify');
 
 // Client signs off a document. Returns a signed receipt token.
 module.exports = handler(async (body, req) => {
@@ -57,6 +58,8 @@ async function recordSigning(docHash, receipt, token) {
       await scheduleToPayments(data, receipt);
     }
     await db.logActivity(data.owner, data.project_id, 'document_signed', { outcome: receipt.outcome, signer: receipt.signer.name, title: receipt.doc.title });
+    await notify.documentEvent('signed', { ...data, title: receipt.doc.title }, { outcome: receipt.outcome, signer: receipt.signer.name,
+      total: receipt.totals ? new Intl.NumberFormat('en', { style: 'currency', currency: receipt.totals.currency }).format(receipt.totals.accepted) : null });
   } catch (e) { console.error('recordSigning', e.message); }
 }
 

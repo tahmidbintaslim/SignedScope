@@ -1,6 +1,7 @@
 'use strict';
 const { open, handler } = require('./_lib');
 const db = require('./_supabase');
+const notify = require('./_notify');
 
 // Anyone holding a link can check it was issued by SignedScope and not modified.
 // The sign page sends viewed:true so the freelancer's dashboard can show "Viewed".
@@ -14,6 +15,9 @@ async function markViewed(docHash) {
   try {
     const { data } = await db.admin().from('documents').update({ status: 'viewed', viewed_at: new Date().toISOString() })
       .eq('doc_hash', docHash).eq('status', 'sent').select('owner, project_id, title').maybeSingle();
-    if (data) await db.logActivity(data.owner, data.project_id, 'document_viewed', { title: data.title });
+    if (data) {
+      await db.logActivity(data.owner, data.project_id, 'document_viewed', { title: data.title });
+      await notify.documentEvent('viewed', data);
+    }
   } catch (e) { console.error('markViewed', e.message); }
 }

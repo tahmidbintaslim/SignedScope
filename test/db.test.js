@@ -26,7 +26,7 @@ ${sql}; commit;`);
 };
 
 test('migration applies and RLS isolates users', opts, () => {
-  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade;');
+  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade;');
   for (const f of ['test/db/supabase-stub.sql', ...require('fs').readdirSync('supabase/migrations').sort().map((m) => 'supabase/migrations/' + m)]) {
     const r = file(path.join(__dirname, '..', f));
     assert.equal(r.status, 0, `${f}: ${r.stderr}`);
@@ -76,6 +76,14 @@ test('migration applies and RLS isolates users', opts, () => {
   assert.ok(!as(B, `insert into activity (project_id, kind) values ('${projectId}', 'note')`).ok);
   assert.ok(as(A, `update profiles set business_name = 'A Studio', hourly_rate = 40`).ok);
   assert.equal(psql(`select coalesce(business_name, '-') from profiles where id = '${B}'`).out, '-');
+
+  // Vault: own folder and own project only.
+  assert.ok(as(A, `insert into storage.objects (bucket_id, name) values ('vault', '${A}/${projectId}/brief.pdf')`).ok, 'A uploads to own project');
+  assert.ok(!as(B, `insert into storage.objects (bucket_id, name) values ('vault', '${A}/${projectId}/x.pdf')`).ok, 'B cannot write in A folder');
+  assert.ok(!as(B, `insert into storage.objects (bucket_id, name) values ('vault', '${B}/${projectId}/x.pdf')`).ok, 'B cannot file under A project');
+  assert.equal(as(B, `select count(*) from storage.objects`).out, '0', 'B sees none of A files');
+  assert.equal(as(A, `select count(*) from storage.objects`).out, '1');
+  assert.equal(psql(`select notify_signed::text || notify_viewed::text from profiles where id = '${A}'`).out, 'truefalse', 'notification defaults');
 
   // Anonymous requests see nothing.
   assert.ok(!psql(`begin; set local role anon; select count(*) from clients; commit;`).ok);

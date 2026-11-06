@@ -34,5 +34,11 @@
     "api/proposal.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/reminders",
+      "schedule": "7 2 * * *"
+    }
+  ]
 }

@@ -28,6 +28,19 @@ In **Authentication → Multi-Factor**: turn on **TOTP**. Users switch it on for
 
 Accounts switch on only when all three are set. Redeploy after adding them.
 
+## 3b. Files and email (optional)
+- **Files:** the second migration (`supabase/migrations/20261106010000_vault_notify.sql`) creates a private `vault` bucket (25 MB per file) with per-user rules. Run it the same way as the first.
+- **Email notifications:** create a Resend account, verify your sending domain, then set:
+
+| Name | Value | Secret? |
+|---|---|---|
+| `RESEND_API_KEY` | Resend API key | **Yes** |
+| `EMAIL_FROM` | e.g. `SignedScope <hello@yourdomain.com>` (domain verified in Resend) | No |
+| `APP_URL` | `https://<your domain>` (used for links in emails) | No |
+| `CRON_SECRET` | any random string of 16+ characters; Vercel sends it to the daily reminder job | **Yes** |
+
+The daily job (`/api/reminders`, 02:07 UTC, which is 09:07 in Bangkok) emails each freelancer about client payments that are 1, 7, 14 or 30 days overdue. Emails only ever go to the freelancer, never to their client. Each person chooses which emails they get in Settings.
+
 ## 4. Check it works
 1. Open `/login`, sign in with your email, and confirm you land on `/app`.
 2. Create a client and a project.
