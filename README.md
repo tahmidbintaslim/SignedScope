@@ -68,9 +68,9 @@ SIGNING_SECRET=$(openssl rand -base64 32) npm run dev   # http://localhost:3000,
 
 Tests: `npm test` runs unit and server tests; set `PGTEST_URL` to a Postgres URL to also run the Row Level Security tests (CI does). `node test/browser/app.e2e.js` drives the workspace in a browser against an in-memory Supabase, and `node test/browser/home.e2e.js` checks the home page demos, the 3D hero fallback and the hand-off to the estimator (set `AXE` to an `axe.min.js` path for an accessibility scan).
 
-`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`. `scripts/record-tour.js` records the home page product tour (`public/media/tour.*`, captions in English, Bengali and Thai) from the real app with sample data, and `scripts/capture-demo.js` then renders `public/og.png` and `docs/img/demo.gif`. All run against the dev server (`BASE=http://localhost:3000`).
+`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`. `scripts/record-tour.js` records the home page product tour (`public/media/tour.*`, captions in English, Bengali and Thai) from the real app with sample data, `scripts/capture-media.js` captures the product screens and short clips the home page shows (`public/media/screens/`, `public/media/clips/`), and `scripts/capture-demo.js` renders `public/og.png` and `docs/img/demo.gif`. All run against the dev server (`BASE=http://localhost:3000`).
 
-The home page hero uses three.js (MIT), vendored in `public/vendor/three/` and loaded only on wide screens without reduced motion; the HTML layers underneath are the fallback.
+The home page hero renders those real screens in 3D with three.js (MIT), vendored in `public/vendor/three/` and loaded only on wide screens without reduced motion; a CSS 3D version of the same screens is the fallback.
 
 Payments: Pro and Plus are not built yet, so the landing page links to the waitlist. The `/api/checkout` route and the Stripe test-mode links stay in place for when live mode is approved.
 

@@ -27,8 +27,13 @@ const ok = (c, m) => { if (!c) throw new Error('FAIL: ' + m); console.log('  ok'
     // Mobile menu.
     if (name === 'mobile') {
       await p.click('#menu-btn'); ok(await p.isVisible('#nav a[href="#pricing"]'), 'menu opens');
-      await p.click('#nav a[href="#pricing"]'); ok(!(await p.isVisible('#nav a[href="#how"]')), 'menu closes on link');
+      await p.click('#nav a[href="#pricing"]'); ok(!(await p.isVisible('#nav a[href="#product"]')), 'menu closes on link');
     }
+
+    // Product story: picking a step loads its clip.
+    await p.locator('#product').scrollIntoViewIfNeeded();
+    await p.click('#steps li[data-clip="sign"] button');
+    ok((await p.getAttribute('#clip', 'poster')).endsWith('sign.webp') && (await p.textContent('#clip-label')) === 'Client signs', 'story step switches the clip');
 
     // Estimate demo: tabs and live price.
     await p.locator('#demo').scrollIntoViewIfNeeded();
@@ -37,8 +42,8 @@ const ok = (c, m) => { if (!c) throw new Error('FAIL: ' + m); console.log('  ok'
     await p.locator('#d-rate').fill('1000'); await p.locator('#d-buf').fill('10');
     ok((await p.textContent('#d-total')) === '฿156,200', 'total = 142 h × 1,000 × 1.10');
 
-    // Client demo: the question line blocks signing until approved.
-    await p.locator('#client').scrollIntoViewIfNeeded();
+    // Client demo (second tab): the question line blocks signing until approved.
+    await p.click('#dt-cli'); ok(await p.isVisible('#doc') && !(await p.isVisible('#demo')), 'demo switch shows the client view');
     await p.check('#sig-ok'); await p.click('#sign-btn');
     ok((await p.textContent('#sig-err')).includes('Approve every line'), 'cannot sign with an open question');
     await p.click('.lines .q button'); await p.click('#sign-btn');
@@ -55,14 +60,15 @@ const ok = (c, m) => { if (!c) throw new Error('FAIL: ' + m); console.log('  ok'
     ok(true, 'chapter seeks the video');
 
     if (process.env.AXE && name !== 'reduced motion') {
+      await p.evaluate(() => document.querySelectorAll('.reveal').forEach((n) => { n.style.transition = 'none'; n.classList.add('in'); }));
       await p.addScriptTag({ content: fs.readFileSync(process.env.AXE, 'utf8') });
-      const res = await p.evaluate(async () => (await window.axe.run(document, { resultTypes: ['violations'] })).violations.map((v) => ({ id: v.id, impact: v.impact, n: v.nodes.length, t: v.nodes[0].target.join(' ') })));
+      const res = await p.evaluate(async () => (await window.axe.run(document, { resultTypes: ['violations'] })).violations.map((v) => ({ id: v.id, impact: v.impact, n: v.nodes.length, t: v.nodes.map((x) => x.target.join(' ') + ' ' + ((x.any[0] || {}).message || '').slice(0, 90)).join(' | ') })));
       res.forEach((v) => console.log('   axe', v.impact, v.id, v.n, v.t));
       ok(!res.some((v) => v.impact === 'serious' || v.impact === 'critical'), 'no serious axe issues');
     }
 
     // Hero hand-off: the brief opens /estimate and runs (sample estimate while the AI is off).
-    await p.evaluate(() => scrollTo(0, 0));
+    await p.locator('#try-form').scrollIntoViewIfNeeded();
     await p.click('[data-lang="th"]');
     await p.click('#try .go');
     await p.waitForURL('**/estimate?from=home');
