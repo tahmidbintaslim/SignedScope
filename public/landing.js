@@ -1,5 +1,5 @@
 'use strict';
-const PLAN_NAMES = { free: 'Free', pro: 'Pro', agency: 'Agency' };
+const PLAN_NAMES = { free: 'Free', pro: 'Pro', plus: 'Plus' };
 // Launch-channel attribution: remember ?ref= for this visit and count it once per session.
 const REF_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 let ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();

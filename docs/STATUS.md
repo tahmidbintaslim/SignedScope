@@ -1,78 +1,42 @@
-# SignedScope: project status (Fri 6 Nov 2026)
+# SignedScope: project status (Sat 7 Nov 2026)
 
-## Summary
-
-Brief: own ScopeLock end to end, from research and strategy through design, build, test, PR and launch prep.
-
-1. **Research.** Looked at competitors, pricing, reviews and freelancer pain. The biggest problem is scope creep and unpaid extras. A name collision on "ScopeLock" forced a rename.
-2. **Strategy and decisions.** Asked the owner the key questions (listed under Core decisions below).
-3. **Design.** Went through four rounds:
-   - **v2:** a "paper" style. Rejected as generic and AI-looking.
-   - **v3:** bold and colorful. The colors were liked; the type and the amount of text were not.
-   - **v4:** approved. Researched type and switched to Plus Jakarta Sans plus JetBrains Mono. Cut the copy hard, added a live five-step interactive demo, and mirrored the static design in Figma (file `pOuAmiM68x3cLukw3uIGJD`).
-4. **Build.** Added these features:
-   - Prices, currency and a pay link per item.
-   - Totals with a comparison to the previous signed total.
-   - AI drafting from a pasted client message (Anthropic API), falling back to simple rules.
-   - Visit counts per `?ref=` tag, waitlist plans and the rename across the product.
-   - New social image, demo GIF and screenshots.
-5. **Test.** 10 unit tests and a Playwright run through the flow pass, and CI is green.
-6. **PR #4.** Merged to `main` on 5 Nov (`de2d1d9`). The repo is now `tahmidbintaslim/signedscope`.
-7. **Code review.** Ran on PR #4 and found 8 issues. They were **not** fixed before the merge.
+The product brief (`docs/PRODUCT-BRIEF.md`) is the source of truth for what SignedScope is. The approved design is the Figma page "SignedScope v5 · Brief to signed quote" in file `pOuAmiM68x3cLukw3uIGJD`.
 
 ## Core decisions
 
 | Topic | Decision |
 |---|---|
-| Name | **SignedScope** (old name ScopeLock is mentioned in the FAQ) |
-| AI | AI drafting ships now, in v2 |
-| Payments | Agencies use their own payment links (Stripe, Wise, Omise, PayPal, Payoneer). Later, Pro uses the owner's Stripe through Stripe Connect for invoices, pay links and tax |
-| Pricing | Flat plans: Free, Pro $19/mo, Agency $49/mo |
-| Visual | Bold colors in a Stripe/Framer style without copying Stripe's look. Violet #7C3AED, pink, coral, sun, sky, navy ink |
-| Type | Plus Jakarta Sans (free license, covers Vietnamese) with JetBrains Mono, both hosted on our own server |
-| Copy | Plain words, no hype, US spelling, no em-dashes. Headline 7 words max, section heads 6 words max. Never invent testimonials or figures |
-| Constraints | Page URLs stay the same. Scripts load only from our own site (no inline scripts). The site says it is not a legal e-signature |
+| Wedge | AI estimate and quote: brief → requirements, user stories, hours, milestones, price |
+| Price | The AI gives hours only. Price = hours × your rate × (1 + buffer). The AI never writes prices or legal terms |
+| Who | Freelancers, studios and agencies (1 to 20) and in-house leads who quote software work. Thailand and Bangladesh first, then Malaysia and Singapore |
+| Languages | English, Bengali, Thai |
+| Stack | Vercel (static `public/` + Node `api/`), Supabase (Auth, Postgres with RLS, Storage), Resend, Anthropic API |
+| Money | SignedScope never holds or moves client money. Manual payment instructions (PromptPay, bank, bKash) or the freelancer's own Stripe link |
+| Legal | Not a legal e-signature. Clauses are templates, not legal advice |
+| Plans | Free (stays free), Pro $10, Plus $20. Everything free during the beta |
+| Media | Real product + custom: three.js hero, 2D demos built from the real UI, tour video recorded from the app, custom icons. No stock photos, no paid generation, no invented logos, figures or testimonials |
+| Constraints | URLs `/new`, `/sign`, `/receipt`, `/verify`, `/privacy`, `/thanks` stay. CSP `script-src 'self'` (libraries vendored). Plain words, US spelling, no em-dashes in copy |
 
 ## Tasks
 
 ### Completed
-- [x] Competitor, pricing and pain research, plus the name collision check
-- [x] Owner decisions on name, AI, payments and pricing
-- [x] v4 design system, home page, interactive demo and motion, plus Figma frames
-- [x] Prices, currency, pay link and totals on the new, sign and receipt pages
-- [x] AI drafting with the rules fallback (`api/draft.js`)
-- [x] Ref visit counts (`api/hit.js`, `scripts/ref-report.js`) and a privacy note for them
-- [x] Social image, demo GIF, screenshots, launch kit (`docs/LAUNCH.md`)
-- [x] Tests pass and CI is green
-- [x] PR #4 merged; repo cloned as `signedscope`
-- [x] Code review of PR #4 (8 findings)
-
-### In progress
-- [ ] Follow-up PR with the review fixes (waiting for the go-ahead)
+- [x] Research, audit, validation kit, interview pack (`docs/research/`)
+- [x] Quick fixes (#7), AI estimator in en/bn/th (#8)
+- [x] Accounts, dashboard, two-step sign-in, RLS tested on real Postgres (#9)
+- [x] Proposals, agreements, country clauses, payment schedule, PDF (#10)
+- [x] File vault, email notifications, overdue reminders (#11)
+- [x] Product brief (#12)
+- [x] Figma v5: desktop 1440 and mobile 390 homepage, 19 icons, step/feature/plan components
+- [x] Homepage v5 built: three.js hero with HTML fallback, hero brief box that runs the real estimator, estimate demo, client approve-and-sign demo, 60-second tour video with en/bn/th captions, security, comparison, Free/$10/$20 pricing, FAQ (`test/browser/home.e2e.js`)
 
 ### Pending, by priority
-**P0: before launch**
-- [ ] AI drafting timeout. The Anthropic call can run past the 30-second limit on Vercel, so the rules fallback never runs. Shorten it to about 9 seconds with no retry.
-- [ ] Decimal-comma prices. "1.234,50" is read as 1.2345. Reject commas that could be either a decimal or a thousands mark, or read them by locale.
-- [ ] Mixed currencies. A change request keeps the previous total but not its currency. Store the currency and refuse to compare totals in different currencies.
-- [ ] AI cost abuse. The rate limit lives only in memory and is skipped when there is no IP. Move it to storage, add an overall cap and skip AI when there is no IP.
-- [ ] Pay button. Show it only when something was approved and the total is above 0, and say the link belongs to the agency.
-- [ ] Privacy page. Say that pasted messages go to Anthropic when AI drafting is on.
-- [ ] Point the production domain at the site and update `og:image`, which still uses `scopelock-sable.vercel.app`.
-- [ ] Set `ANTHROPIC_API_KEY`, `SIGNING_SECRET` and `BLOB_READ_WRITE_TOKEN` in Vercel production.
-
-**P1**
-- [ ] Out-of-scope detection misses "won’t" typed with a curly apostrophe.
-- [ ] `money()` can show one decimal place ("$750.5"). Set the minimum decimal places to match.
-- [ ] Tests for both of these.
-- [ ] Launch posts on the channels listed in `docs/LAUNCH.md`, each with its own `?ref=` tag.
-
-**P2**
-- [ ] One shared rate-limit helper and one shared ref pattern.
-- [ ] Pro: invoices, pay links and tax through Stripe Connect.
-- [ ] Turn waitlist sign-ups into paid plans (billing).
+1. [ ] App screens in Bengali and Thai (only the estimator and tour captions are translated)
+2. [ ] Prompt to PDF and a templates gallery
+3. [ ] Later: subscription billing, branding on documents, team seats, learning from past projects
 
 ### Blocked (owner action)
-- [ ] Trademark check on "SignedScope".
-- [ ] Buy signedscope.com or .app. Both were free on 3 Nov.
-- [ ] Vercel access and production secrets (see P0).
+- [ ] Vercel production env vars: `SIGNING_SECRET`, `BLOB_READ_WRITE_TOKEN` (production is broken without these), then `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`, `CRON_SECRET` (`docs/SETUP-ACCOUNTS.md`)
+- [ ] Create the Supabase project and run both migrations
+- [ ] Domain: the live domain is spelled "singedscope"; `og:image` still points at `scopelock-sable.vercel.app`
+- [ ] Native review of the Bengali and Thai text: `public/estimate-i18n.js`, `scripts/tour-captions.js` (→ `public/media/tour.*.vtt`), the Thai lines in the home page client demo
+- [ ] Lawyer review of the clause library (`public/clauses.js`)

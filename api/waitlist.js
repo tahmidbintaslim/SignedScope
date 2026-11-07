@@ -16,7 +16,7 @@ module.exports = handler(async (body, req) => {
   }
   const addr = email(body.email, 'Email');
   if (!addr) throw httpError(400, 'Email is required');
-  const plan = ['free', 'pro', 'agency'].includes(body.plan) ? body.plan : 'free';
+  const plan = ['free', 'pro', 'plus', 'agency'].includes(body.plan) ? body.plan : 'free';
   const note = str(body.note, 300, 'Note', false);
   const ref = typeof body.ref === 'string' && REF_RE.test(body.ref) ? body.ref : undefined;
   await blob.put(`waitlist/${sha256(addr).slice(0, 24)}.json`,
