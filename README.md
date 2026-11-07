@@ -1,13 +1,13 @@
 <p align="center"><img src="public/favicon.svg" width="56" alt=""></p>
 <h1 align="center">SignedScope</h1>
-<p align="center"><b>Every line signed. Every change priced.</b><br>
-The client accepts or rejects each scope item and UAT check, with a price on each line, and signs. They get an HMAC-signed receipt. A later request becomes a change request shown as a priced diff against what they signed, with your own Pay link.<br>
-No database and no client login. Formerly ScopeLock.</p>
+<p align="center"><b>From client brief to signed quote.</b><br>
+Paste a brief and get the requirements, user stories, hours, milestones and a price from your own rate. Turn it into a scope, proposal or agreement your client approves line by line and signs, with no account. The schedule becomes payment requests; SignedScope never holds the money.<br>
+Formerly ScopeLock.</p>
 <p align="center"><a href="https://scopelock-sable.vercel.app">Live app</a> · <a href="#how-it-works">How it works</a> · <a href="#self-host">Self-host</a></p>
 
 <p align="center"><a href="https://scopelock-sable.vercel.app"><b>Try the live demo</b></a> &nbsp;·&nbsp; free, no signup</p>
 
-<p align="center"><img src="docs/img/demo.gif" width="760" alt="Demo: a client request is dragged onto the signed scope, priced, approved by the client and signed, and the total updates"></p>
+<p align="center"><img src="docs/img/demo.gif" width="760" alt="Product tour: a brief pasted on the home page becomes an estimate, is saved to a project and turned into an agreement"></p>
 
 ## Why
 
@@ -66,11 +66,13 @@ No framework and no build step: static files in `public/` plus Node functions in
 SIGNING_SECRET=$(openssl rand -base64 32) npm run dev   # http://localhost:3000, no Vercel CLI needed
 ```
 
-Tests: `npm test` runs unit and server tests; set `PGTEST_URL` to a Postgres URL to also run the Row Level Security tests (CI does). `node test/browser/app.e2e.js` drives the workspace in a browser against an in-memory Supabase.
+Tests: `npm test` runs unit and server tests; set `PGTEST_URL` to a Postgres URL to also run the Row Level Security tests (CI does). `node test/browser/app.e2e.js` drives the workspace in a browser against an in-memory Supabase, and `node test/browser/home.e2e.js` checks the home page demos, the 3D hero fallback and the hand-off to the estimator (set `AXE` to an `axe.min.js` path for an accessibility scan).
 
-`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`, and `scripts/capture-demo.js` records `docs/img/demo.gif` and `public/og.png`, both from a real run against the dev server (`BASE=http://localhost:3000`).
+`scripts/capture-screenshots.js` regenerates the app screenshots in `docs/img/`. `scripts/record-tour.js` records the home page product tour (`public/media/tour.*`, captions in English, Bengali and Thai) from the real app with sample data, and `scripts/capture-demo.js` then renders `public/og.png` and `docs/img/demo.gif`. All run against the dev server (`BASE=http://localhost:3000`).
 
-Payments: Pro and Agency are not built yet, so the landing page links to the waitlist. The `/api/checkout` route and the Stripe test-mode links stay in place for when live mode is approved.
+The home page hero uses three.js (MIT), vendored in `public/vendor/three/` and loaded only on wide screens without reduced motion; the HTML layers underneath are the fallback.
+
+Payments: Pro and Plus are not built yet, so the landing page links to the waitlist. The `/api/checkout` route and the Stripe test-mode links stay in place for when live mode is approved.
 
 ## Roadmap
 

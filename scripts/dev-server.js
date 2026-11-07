@@ -7,7 +7,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const port = Number(process.env.PORT) || 3000;
-const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.gif': 'image/gif', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
+const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.gif': 'image/gif', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.mp4': 'video/mp4', '.webm': 'video/webm', '.vtt': 'text/vtt' };
 
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
@@ -32,6 +32,16 @@ http.createServer((req, res) => {
   if (!path.extname(p)) p += '.html';
   fs.readFile(p, (err, data) => {
     if (err) { res.writeHead(404).end('Not found'); return; }
-    res.writeHead(200, { 'content-type': types[path.extname(p)] || 'application/octet-stream' }).end(data);
+    const type = types[path.extname(p)] || 'application/octet-stream';
+    // Byte ranges, so video seeking works like it does on Vercel.
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m) {
+      const start = m[1] ? Number(m[1]) : Math.max(0, data.length - Number(m[2]));
+      const end = m[1] && m[2] ? Math.min(Number(m[2]), data.length - 1) : data.length - 1;
+      if (start > end || start >= data.length) { res.writeHead(416, { 'content-range': `bytes */${data.length}` }).end(); return; }
+      res.writeHead(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${end}/${data.length}`, 'content-length': end - start + 1 }).end(data.subarray(start, end + 1));
+      return;
+    }
+    res.writeHead(200, { 'content-type': type, 'accept-ranges': 'bytes' }).end(data);
   });
 }).listen(port, () => console.log(`SignedScope on http://localhost:${port}`));

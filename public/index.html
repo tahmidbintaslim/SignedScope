@@ -1,258 +1,342 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preload" href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/home.css"><link rel="icon" href="/favicon.svg"><script src="/common.js"></script>
-<title>SignedScope: get the scope signed, get the extras paid</title>
-<meta name="description" content="Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.">
-<meta name="theme-color" content="#3B0D8F">
-<meta property="og:title" content="SignedScope: get the scope signed, get the extras paid">
-<meta property="og:description" content="Scope approval and priced change requests your client signs on any phone. Free, no signup for your client.">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/home.css"><link rel="icon" href="/favicon.svg">
+<script src="/common.js"></script><script src="/estimate-i18n.js"></script>
+<title>SignedScope: from client brief to signed quote</title>
+<meta name="description" content="Paste a client brief. Get the requirements, user stories, a timeline and a fair price in minutes, then send it to your client to approve and sign.">
+<meta name="theme-color" content="#1A0B4D">
+<meta property="og:title" content="SignedScope: from client brief to signed quote">
+<meta property="og:description" content="AI estimates for software work. You set the rate. Your client approves line by line, signs, and pays you directly.">
 <meta property="og:type" content="website"><meta property="og:image" content="https://scopelock-sable.vercel.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"></head>
 <body class="home">
-<a class="sr" href="#demo">Skip to the live demo</a>
+<a class="sr" href="#try">Skip to the AI estimate</a>
 
-<!-- ============ HERO ============ -->
+<!-- ================= HERO ================= -->
 <section class="hero" aria-labelledby="hero-h">
-  <div class="mesh" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
-  <header class="top wrap on-dark">
+  <header class="top wrap">
     <a class="logo" href="/">SignedScope</a>
-    <nav aria-label="Main"><a href="/estimate">AI estimate</a><a href="#demo">Demo</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="/app">Sign in</a></nav>
-    <a class="btn white sm" href="/new">Create a free scope</a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#how">How it works</a><a href="#demo">Demo</a><a href="#security">Security</a><a href="#pricing">Pricing</a>
+    </nav>
+    <div class="top-actions">
+      <a class="signin" href="/app">Sign in</a>
+      <a class="btn violet sm hide-sm" href="#try">Try AI estimate</a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" id="menu-btn"><svg class="i" aria-hidden="true"><use href="/icons.svg#menu"/></svg><span class="sr">Menu</span></button>
+    </div>
   </header>
+
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow glass">Scope approval + change requests</p>
-      <h1 id="hero-h">Get the scope signed.<br><span class="hl">Get the extras paid.</span></h1>
-      <p class="hero-sub">Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.</p>
-      <div class="row cta"><a class="btn white lg" href="/new">Create a free scope</a><a class="btn outline lg" href="#demo"><span aria-hidden="true">▶</span> Try the live demo</a></div>
-      <p class="trust">Free plan, no card. Your client never signs up.</p>
-      <p class="trust"><a href="/estimate" class="new-link"><span class="pill sunp">New</span> Paste a brief, get an AI estimate and quote →</a></p>
-    </div>
-    <div class="hero-art" id="hero-art" aria-label="Example: the client's approval screen on a phone">
-      <div class="phone float" data-depth="10">
-        <div class="screen">
-          <p class="from">From Northwind Studio</p>
-          <p class="ttl">Acme Store: phase 1</p>
-          <p class="hint">Approve each line, then sign.</p>
-          <ul class="plist" id="plist">
-            <li><b class="ck"></b>Custom theme<span class="amt">$3,200</span></li>
-            <li><b class="ck"></b>Filters and search<span class="amt">$1,400</span></li>
-            <li><b class="ck"></b>Checkout<span class="amt">$1,400</span></li>
-            <li class="new"><b class="ck"></b>Apple Pay<span class="amt">+$480</span></li>
-          </ul>
-          <div class="ptotal"><span>Total</span><strong>$6,480</strong></div>
-          <span class="pbtn">Approve and sign</span>
+      <p class="eyebrow"><svg class="i sun" aria-hidden="true"><use href="/icons.svg#spark"/></svg>AI estimates for software work · Free during beta</p>
+      <h1 id="hero-h">From client brief<br>to signed quote.</h1>
+      <p class="hero-sub">Paste a brief. Get the requirements, user stories, a timeline and a fair price in minutes. Then send it to your client to approve and sign.</p>
+
+      <form class="try" id="try" aria-labelledby="try-h" action="/estimate">
+        <div class="try-head">
+          <label id="try-h" for="try-brief">Paste your client's brief</label>
+          <div class="seg" role="radiogroup" aria-label="Estimate language">
+            <button type="button" role="radio" aria-checked="true" data-lang="en">EN</button>
+            <button type="button" role="radio" aria-checked="false" data-lang="bn" lang="bn">বাংলা</button>
+            <button type="button" role="radio" aria-checked="false" data-lang="th" lang="th">ไทย</button>
+          </div>
         </div>
+        <textarea id="try-brief" name="brief" rows="4" minlength="20" maxlength="12000" required></textarea>
+        <div class="try-foot">
+          <label class="field"><span class="lbl-long">Your rate</span><span class="lbl-short">Rate</span><span class="cur">฿</span><input id="try-rate" type="number" min="1" max="100000" step="any" value="1200" inputmode="decimal" aria-label="Your hourly rate in baht"><span>/ h</span></label>
+          <label class="field"><span>Buffer</span><input id="try-buffer" type="number" min="0" max="100" step="1" value="15" inputmode="numeric" aria-label="Buffer percent"><span>%</span></label>
+          <button class="btn violet go" type="submit">Try the AI estimate, no signup<svg class="i" aria-hidden="true"><use href="/icons.svg#arrow"/></svg></button>
+        </div>
+        <p class="try-note">The sample brief is filled in. Replace it with yours. Nothing is stored.</p>
+      </form>
+
+      <ul class="trust-row">
+        <li><svg class="i mint" aria-hidden="true"><use href="/icons.svg#check"/></svg>No signup</li>
+        <li><svg class="i mint" aria-hidden="true"><use href="/icons.svg#hand"/></svg>You set the rate. The AI never does.</li>
+        <li><svg class="i mint" aria-hidden="true"><use href="/icons.svg#lock"/></svg>We never hold your money</li>
+      </ul>
+    </div>
+
+    <!-- 3D scene: HTML layers are the fallback and the accessible description; hero3d.js draws the WebGL version over them. -->
+    <div class="scene" id="scene" role="img" aria-label="A client brief turning into requirements, then a timeline and a price of 195,960 baht, then signed by the client.">
+      <div class="layers" aria-hidden="true">
+        <div class="layer l1"><p class="lt"><svg class="i"><use href="/icons.svg#brief"/></svg>Client brief</p><i></i><i></i><i></i><i class="s"></i><i></i><i class="xs"></i></div>
+        <div class="layer l2"><p class="cap">Requirements</p>
+          <p><b>FR-1</b>Online table booking</p><p><b>FR-2</b>Deposit by PromptPay</p><p><b>FR-3</b>LINE reminder</p><p><b class="n">NFR-1</b>Thai and English</p><p><b class="n">NFR-2</b>Loads under 2 s on 4G</p></div>
+        <div class="layer l3"><p class="cap">Timeline and price</p>
+          <p class="bar"><i style="--w:38%;--c:var(--sky)"></i>Design · 2 wk</p><p class="bar"><i style="--w:62%;--c:var(--violet)"></i>Build · 4 wk</p><p class="bar"><i style="--w:22%;--c:var(--mint)"></i>Launch · 1 wk</p>
+          <p class="tot"><span>142 h × ฿1,200 + 15%</span><strong>฿195,960</strong></p></div>
+        <div class="layer badge"><svg class="i"><use href="/icons.svg#sign"/></svg>Signed by Café Lumi · 6 Nov</div>
       </div>
-      <div class="chip change float" data-depth="24">
-        <span class="bubble">“Can we also add Apple Pay?”</span>
-        <span class="okline"><b class="ck"></b>Approved · +$480</span>
-      </div>
-      <div class="chip pay float" data-depth="34"><strong>Pay $480</strong><span>via your Stripe link</span></div>
+      <canvas id="scene-gl" aria-hidden="true"></canvas>
     </div>
   </div>
 </section>
 
 <main>
-<!-- ============ PROBLEM ============ -->
-<section class="sec wrap split" aria-labelledby="prob-h">
-  <div>
-    <p class="label coral">The problem</p>
-    <h2 id="prob-h">Small asks add up fast.</h2>
-    <p class="sub">Each one feels too small to charge for. Together, they eat your margin.</p>
-    <div class="stat"><b data-count="52">52%</b><span>of projects had scope creep.<br><a href="https://www.pmi.org/learning/library/scope-creep-rising-11308" rel="noopener">PMI Pulse of the Profession, 2018</a></span></div>
-  </div>
-  <div class="asks" id="asks">
-    <p class="ask-row" data-cost="240">Quick one, can the banner rotate?<span class="tag">+$240 free</span></p>
-    <p class="ask-row" data-cost="480">Can we also add Apple Pay?<span class="tag">+$480 free</span></p>
-    <p class="ask-row" data-cost="360">Oh, and a size guide popup?<span class="tag">+$360 free</span></p>
-    <p class="ask-row" data-cost="600">Maybe a gift option at checkout?<span class="tag">+$600 free</span></p>
-    <p class="ask-sum">Given away on one project <strong id="leak">$1,680</strong></p>
+<!-- ================= AUDIENCE ================= -->
+<section class="aud" aria-label="Who it is for">
+  <div class="wrap">
+    <p>Built for people who quote software work</p>
+    <ul class="chips"><li>Freelance developers</li><li>UI and UX designers</li><li>Studios and agencies (1 to 20)</li><li>In-house leads</li></ul>
+    <p class="small">Thailand and Bangladesh first, then Malaysia and Singapore · English, Bengali, Thai</p>
   </div>
 </section>
 
-<!-- ============ LIVE DEMO ============ -->
-<section class="sec dark" id="demo" aria-labelledby="demo-h">
+<!-- ================= HOW ================= -->
+<section class="sec" id="how" aria-labelledby="how-h">
   <div class="wrap">
-    <p class="label sun">Live demo</p>
-    <h2 id="demo-h">Try it. It takes 30 seconds.</h2>
-    <p class="sub">Drag the ask in, set a price, sign as the client. Example data.</p>
-    <ol class="stepper" id="stepper" aria-label="Demo progress">
-      <li class="on"><i>1</i>Catch the ask</li><li><i>2</i>Price it</li><li><i>3</i>Client approves</li><li><i>4</i>Signed and paid</li>
+    <header class="head"><p class="eyebrow-l">How it works</p><h2 id="how-h">Five steps. One link. No Google Doc.</h2><p class="lead">Everything from the first brief to the last payment lives in one project.</p></header>
+    <ol class="steps">
+      <li class="card reveal"><div class="card-top"><span class="tile"><svg class="i"><use href="/icons.svg#brief"/></svg></span><span class="num">01</span></div><h3>Estimate</h3><p>Paste the brief. Get requirements, stories, hours and milestones.</p></li>
+      <li class="card reveal"><div class="card-top"><span class="tile"><svg class="i"><use href="/icons.svg#doc"/></svg></span><span class="num">02</span></div><h3>Document</h3><p>Turn it into a scope, proposal or agreement. Templates and country clauses.</p></li>
+      <li class="card reveal"><div class="card-top"><span class="tile"><svg class="i"><use href="/icons.svg#link"/></svg></span><span class="num">03</span></div><h3>Share</h3><p>Send one sealed link. Your client reads it in their language.</p></li>
+      <li class="card reveal"><div class="card-top"><span class="tile"><svg class="i"><use href="/icons.svg#sign"/></svg></span><span class="num">04</span></div><h3>Approve and sign</h3><p>They approve line by line and sign. No account needed.</p></li>
+      <li class="card reveal"><div class="card-top"><span class="tile"><svg class="i"><use href="/icons.svg#pay"/></svg></span><span class="num">05</span></div><h3>Get paid</h3><p>The schedule becomes payment requests with your PromptPay, bank or bKash details.</p></li>
     </ol>
-    <div class="stage" id="stage">
-      <div class="doc" id="doc">
-        <div class="doc-head">
-          <div><span class="pill ok" id="doc-pill">Signed · revision 1</span><p class="doc-ttl">Acme Store: phase 1</p></div>
-          <div class="stamp-slot" id="stamp-slot" aria-hidden="true"></div>
-        </div>
-        <ul class="lines" id="lines">
-          <li><span>Custom theme</span><span class="amt">$3,200</span></li>
-          <li><span>Filters and search</span><span class="amt">$1,400</span></li>
-          <li><span>Checkout</span><span class="amt">$1,400</span></li>
-        </ul>
-        <div class="drop" id="drop">Drop the ask here</div>
-        <div class="total"><span id="total-label">Signed total</span><span class="amt" id="d-total">$6,000</span></div>
-      </div>
-      <div class="panel" id="panel">
-        <div class="pstep" data-step="1">
-          <p class="p-meta">New message from Dana</p>
-          <div class="ask" id="ask" tabindex="0" role="button" aria-describedby="ask-help"><span class="grip" aria-hidden="true">⠿</span>Can we also add Apple Pay? Should be quick.</div>
-          <p class="p-help" id="ask-help">Drag it onto the signed scope. Or press Enter.</p>
-        </div>
-        <div class="pstep" data-step="2" hidden>
-          <p class="p-q">It’s a line in revision 2. What does it cost?</p>
-          <label for="price" class="price-row"><span>Apple Pay at checkout</span><output id="price-out">$480</output></label>
-          <input type="range" id="price" min="0" max="1500" step="20" value="480" aria-label="Price for Apple Pay at checkout">
-          <p class="p-help">About 6 hours at $80. Set your own number.</p>
-          <button class="btn primary block" type="button" id="send">Send the change request →</button>
-        </div>
-        <div class="pstep" data-step="3" hidden>
-          <p class="p-q">You’re Dana now. Only the change needs a decision.</p>
-          <div class="cline"><span class="pill ok">Added</span> Apple Pay at checkout <span class="amt" id="c-price">+$480</span></div>
-          <div class="opts" role="radiogroup" aria-label="Your decision"><button type="button" class="opt" data-v="accepted" role="radio" aria-checked="false">Approve</button><button type="button" class="opt" data-v="rejected" role="radio" aria-checked="false">Reject</button></div>
-          <input id="reason" class="hidden" placeholder="Why? A reason is required" maxlength="120" aria-label="Reason for rejecting">
-          <button class="btn primary block" type="button" id="to-sign" disabled>Continue to sign →</button>
-        </div>
-        <div class="pstep" data-step="4" hidden>
-          <p class="p-q">Sign with your mouse or finger.</p>
-          <canvas id="pad" width="400" height="160" aria-label="Signature pad"></canvas>
-          <div class="row"><button class="btn primary" type="button" id="sign" disabled>Sign revision 2</button><button class="btn ghost" type="button" id="clear">Clear</button></div>
-        </div>
-        <div class="pstep" data-step="5" hidden>
-          <p class="p-q ok" id="done-h">Signed. Nobody had to bring up money.</p>
-          <div class="rm"><span>Signed before</span><span class="amt">$6,000</span></div>
-          <div class="rm"><span>Approved change</span><span class="amt" id="r-change">+$480</span></div>
-          <div class="rm sum"><span>New total</span><span class="amt" id="r-total">$6,480</span></div>
-          <p class="mono p-help" id="r-hash">receipt sha256 · 9f3c…a71e</p>
-          <div class="row"><span class="btn pay" id="r-pay" aria-disabled="true">Pay $480</span><button class="btn ghost" type="button" id="replay">Play again</button></div>
-        </div>
-      </div>
-    </div>
-    <div class="row demo-cta"><a class="btn white lg" href="/new">Do this with a real client</a><span class="trust">Two minutes. Free.</span></div>
+    <p class="note-row"><svg class="i" aria-hidden="true"><use href="/icons.svg#change"/></svg>Client asks for more? Estimate the extra the same way and send it as a priced change.</p>
   </div>
 </section>
 
-<!-- ============ HOW IT WORKS ============ -->
-<section class="sec wrap" id="how" aria-labelledby="how-h">
-  <p class="label violet">How it works</p>
-  <h2 id="how-h">Three steps. One link.</h2>
-  <div class="steps3">
-    <article class="s3">
-      <div class="mini">
-        <p class="mrow"><span>Custom theme</span><span class="amt box">$3,200</span></p>
-        <p class="mrow"><span>Filters and search</span><span class="amt box">$1,400</span></p>
-        <p class="mrow"><span>Apple Pay</span><span class="amt box">$480</span></p>
-      </div>
-      <h3><i>1</i>Write the scope</h3><p>Paste a list or a client message. Add a price per line.</p>
-    </article>
-    <article class="s3">
-      <div class="mini">
-        <p class="mlink"><span class="mono">signedscope.com/sign#v1…</span><span class="copy">Copy</span></p>
-        <p class="mi"><b class="ck v"></b>Sent to Dana on WhatsApp</p>
-        <p class="mi muted small">No account needed to open it</p>
-      </div>
-      <h3><i>2</i>Send one link</h3><p>WhatsApp, email or Slack. It opens on any phone.</p>
-    </article>
-    <article class="s3">
-      <div class="mini">
-        <p class="mi"><b class="ck"></b>Custom theme</p>
-        <p class="mi"><b class="ck"></b>Filters and search</p>
-        <p class="mi"><b class="x"></b>Blog: “next phase, please”</p>
-        <svg class="sig" viewBox="0 0 200 44" aria-hidden="true"><path d="M6 30c14-22 22-24 24-10s-8 18 2 6 16-20 20-6 10 10 20-4 12 4 20 2 18-10 30-8 26 6 40 2"/></svg>
-      </div>
-      <h3><i>3</i>Client approves and signs</h3><p>Each line gets a yes, or a no with a reason. Then one signature.</p>
-    </article>
-  </div>
-</section>
-
-<!-- ============ WHY IT WORKS (bento) ============ -->
-<section class="sec mist" aria-labelledby="why-h">
+<!-- ================= DEMO 1: ESTIMATE ================= -->
+<section class="sec mist" id="demo" aria-labelledby="d1-h">
   <div class="wrap">
-    <p class="label violet">Why it works</p>
-    <h2 id="why-h">The price is already on the page.</h2>
-    <p class="sub">So you never have to bring it up.</p>
-    <div class="bento">
-      <article class="tile t-change">
-        <h3>Extras become priced changes</h3><p>Paste their message, set a price, send. They tap Approve.</p>
-        <div class="t-ui"><span class="bubble glass">“Can we also add Apple Pay?”</span>
-          <div class="t-card"><span><span class="pill ok solid">Added</span> Apple Pay at checkout</span><span class="t-btn">Approve +$480</span></div></div>
-      </article>
-      <article class="tile t-pay">
-        <h3>Paid on the same screen</h3><p>Add your own payment link. We never hold your money.</p>
-        <div class="t-ui"><span class="t-paybtn">Pay $480</span><p class="providers"><span>Stripe</span><span>Wise</span><span>PayPal</span><span>Payoneer</span><span>Omise</span></p></div>
-      </article>
-      <article class="tile t-lines">
-        <h3>Approved line by line</h3><p>Every item gets a yes or a no. Questions come up now, not at handover.</p>
-        <div class="t-ui"><p class="lr"><b class="ck"></b>Custom theme<span class="pill ok">Accepted</span></p><p class="lr"><b class="ck"></b>Filters and search<span class="pill ok">Accepted</span></p><p class="lr"><b class="x"></b>Blog: next phase<span class="pill warn">Rejected</span></p></div>
-      </article>
-      <article class="tile t-record">
-        <h3>A clear record for both sides</h3><p>What was approved, by whom, and when. Anyone can <a href="/verify">verify it</a>.</p>
-        <div class="t-ui"><div class="rec"><p><b class="ck"></b>Signed by Dana Lee · 3 Nov, 14:02</p><p class="mono">receipt sha256 9f3c…a71e · Verified</p></div><p class="fine">A sign-off record, not a legal e-signature.</p></div>
-      </article>
+    <header class="head"><p class="eyebrow-l">Live demo · Estimate</p><h2 id="d1-h">See the whole job before you quote it.</h2><p class="lead">Drag your rate and buffer. The total updates the same way the real estimator does: hours × rate + buffer.</p></header>
+    <div class="est-panel">
+      <div class="est-tabs" role="tablist" aria-label="Estimate views">
+        <p class="cap">Café Lumi booking</p>
+        <button role="tab" id="tab-req" aria-controls="p-req" aria-selected="true"><svg class="i" aria-hidden="true"><use href="/icons.svg#split"/></svg>Requirements</button>
+        <button role="tab" id="tab-sto" aria-controls="p-sto" aria-selected="false" tabindex="-1"><svg class="i" aria-hidden="true"><use href="/icons.svg#brief"/></svg>User stories</button>
+        <button role="tab" id="tab-mil" aria-controls="p-mil" aria-selected="false" tabindex="-1"><svg class="i" aria-hidden="true"><use href="/icons.svg#clock"/></svg>Milestones</button>
+        <button role="tab" id="tab-pri" aria-controls="p-pri" aria-selected="false" tabindex="-1"><svg class="i" aria-hidden="true"><use href="/icons.svg#coin"/></svg>Price</button>
+      </div>
+      <div class="est-body">
+        <div role="tabpanel" id="p-req" aria-labelledby="tab-req">
+          <p class="cap v">Functional</p>
+          <ul class="reqs">
+            <li><b>FR-1</b><span>Online table booking with time slots</span><em>36 h</em></li>
+            <li><b>FR-2</b><span>Deposit by PromptPay QR</span><em>24 h</em></li>
+            <li><b>FR-3</b><span>LINE reminder before the booking</span><em>14 h</em></li>
+            <li><b>FR-4</b><span>Staff screen to manage bookings</span><em>28 h</em></li>
+            <li><b>FR-5</b><span>Thai and English content</span><em>10 h</em></li>
+          </ul>
+          <p class="cap m">Non-functional</p>
+          <ul class="reqs n">
+            <li><b>NFR-1</b><span>Loads under 2 s on 4G</span><em>8 h</em></li>
+            <li><b>NFR-2</b><span>PDPA-friendly data handling</span><em>12 h</em></li>
+            <li><b>NFR-3</b><span>Testing and launch</span><em>10 h</em></li>
+          </ul>
+        </div>
+        <div role="tabpanel" id="p-sto" aria-labelledby="tab-sto" hidden>
+          <ul class="stories">
+            <li><b>As a guest</b>I pick a date, time and party size so I know my table is held.</li>
+            <li><b>As a guest</b>I pay a deposit by scanning a PromptPay QR so the booking is confirmed.</li>
+            <li><b>As a guest</b>I get a LINE message the day before so I don't forget.</li>
+            <li><b>As staff</b>I see today's bookings and mark no-shows from one screen.</li>
+            <li><b>As the owner</b>I switch the site between Thai and English.</li>
+          </ul>
+        </div>
+        <div role="tabpanel" id="p-mil" aria-labelledby="tab-mil" hidden>
+          <ol class="miles">
+            <li><span style="--w:28%;--c:var(--sky)"></span><b>Design approved</b><em>2 weeks · FR-5</em></li>
+            <li><span style="--w:57%;--c:var(--violet)"></span><b>Booking, deposit and reminder on staging</b><em>4 weeks · FR-1 to FR-4</em></li>
+            <li><span style="--w:15%;--c:var(--mint)"></span><b>Testing and launch</b><em>1 week · NFR-1 to NFR-3</em></li>
+          </ol>
+          <p class="muted small">7 weeks in total. The client approves each milestone before the next one starts.</p>
+        </div>
+        <div role="tabpanel" id="p-pri" aria-labelledby="tab-pri" hidden>
+          <table class="price-t"><caption class="sr">Price breakdown</caption><tbody>
+            <tr><th scope="row">Hours from the AI</th><td>142 h</td></tr>
+            <tr><th scope="row">Your rate</th><td data-out="rate">฿1,200 / h</td></tr>
+            <tr><th scope="row">Subtotal</th><td data-out="sub">฿170,400</td></tr>
+            <tr><th scope="row">Buffer</th><td data-out="buf">15% · ฿25,560</td></tr>
+            <tr class="t"><th scope="row">Total</th><td data-out="total">฿195,960</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="est-calc">
+        <p class="cap sky">Your price</p>
+        <div class="meter"><p><span>Hours (from the AI)</span><b>142 h</b></p><div class="track" aria-hidden="true"><i style="width:62%"></i></div></div>
+        <label class="meter"><p><span>Your rate</span><b data-out="rate">฿1,200 / h</b></p><input type="range" id="d-rate" min="300" max="3000" step="50" value="1200"></label>
+        <label class="meter"><p><span>Buffer</span><b data-out="bufpct">15%</b></p><input type="range" id="d-buf" min="0" max="40" step="1" value="15"></label>
+        <div class="total"><span>Total</span><output id="d-total" for="d-rate d-buf" aria-live="polite">฿195,960</output><small data-out="formula">฿170,400 + 15% buffer</small></div>
+        <a class="btn violet block" href="#try">Turn into a proposal<svg class="i" aria-hidden="true"><use href="/icons.svg#arrow"/></svg></a>
+        <p class="fine">The AI estimates hours. You set the rate. The AI never sets the price.</p>
+      </div>
+    </div>
+    <p class="sample-label">Sample project. Your own estimate runs from the box at the top.</p>
+  </div>
+</section>
+
+<!-- ================= DEMO 2: CLIENT ================= -->
+<section class="sec" id="client" aria-labelledby="d2-h">
+  <div class="wrap">
+    <header class="head"><p class="eyebrow-l">Live demo · Client view</p><h2 id="d2-h">Your client approves line by line, then signs.</h2><p class="lead">No account for them. They see a fixed version in their language. Signing turns your schedule into payment requests.</p></header>
+    <div class="client-grid">
+      <form class="doc card" id="doc" aria-labelledby="doc-h">
+        <div class="doc-head">
+          <div><p class="cap v">Proposal · revision 1</p><h3 id="doc-h">Café Lumi booking site</h3><p class="muted small">From Nok Studio</p></div>
+          <div class="seg light" role="radiogroup" aria-label="Document language"><button type="button" role="radio" aria-checked="true" data-doclang="en">EN</button><button type="button" role="radio" aria-checked="false" data-doclang="th" lang="th">ไทย</button></div>
+        </div>
+        <p class="muted small" id="doc-hint">Tap a line to approve it. One line has a question from the client.</p>
+        <ul class="lines" id="lines">
+          <li><button type="button" aria-pressed="true"><i class="box"></i><span data-en="Online table booking" data-th="ระบบจองโต๊ะออนไลน์">Online table booking</span><b>฿49,680</b></button></li>
+          <li><button type="button" aria-pressed="true"><i class="box"></i><span data-en="Deposit by PromptPay QR" data-th="มัดจำผ่าน PromptPay QR">Deposit by PromptPay QR</span><b>฿33,120</b></button></li>
+          <li class="q"><button type="button" aria-pressed="false"><i class="box"></i><span data-en="LINE reminder" data-th="แจ้งเตือนทาง LINE">LINE reminder</span><em>Question</em><b>฿19,320</b></button></li>
+          <li><button type="button" aria-pressed="true"><i class="box"></i><span data-en="Staff booking screen" data-th="หน้าจัดการการจองสำหรับพนักงาน">Staff booking screen</span><b>฿38,640</b></button></li>
+          <li><button type="button" aria-pressed="true"><i class="box"></i><span data-en="Thai and English content, speed, PDPA, testing" data-th="เนื้อหาไทยและอังกฤษ ความเร็ว PDPA และการทดสอบ">Thai and English content, speed, PDPA, testing</span><b>฿55,200</b></button></li>
+        </ul>
+        <p class="doc-total"><span>Total (incl. 15% buffer)</span><strong>฿195,960</strong></p>
+        <div class="sig">
+          <label for="sig-name">Type your full name to sign</label>
+          <input id="sig-name" autocomplete="off" value="Nok Chaiyaporn">
+          <label class="agree"><input type="checkbox" id="sig-ok"> I approve this scope and agree to the payment schedule</label>
+        </div>
+        <p class="err" id="sig-err" role="alert"></p>
+        <button class="btn violet block" type="submit" id="sign-btn">Approve and sign<svg class="i" aria-hidden="true"><use href="/icons.svg#sign"/></svg></button>
+      </form>
+      <div class="side">
+        <div class="card">
+          <p class="cap v">What you see</p>
+          <ol class="timeline" id="timeline" aria-live="polite">
+            <li style="--c:#6B7690"><time>09:02</time>Sent to Café Lumi</li>
+            <li style="--c:var(--sky)"><time>09:40</time>Viewed by the client</li>
+          </ol>
+          <p class="fp">Fingerprint <code>sha256 · 4f1c 9a0e … b27d</code></p>
+        </div>
+        <div class="card">
+          <p class="cap v">Payment requests</p>
+          <ul class="pays" id="pays">
+            <li><div><b>Deposit 50%</b><span>฿97,980 · due on signing</span></div><em class="st wait">Waiting for signature</em></li>
+            <li><div><b>Final 50%</b><span>฿97,980 · due 20 Dec</span></div><em class="st">Scheduled</em></li>
+          </ul>
+          <p class="pay-how"><svg class="i" aria-hidden="true"><use href="/icons.svg#pay"/></svg>Pay by PromptPay 081-234-5678 or bank transfer</p>
+          <p class="fine note"><svg class="i" aria-hidden="true"><use href="/icons.svg#hand"/></svg>Your client pays you directly. SignedScope never holds the money.</p>
+        </div>
+      </div>
+    </div>
+    <p class="sample-label">Sample data. Nothing is sent. <button type="button" class="linkish" id="reset-doc">Reset the demo</button></p>
+  </div>
+</section>
+
+<!-- ================= VIDEO ================= -->
+<section class="sec dark" id="tour" aria-labelledby="tour-h">
+  <div class="wrap">
+    <header class="head"><p class="eyebrow-l sky">Product tour · 60 seconds</p><h2 id="tour-h">Watch the real app, start to finish.</h2><p class="lead">Recorded from SignedScope itself with sample data. Captions in English, Bengali and Thai.</p></header>
+    <div class="player">
+      <video id="tour-v" controls playsinline preload="none" poster="/media/tour-poster.jpg" width="1280" height="720">
+        <source src="/media/tour.webm" type="video/webm">
+        <source src="/media/tour.mp4" type="video/mp4">
+        <track kind="captions" src="/media/tour.en.vtt" srclang="en" label="English" default>
+        <track kind="captions" src="/media/tour.bn.vtt" srclang="bn" label="বাংলা">
+        <track kind="captions" src="/media/tour.th.vtt" srclang="th" label="ไทย">
+      </video>
+    </div>
+    <ul class="chapters" aria-label="Chapters">
+      <li><button type="button" data-t="0"><b>0:00</b>Paste a brief</button></li>
+      <li><button type="button" data-t="6"><b>0:06</b>Estimate</button></li>
+      <li><button type="button" data-t="11"><b>0:11</b>Save to a project</button></li>
+      <li><button type="button" data-t="18"><b>0:18</b>Agreement</button></li>
+      <li><button type="button" data-t="28"><b>0:28</b>Client signs</button></li>
+      <li><button type="button" data-t="48"><b>0:48</b>Payment</button></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= SECURITY ================= -->
+<section class="sec" id="security" aria-labelledby="sec-h">
+  <div class="wrap">
+    <header class="head"><p class="eyebrow-l">Security and trust</p><h2 id="sec-h">Built so you and your client can trust the link.</h2></header>
+    <ul class="features">
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#lock"/></svg></span><h3>Secure sign-in</h3><p>Email link, Google or GitHub, plus optional two-step sign-in with an authenticator app.</p></li>
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#vault"/></svg></span><h3>Private vault</h3><p>Briefs, contracts and files stay in each project. Share a file with a link that ends after 7 days.</p></li>
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#shield"/></svg></span><h3>Sealed links</h3><p>Each document is sealed when you send it. The receipt shows its fingerprint, so any change is visible.</p></li>
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#hand"/></svg></span><h3>We never hold your money</h3><p>Clients pay you directly by PromptPay, bank, bKash or your own Stripe link.</p></li>
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#scale"/></svg></span><h3>Clauses by country</h3><p>Clause templates for Thailand, Bangladesh, Malaysia and Singapore. Templates, not legal advice.</p></li>
+      <li class="card reveal"><span class="tile"><svg class="i"><use href="/icons.svg#globe"/></svg></span><h3>Your client's language</h3><p>Your client can read estimates and documents in English, Bengali or Thai.</p></li>
+    </ul>
+    <p class="fine center">SignedScope is not a law firm or a legal e-signature service. Row Level Security keeps every account's data separate.</p>
+  </div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section class="sec mist" id="compare" aria-labelledby="cmp-h">
+  <div class="wrap">
+    <header class="head"><p class="eyebrow-l">Compared</p><h2 id="cmp-h">Why not just a Google Doc?</h2><p class="lead">A doc is a blank page. SignedScope does the estimate and keeps the deal in one place.</p></header>
+    <table class="cmp">
+      <thead><tr><th scope="col"><span class="sr">Task</span></th><th scope="col">Google Doc</th><th scope="col">SignedScope</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Estimate from the brief</th><td>You do it by hand</td><td>AI breakdown in minutes</td></tr>
+        <tr><th scope="row">Requirements and user stories</th><td>Write them yourself</td><td>Drafted for you to edit</td></tr>
+        <tr><th scope="row">A fixed version the client approves</th><td>Anyone can edit it</td><td>Sealed, with a fingerprint</td></tr>
+        <tr><th scope="row">Line-by-line approval and signature</th><td>Comments</td><td>Built in, no client account</td></tr>
+        <tr><th scope="row">Payment requests and reminders</th><td>Somewhere else</td><td>Made from the schedule</td></tr>
+        <tr><th scope="row">Extra work mid-project</th><td>An email thread</td><td>Priced change, approved the same way</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section class="sec" id="pricing" aria-labelledby="pr-h">
+  <div class="wrap">
+    <header class="head"><p class="eyebrow-l">Pricing</p><h2 id="pr-h">Free to start. Simple when you grow.</h2><p class="lead">Prices in US dollars. Exact limits are set after the beta from real use.</p></header>
+    <p class="beta"><svg class="i" aria-hidden="true"><use href="/icons.svg#spark"/></svg>Free for everyone during the beta. No card needed.</p>
+    <div class="plans">
+      <article class="plan card"><h3>Free</h3><p class="price"><b>$0</b>/ month</p><p class="blurb">For trying it with real clients.</p>
+        <ul><li>A few AI estimates each month</li><li>Scopes, proposals, share links</li><li>Basic templates and clauses</li><li>Small file vault</li></ul>
+        <a class="btn soft block" href="/login">Start free</a></article>
+      <article class="plan card pro"><h3>Pro</h3><p class="price"><b>$10</b>/ month</p><p class="blurb">For freelancers who quote every week.</p>
+        <ul><li>More AI estimates</li><li>All templates and prompt to PDF</li><li>Clauses by country</li><li>Your branding on documents</li><li>Larger vault</li></ul>
+        <a class="btn violet block" href="#waitlist" data-plan="pro">Choose Pro</a></article>
+      <article class="plan card"><h3>Plus</h3><p class="price"><b>$20</b>/ month</p><p class="blurb">For studios with more projects.</p>
+        <ul><li>The most AI estimates</li><li>Everything in Pro</li><li>Largest vault</li><li>Team seats (coming later)</li></ul>
+        <a class="btn soft block" href="#waitlist" data-plan="plus">Choose Plus</a></article>
+    </div>
+    <form id="wl" class="waitlist" aria-labelledby="wl-h">
+      <p id="wl-h" class="wl-h" tabindex="-1"><strong>Pro and Plus open after the beta.</strong> Get one email when they do.</p>
+      <span id="waitlist"></span>
+      <div class="wl-row">
+        <label class="sr" for="wl-email">Work email</label><input id="wl-email" type="email" required autocomplete="email" placeholder="you@studio.com">
+        <label class="sr" for="wl-plan">Plan</label><select id="wl-plan"><option value="pro">Pro</option><option value="plus">Plus</option><option value="free">Free updates</option></select>
+        <button class="btn violet" type="submit">Join the waitlist</button>
+      </div>
+      <input id="wl-note" type="hidden" value="">
+      <input name="company" id="wl-hp" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+      <p class="err" id="wl-err"></p><p id="wl-ok" class="hidden ok-msg">You are on the list.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="sec mist" id="faq" aria-labelledby="faq-h">
+  <div class="wrap narrow">
+    <header class="head"><p class="eyebrow-l">Questions</p><h2 id="faq-h">Straight answers.</h2></header>
+    <div class="faq">
+      <details open><summary>Does the AI set my price?</summary><p>No. It estimates the hours. Your price is hours × your rate + your buffer, and you can change any line.</p></details>
+      <details><summary>Is the signature legally binding?</summary><p>It records who approved what and when, with a fingerprint of the exact document. It is not a certified e-signature, so check your local rules for large contracts.</p></details>
+      <details><summary>Do you handle the payments?</summary><p>No. Your client pays you directly by PromptPay, bank, bKash or your own Stripe link. SignedScope never holds or moves money.</p></details>
+      <details><summary>Which languages?</summary><p>English, Bengali and Thai for estimates and client documents. More of the app is being translated.</p></details>
+      <details><summary>Is my data private?</summary><p>Each account can only see its own data. Files sit in a private vault, and share links expire.</p></details>
     </div>
   </div>
 </section>
 
-<!-- ============ FOR YOUR CLIENT ============ -->
-<section class="sec phones-sec" aria-labelledby="ph-h">
-  <div class="wrap center">
-    <p class="label sun">For your client</p>
-    <h2 id="ph-h">No account. No app. Just a link.</h2>
-    <div class="phones">
-      <div class="mphone r1"><div class="screen"><p class="ttl">Approve each line</p><p class="lr"><b class="ck"></b>Custom theme</p><p class="lr"><b class="ck"></b>Filters and search</p><p class="lr"><b class="ck"></b>Checkout</p></div></div>
-      <div class="mphone"><div class="screen"><p class="ttl">Change request</p><p class="lr dim">Checkout<span class="amt">$1,400</span></p><p class="lr add"><span class="pill ok solid">New</span> Apple Pay<span class="amt">+$480</span></p><p class="ptotal"><span>New total</span><strong>$6,480</strong></p><span class="pbtn">Approve change</span></div></div>
-      <div class="mphone r2"><div class="screen"><p class="ttl">Signed</p><b class="ck big"></b><p class="who">Dana Lee · 14:02</p><p class="muted small">Receipt saved. Anyone can verify it.</p><span class="pbtn mint">Pay $480</span></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PRICING ============ -->
-<section class="sec wrap" id="pricing" aria-labelledby="pr-h">
-  <p class="label violet">Pricing</p>
-  <h2 id="pr-h">Free to start. Flat after that.</h2>
-  <p class="sub">No per-seat fees. Pro and Agency are waitlist only for now.</p>
-  <div class="plans">
-    <article class="plan"><h3>Free</h3><p class="pp">$0 <small>forever</small></p><ul><li>Unlimited scopes and changes</li><li>Prices and totals</li><li>Your own Pay link</li></ul><a class="btn block" href="/new">Create a free scope</a></article>
-    <article class="plan hl"><h3>Pro <span class="pill sunp">Waitlist</span></h3><p class="pp">$19 <small>/month</small></p><ul><li>Saved history</li><li>Email when a client signs</li><li>Invoices and tax via Stripe</li></ul><a class="btn white block" href="/?plan=pro#waitlist">Join the waitlist</a></article>
-    <article class="plan"><h3>Agency <span class="pill">Waitlist</span></h3><p class="pp">$49 <small>/month</small></p><ul><li>Everything in Pro</li><li>5 seats</li><li>Your own domain</li></ul><a class="btn block" href="/?plan=agency#waitlist">Join the waitlist</a></article>
-  </div>
-  <form id="wl" class="waitlist" aria-labelledby="wl-h">
-    <p id="wl-h" class="wl-h" tabindex="-1"><strong>Get an email when Pro opens.</strong> One email, no spam.</p>
-    <span id="waitlist"></span>
-    <div class="wl-row">
-      <label class="sr" for="wl-email">Work email</label><input id="wl-email" type="email" required autocomplete="email" placeholder="you@studio.com">
-      <label class="sr" for="wl-plan">Plan</label><select id="wl-plan"><option value="pro">Pro</option><option value="agency">Agency</option><option value="free">Free updates</option></select>
-      <button class="btn primary" type="submit">Join the waitlist</button>
-    </div>
-    <input id="wl-note" type="hidden" value="">
-    <input name="company" id="wl-hp" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-    <p class="err" id="wl-err"></p><p id="wl-ok" class="hidden ok-msg">You are on the list.</p>
-  </form>
-</section>
-
-<!-- ============ FAQ ============ -->
-<section class="sec mist" aria-labelledby="faq-h">
-  <div class="wrap faq">
-    <div><p class="label violet">FAQ</p><h2 id="faq-h">Good questions.</h2></div>
-    <div class="qa">
-      <details><summary>Is this a legal e-signature?</summary><p>No. It is a clear record of what your client approved and when.</p></details>
-      <details><summary>Does my client need an account?</summary><p>No. They open the link on any device and approve.</p></details>
-      <details><summary>How do I get paid?</summary><p>The Pay button opens your own Stripe, Wise, PayPal, Payoneer or Omise link.</p></details>
-      <details><summary>Are Pro and Agency live?</summary><p>Not yet. Join the waitlist and we will email you when they open.</p></details>
-      <details><summary>Wasn’t this called ScopeLock?</summary><p>Yes. We renamed it. Links you already sent still work.</p></details>
-    </div>
-  </div>
-</section>
-
-<!-- ============ CTA ============ -->
-<section class="sec wrap">
-  <div class="cta-band">
-    <h2>Send your next scope with a price.</h2>
-    <a class="btn white lg" href="/new">Create a free scope</a>
-    <p class="trust">Free plan, no card. Your client never signs up.</p>
+<!-- ================= CTA ================= -->
+<section class="cta-end" aria-labelledby="cta-h">
+  <div class="wrap">
+    <h2 id="cta-h">Paste your next brief.</h2>
+    <p>See the requirements, timeline and price before you reply to the client.</p>
+    <div class="row"><a class="btn violet lg" href="#try">Try the AI estimate, no signup<svg class="i" aria-hidden="true"><use href="/icons.svg#arrow"/></svg></a><a class="btn ghost-w lg" href="/login">Create a free account</a></div>
   </div>
 </section>
 </main>
-<footer><div class="wrap row" style="justify-content:space-between"><span>SignedScope · open source, MIT · built in Bangkok by Tahmid Rafi</span><span><a href="/privacy">Privacy</a> · <a href="/verify">Verify a link</a> · <a href="https://github.com/tahmidbintaslim/scopelock">Source</a></span></div></footer>
-<script src="/landing.js"></script><script src="/demo.js"></script></body></html>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><a class="logo" href="/">SignedScope</a><p>SignedScope never holds or moves client money.</p></div>
+    <nav aria-label="Footer"><a href="/estimate">AI estimate</a><a href="#pricing">Pricing</a><a href="#security">Security</a><a href="/verify">Verify a receipt</a><a href="/privacy">Privacy</a><a href="https://github.com/tahmidbintaslim/SignedScope">Source</a></nav>
+  </div>
+</footer>
+<script src="/landing.js"></script><script src="/home.js"></script><script type="module" src="/hero3d.js"></script>
+</body></html>

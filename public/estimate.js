@@ -192,3 +192,17 @@ let saved; try { saved = localStorage.getItem('ss-lang'); } catch { /* ignore */
 const guess = (navigator.language || '').slice(0, 2);
 setLang(saved || (guess === 'th' || guess === 'bn' ? guess : 'en'));
 if (lang === 'th') $('#currency').value = 'THB'; else if (lang === 'bn') $('#currency').value = 'BDT';
+
+// Brief handed over from the home page box (/estimate?from=home): fill the form and run it once.
+if (params.get('from') === 'home') {
+  let hand = null;
+  try { hand = JSON.parse(sessionStorage.getItem('ss-home-brief') || 'null'); sessionStorage.removeItem('ss-home-brief'); } catch { /* ignore */ }
+  if (hand && typeof hand.brief === 'string' && hand.brief.trim().length >= 20) {
+    if (T[hand.lang]) setLang(hand.lang);
+    $('#brief').value = hand.brief.slice(0, 12000);
+    if (Number(hand.rate) > 0) $('#rate').value = Number(hand.rate);
+    if (Number(hand.buffer) >= 0 && Number(hand.buffer) <= 100) $('#buffer').value = Number(hand.buffer);
+    if (CURRENCIES.includes(hand.currency)) $('#currency').value = hand.currency;
+    $('#f').requestSubmit();
+  }
+}
