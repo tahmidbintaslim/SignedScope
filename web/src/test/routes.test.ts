@@ -14,3 +14,15 @@ describe('routes', () => {
   });
   it('pre-renders every React page', () => { expect(PRERENDER).toEqual(Object.keys(pages)); });
 });
+
+import { safeNext } from '../lib/session';
+describe('safeNext', () => {
+  const o = 'https://signedscope.app';
+  it('keeps same-origin paths and drops anything else', () => {
+    expect(safeNext('/app/projects/1?x=1#y', o)).toBe('/app/projects/1?x=1#y');
+    expect(safeNext(null, o)).toBe('/app');
+    expect(safeNext('https://evil.com/app', o)).toBe('/app');
+    expect(safeNext('//evil.com', o)).toBe('/app');
+    expect(safeNext('/\\evil.com', o)).toBe('/app');
+  });
+});

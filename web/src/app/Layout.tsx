@@ -90,6 +90,18 @@ export function Layout() {
     if (target) { target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
   }
 
+  // The workspace (/app) draws its own frame: sidebar, top bar and tab bar.
+  if (location.pathname === '/app' || location.pathname.startsWith('/app/')) {
+    return (
+      <>
+        <a href="#main" className="skip-link">{t('nav.skip')}</a>
+        <NavProgress />
+        <Outlet />
+        <ScrollRestoration />
+      </>
+    );
+  }
+
   return (
     <>
       <a href="#main" className="skip-link">{t('nav.skip')}</a>

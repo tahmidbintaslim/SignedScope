@@ -45,9 +45,11 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [ ] One domain and repo name everywhere; 301s from old URLs
 
 ### E. Accounts and onboarding
-- [ ] Sign up / sign in (email link, Google, GitHub), two-step setup
-- [ ] First-run onboarding: name, business, country, language, currency, rate, payment details, first client and project, first estimate
-- [ ] Dashboard, projects, clients, settings, composer, vault rebuilt in React with the new design
+- [x] Sign up / sign in (email link, Google, GitHub), two-step code step (React; ships with the rest of /app)
+- [x] First-run onboarding: name, business, country, time zone, language, currency, rate, payment details, alerts, first client and project (needs migration 20261108030000_onboarding.sql on Supabase)
+- [x] Dashboard (React)
+- [ ] Projects, clients, settings, composer, vault in React
+- [ ] Client sign and receipt pages, /new, then switch /login and /app to React in production
 
 ### F. Product
 - [ ] Starter limit of 3 active scopes; email alerts on every plan
