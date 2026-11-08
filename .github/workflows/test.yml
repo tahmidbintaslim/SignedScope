@@ -48,3 +48,5 @@ jobs:
         working-directory: web
       - run: npm audit --omit=dev
         working-directory: web
+      # What Vercel serves: old pages plus the pre-rendered React pages.
+      - run: node scripts/build-site.mjs

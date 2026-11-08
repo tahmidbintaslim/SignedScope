@@ -121,3 +121,4 @@
   .ss-card--interactive:hover { transform: none; }
   .ss-tooltip { transform: translate(-50%, 0); }
 }
+.ss-art { display: block; } .ss-art svg { display: block; width: 100%; height: auto; }

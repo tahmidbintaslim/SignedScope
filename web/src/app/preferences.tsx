@@ -24,9 +24,12 @@ function readTheme(): Theme {
   try { const t = localStorage.getItem(THEME_KEY); return t === 'light' || t === 'dark' ? t : 'system'; } catch { return 'system'; }
 }
 
-export function PreferencesProvider({ children, initial }: { children: ReactNode; initial?: LocalePrefs }) {
+export function PreferencesProvider({ children, initial, adoptStored }: { children: ReactNode; initial?: LocalePrefs; adoptStored?: boolean }) {
   const [locale, setLocaleState] = useState<LocalePrefs>(() => initial ?? loadLocale());
-  const [theme, setThemeState] = useState<Theme>(readTheme);
+  const [theme, setThemeState] = useState<Theme>(() => (typeof window === 'undefined' ? 'system' : readTheme()));
+
+  // After hydrating pre-rendered HTML (rendered with defaults), switch to the visitor's settings.
+  useEffect(() => { if (adoptStored) setLocaleState(loadLocale()); }, [adoptStored]);
 
   const setLocale = useCallback((patch: Partial<LocalePrefs>) => {
     setLocaleState((prev) => { const next = { ...prev, ...patch }; saveLocale(next); return next; });

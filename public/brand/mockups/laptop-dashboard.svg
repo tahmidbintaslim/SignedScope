@@ -8,7 +8,7 @@
   <path d="M20 532h920a0 0 0 0 1 0 0v8a20 20 0 0 1-20 20H40a20 20 0 0 1-20-20v-8z" fill="#C9D0E0"/>
   <rect x="20" y="524" width="920" height="12" rx="6" fill="#E3E8F2"/>
   <rect x="420" y="524" width="120" height="8" rx="4" fill="#A3ACC2"/>
-  <g clip-path="url(#lp-screen)" font-family="Plus Jakarta Sans">
+  <g clip-path="url(#lp-screen)" font-family="Plus Jakarta Sans, system-ui, sans-serif">
     <rect x="96" y="28" width="768" height="480" fill="#F5F7FC"/>
     <!-- Sidebar -->
     <rect x="96" y="28" width="168" height="480" fill="#fff"/>

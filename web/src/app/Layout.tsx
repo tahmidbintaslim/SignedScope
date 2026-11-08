@@ -9,6 +9,7 @@ import { Logo, Menu, IconButton, Select } from '../ui';
 import { LANGUAGES, type Language } from '../lib/locale';
 import { AppLink, AppNavLink } from './AppLink';
 import { usePrefs, type Theme } from './preferences';
+import { META } from './routes';
 
 const LANG_NAME: Record<Language, string> = { en: 'English', bn: 'বাংলা', th: 'ไทย' };
 
@@ -24,6 +25,7 @@ function Header() {
         <AppLink to="/" className="site-logo" aria-label={t('nav.home')}><Logo size={28} /></AppLink>
         <nav aria-label={t('nav.main')} className="site-nav">
           <AppNavLink to="/estimate">{t('nav.estimate')}</AppNavLink>
+          <AppNavLink to="/#pricing">{t('nav.pricing')}</AppNavLink>
           <AppNavLink to="/login">{t('nav.signIn')}</AppNavLink>
         </nav>
         <div className="site-tools">
@@ -41,6 +43,23 @@ function Header() {
   );
 }
 
+function Footer() {
+  const { t } = useTranslation();
+  return (
+    <footer className="site-footer">
+      <div className="container site-footer-row">
+        <Logo size={24} />
+        <p className="muted">{t('home.footer.built')}</p>
+        <nav aria-label="Footer" className="row">
+          <AppLink to="/privacy">{t('home.footer.privacy')}</AppLink>
+          <AppLink to="/verify">{t('home.footer.verify')}</AppLink>
+          <a href="https://github.com/tahmidbintaslim/SignedScope">{t('home.footer.source')}</a>
+        </nav>
+      </div>
+    </footer>
+  );
+}
+
 /** Thin bar at the top while the next page's code or data loads. */
 function NavProgress() {
   const nav = useNavigation();
@@ -53,6 +72,8 @@ export function Layout() {
   const main = useRef<HTMLElement>(null);
   const first = useRef(true);
   const pendingFocus = useRef(false);
+
+  useEffect(() => { const m = META[location.pathname]; if (m) document.title = m.title; }, [location.pathname]);
 
   // After a client-side navigation, focus the new page's h1 (or main) once it has entered.
   useEffect(() => {
@@ -82,6 +103,7 @@ export function Layout() {
           </m.div>
         </AnimatePresence>
       </main>
+      <Footer />
       <ScrollRestoration />
     </>
   );

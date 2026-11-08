@@ -10,3 +10,4 @@ export { Spinner } from './Spinner';
 export { Tabs, type TabItem } from './Tabs';
 export { ToastProvider, useToast } from './Toast';
 export { Tooltip } from './Tooltip';
+export { SignaturePad, type SignaturePadHandle } from './SignaturePad';

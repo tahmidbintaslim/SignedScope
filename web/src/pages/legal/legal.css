@@ -1,0 +1,8 @@
+.legal { max-width: 760px; display: grid; gap: 16px; }
+.legal h1 { margin-bottom: 4px; }
+.legal h2 { font-size: 22px; margin-top: 16px; }
+.legal p { line-height: 1.7; }
+.verify-result { display: grid; gap: 10px; justify-items: start; }
+.verify-result.is-ok { border-color: color-mix(in srgb, var(--ss-success) 40%, var(--ss-border)); }
+.verify-result.is-bad { border-color: color-mix(in srgb, var(--ss-danger) 40%, var(--ss-border)); }
+.verify-hash { font-size: 12px; word-break: break-all; }

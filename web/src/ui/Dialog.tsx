@@ -37,6 +37,7 @@ export function Dialog({ open, onClose, title, description, children, footer, va
   }, [open, dismissible, onClose]);
 
   const v = variant === 'sheet' ? sheetV : dialogV;
+  if (typeof document === 'undefined') return null; // pre-rendering: dialogs start closed
   return createPortal(
     <AnimatePresence>
       {open && (

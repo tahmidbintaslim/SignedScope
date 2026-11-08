@@ -6,3 +6,6 @@ node_modules
 # Impeccable local state
 .impeccable/questions/
 .impeccable/config.local.json
+
+# Vercel output (scripts/build-site.mjs)
+site/
