@@ -10,11 +10,15 @@ type Loader = () => Promise<{ default: ComponentType }>;
 /** Pages served by the React app. Each one is also pre-rendered to static HTML (see prerender). */
 export const pages: Record<string, Loader> = {
   '/': () => import('../pages/home/Home'),
+  '/estimate': () => import('../pages/estimate/Estimate'),
+  '/verify': () => import('../pages/legal/Verify'),
+  '/privacy': () => import('../pages/legal/Privacy'),
+  '/thanks': () => import('../pages/legal/Thanks'),
   '/kit': () => import('../pages/Kit'),
 };
 
 /** URLs still served by the old pages in public/ until phases D and E move them. */
-export const LEGACY = ['/estimate', '/new', '/sign', '/receipt', '/verify', '/privacy', '/thanks', '/login', '/app'];
+export const LEGACY = ['/new', '/sign', '/receipt', '/login', '/app'];
 export const isLegacy = (to: string) => {
   const path = to.split(/[?#]/)[0] || '/';
   return LEGACY.some((p) => path === p || path.startsWith(p + '/'));
@@ -26,6 +30,10 @@ export const PRERENDER = Object.keys(pages);
 /** Title and description per page: written into the pre-rendered HTML and set on navigation. */
 export const META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': { title: 'SignedScope: get the scope signed, get the extras paid', description: 'Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap. Free during the beta.' },
+  '/estimate': { title: 'Free AI project estimate for freelancers · SignedScope', description: 'Paste a client brief and get features, user stories, milestones, a timeline and a price range from your own hourly rate. Free, in English, Bengali and Thai.' },
+  '/verify': { title: 'Verify a link · SignedScope', description: 'Check that a SignedScope sign-off or receipt link is genuine and unchanged.' },
+  '/privacy': { title: 'Privacy · SignedScope', description: 'What SignedScope stores, why, for how long, and your rights.' },
+  '/thanks': { title: 'Thank you · SignedScope', description: 'Your early access is active.', noindex: true },
   '/kit': { title: 'Design system · SignedScope', description: 'Components of the SignedScope app.', noindex: true },
 };
 

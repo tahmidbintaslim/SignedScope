@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppLink } from '../../app/AppLink';
 import { useCountUp, useInView, useReveal } from '../../lib/hooks';
 import { usePrefs } from '../../app/preferences';
-import { ButtonLink, Icon, Logo, type IconName } from '../../ui';
+import { ButtonLink, Icon, type IconName } from '../../ui';
 import { Art, type ArtName } from '../../ui/Art';
 import { Demo } from './Demo';
 import { Faq } from './Faq';
@@ -165,17 +165,6 @@ export default function Home() {
         <p>{t('home.cta.note')}</p>
       </section>
 
-      <footer className="site-footer">
-        <div className="container site-footer-row">
-          <Logo size={24} />
-          <p className="muted">{t('home.footer.built')}</p>
-          <nav aria-label="Footer" className="row">
-            <AppLink to="/privacy">{t('home.footer.privacy')}</AppLink>
-            <AppLink to="/verify">{t('home.footer.verify')}</AppLink>
-            <a href="https://github.com/tahmidbintaslim/SignedScope">{t('home.footer.source')}</a>
-          </nav>
-        </div>
-      </footer>
     </div>
   );
 }

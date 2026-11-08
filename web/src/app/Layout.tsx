@@ -25,6 +25,7 @@ function Header() {
         <AppLink to="/" className="site-logo" aria-label={t('nav.home')}><Logo size={28} /></AppLink>
         <nav aria-label={t('nav.main')} className="site-nav">
           <AppNavLink to="/estimate">{t('nav.estimate')}</AppNavLink>
+          <AppNavLink to="/#pricing">{t('nav.pricing')}</AppNavLink>
           <AppNavLink to="/login">{t('nav.signIn')}</AppNavLink>
         </nav>
         <div className="site-tools">
@@ -39,6 +40,23 @@ function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+function Footer() {
+  const { t } = useTranslation();
+  return (
+    <footer className="site-footer">
+      <div className="container site-footer-row">
+        <Logo size={24} />
+        <p className="muted">{t('home.footer.built')}</p>
+        <nav aria-label="Footer" className="row">
+          <AppLink to="/privacy">{t('home.footer.privacy')}</AppLink>
+          <AppLink to="/verify">{t('home.footer.verify')}</AppLink>
+          <a href="https://github.com/tahmidbintaslim/SignedScope">{t('home.footer.source')}</a>
+        </nav>
+      </div>
+    </footer>
   );
 }
 
@@ -85,6 +103,7 @@ export function Layout() {
           </m.div>
         </AnimatePresence>
       </main>
+      <Footer />
       <ScrollRestoration />
     </>
   );

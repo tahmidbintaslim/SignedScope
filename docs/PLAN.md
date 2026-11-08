@@ -39,9 +39,9 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 ### D. Public site
 - [x] Pre-rendering and the Vercel build (`npm run build:site` → `site/`): React pages replace their old HTML, other URLs keep the old pages
 - [x] Homepage per the blueprint: hero with phone mockup, the quick-ask problem, interactive demo, how it works, benefits, client view, pricing with waitlist, FAQ (pre-rendered, hydrated, en/bn/th)
-- [ ] `/estimate` as the main free tool, with its own SEO metadata
+- [x] `/estimate` as the main free tool, with its own SEO metadata (also `/verify`, `/privacy`, `/thanks` in React)
 - [ ] `/templates/[slug]` (5 seed templates) and `/compare/[slug]` pages
-- [ ] `/verify` as a trust badge and growth loop on receipts
+- [ ] `/verify` as a trust badge and growth loop on receipts (`/verify#token` checks on open; badge on receipts comes with E)
 - [ ] One domain and repo name everywhere; 301s from old URLs
 
 ### E. Accounts and onboarding
