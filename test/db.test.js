@@ -88,6 +88,10 @@ test('migration applies and RLS isolates users', opts, () => {
   // Security hardening (migration 20261108000000_security.sql).
   // Profiles: settings are editable, the notification email is not.
   assert.ok(!as(A, `update profiles set email = 'victim@corp.com'`).ok, 'email is not editable');
+  // Onboarding (20261108030000_onboarding.sql): locale and the onboarding mark are editable; bad values are not.
+  assert.ok(as(A, `update profiles set country = 'TH', time_zone = 'Asia/Bangkok', onboarded_at = now() where id = '${A}'`).ok, 'onboarding fields editable');
+  assert.ok(!as(A, `update profiles set country = 'thailand' where id = '${A}'`).ok, 'country must be a 2-letter code');
+  assert.equal(psql(`select country || ' ' || time_zone from profiles where id = '${A}'`).out, 'TH Asia/Bangkok');
   // Activity: users cannot write server events or mark entries as server-made.
   assert.ok(!as(A, `insert into activity (project_id, kind) values ('${projectId}', 'document_signed')`).ok, 'no forged server events');
   assert.ok(!as(A, `insert into activity (project_id, kind, actor) values ('${projectId}', 'note', 'server')`).ok, 'no forged actor');

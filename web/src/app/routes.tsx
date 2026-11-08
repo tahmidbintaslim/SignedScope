@@ -39,10 +39,29 @@ export const META: Record<string, { title: string; description: string; noindex?
 
 const lazyPage = (load: Loader): RouteObject['lazy'] => async () => ({ Component: (await load()).default });
 
+/**
+ * Account pages and the workspace, built in React but still served by the old pages in
+ * production (they stay in LEGACY) until all of /app has moved over. Not pre-rendered.
+ */
+export const accountRoutes: RouteObject[] = [
+  { path: 'login', lazy: lazyPage(() => import('../pages/auth/Login')) },
+  {
+    path: 'app',
+    lazy: lazyPage(() => import('../pages/app/AppShell')),
+    children: [
+      { index: true, lazy: lazyPage(() => import('../pages/app/Dashboard')) },
+      { path: 'welcome', lazy: lazyPage(() => import('../pages/app/Onboarding')) },
+      { path: '*', lazy: lazyPage(() => import('../pages/Placeholder')) },
+    ],
+  },
+];
+const ACCOUNT_PATHS = ['/login', '/app'];
+
 export const childRoutes: RouteObject[] = [
   ...Object.entries(pages).map(([path, load]): RouteObject => (path === '/' ? { index: true, lazy: lazyPage(load) } : { path: path.slice(1), lazy: lazyPage(load) })),
-  // In dev, legacy URLs show a placeholder; in production their HTML files answer first.
-  ...LEGACY.map((p): RouteObject => ({ path: p.slice(1) + (p === '/app' ? '/*' : ''), lazy: lazyPage(() => import('../pages/Placeholder')) })),
+  ...accountRoutes,
+  // In dev, other legacy URLs show a placeholder; in production their HTML files answer first.
+  ...LEGACY.filter((p) => !ACCOUNT_PATHS.includes(p)).map((p): RouteObject => ({ path: p.slice(1), lazy: lazyPage(() => import('../pages/Placeholder')) })),
   { path: '*', lazy: lazyPage(() => import('../pages/NotFound')) },
 ];
 
