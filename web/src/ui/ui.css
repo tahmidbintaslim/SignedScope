@@ -113,6 +113,7 @@
 .ss-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: var(--ss-radius-sm); background: none; text-align: left; cursor: pointer; font-size: 14px; }
 .ss-menu-item:hover, .ss-menu-item:focus-visible { background: var(--ss-surface); outline: none; }
 .ss-menu-item.is-danger { color: var(--ss-danger); }
+.ss-menu-check { margin-left: auto; color: var(--ss-brand); }
 
 /* Reduced motion: no transforms or loops; opacity changes only. */
 @media (prefers-reduced-motion: reduce) {

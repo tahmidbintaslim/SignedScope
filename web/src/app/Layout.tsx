@@ -33,7 +33,7 @@ function Header() {
           </Select>
           <Menu
             trigger={(p) => <IconButton {...p} icon={theme === 'dark' ? 'moon' : 'sun'} label={t('settings.theme')} />}
-            items={themes.map((x) => ({ label: x.label + (theme === x.id ? ' ✓' : ''), onSelect: () => setTheme(x.id) }))}
+            items={themes.map((x) => ({ label: x.label, checked: theme === x.id, onSelect: () => setTheme(x.id) }))}
           />
         </div>
       </div>
@@ -58,13 +58,16 @@ export function Layout() {
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     pendingFocus.current = true;
+    // Fallback if the enter animation never reports (e.g. animation features not loaded yet).
+    const t = setTimeout(focusPage, 700);
+    return () => clearTimeout(t);
   }, [location.pathname]);
-  const focusPage = () => {
+  function focusPage() {
     if (!pendingFocus.current) return;
     pendingFocus.current = false;
     const target = main.current?.querySelector<HTMLElement>('h1, [role="heading"][aria-level="1"]') ?? main.current;
     if (target) { target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
-  };
+  }
 
   return (
     <>

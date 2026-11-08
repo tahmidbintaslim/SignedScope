@@ -103,3 +103,12 @@ describe('Menu', () => {
     expect(trigger).toHaveFocus();
   });
 });
+
+describe('Menu with choices', () => {
+  it('marks the current choice with aria-checked', async () => {
+    renderUI(<Menu trigger={(p) => <Button {...p}>Theme</Button>} items={[{ label: 'Light', checked: true, onSelect: () => {} }, { label: 'Dark', checked: false, onSelect: () => {} }]} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Theme' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Light' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('menuitemradio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'false');
+  });
+});

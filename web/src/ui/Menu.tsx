@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 import { duration, ease } from '../motion/tokens';
 import { Icon, type IconName } from './Icon';
 
-export interface MenuItem { label: string; icon?: IconName; onSelect: () => void; danger?: boolean }
+/** `checked` makes the item a radio choice (aria-checked) with a check mark. */
+export interface MenuItem { label: string; icon?: IconName; onSelect: () => void; danger?: boolean; checked?: boolean }
 
 export function Menu({ trigger, items, align = 'end' }: { trigger: (p: { 'aria-haspopup': 'menu'; 'aria-expanded': boolean; 'aria-controls': string; onClick: () => void }) => ReactNode; items: MenuItem[]; align?: 'start' | 'end' }) {
   const id = useId();
@@ -14,7 +15,7 @@ export function Menu({ trigger, items, align = 'end' }: { trigger: (p: { 'aria-h
 
   useEffect(() => {
     if (!open) return;
-    list.current?.querySelector<HTMLElement>('[role=menuitem]')?.focus();
+    list.current?.querySelector<HTMLElement>('[role^=menuitem]')?.focus();
     const away = (e: PointerEvent) => { if (!wrap.current?.contains(e.target as Node)) setOpen(false); };
     document.addEventListener('pointerdown', away);
     return () => document.removeEventListener('pointerdown', away);
@@ -22,7 +23,7 @@ export function Menu({ trigger, items, align = 'end' }: { trigger: (p: { 'aria-h
 
   const close = () => { setOpen(false); wrap.current?.querySelector<HTMLElement>('[aria-haspopup]')?.focus(); };
   const onKey = (e: KeyboardEvent) => {
-    const els = [...(list.current?.querySelectorAll<HTMLElement>('[role=menuitem]') ?? [])];
+    const els = [...(list.current?.querySelectorAll<HTMLElement>('[role^=menuitem]') ?? [])];
     const i = els.indexOf(document.activeElement as HTMLElement);
     if (e.key === 'ArrowDown') { e.preventDefault(); els[(i + 1) % els.length]?.focus(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); els[(i - 1 + els.length) % els.length]?.focus(); }
@@ -41,9 +42,10 @@ export function Menu({ trigger, items, align = 'end' }: { trigger: (p: { 'aria-h
             transition={{ duration: duration.base, ease: ease.enter }}>
             {items.map((it) => (
               <li key={it.label} role="none">
-                <button type="button" role="menuitem" tabIndex={-1} className={'ss-menu-item' + (it.danger ? ' is-danger' : '')}
-                  onClick={() => { it.onSelect(); close(); }}>
+                <button type="button" role={it.checked === undefined ? 'menuitem' : 'menuitemradio'} aria-checked={it.checked} tabIndex={-1}
+                  className={'ss-menu-item' + (it.danger ? ' is-danger' : '')} onClick={() => { it.onSelect(); close(); }}>
                   {it.icon && <Icon name={it.icon} size={18} />}{it.label}
+                  {it.checked && <Icon name="check" size={18} className="ss-menu-check" />}
                 </button>
               </li>
             ))}
