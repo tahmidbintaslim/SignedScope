@@ -13,7 +13,7 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 
 ## Phases and tasks
 
-### A. Security (done → merging)
+### A. Security (done, #14 merged)
 - [x] Four-part audit (API, database, frontend, ops) and fixes (#14)
 - [x] Supabase project created; all migrations applied; advisor clean
 - [ ] Owner: Vercel env vars (Production only): `SIGNING_SECRET`, `BLOB_READ_WRITE_TOKEN`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`, `CRON_SECRET`
