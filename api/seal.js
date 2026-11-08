@@ -50,7 +50,8 @@ module.exports = handler(async (body, req) => {
   }
   // Links made without an account say so on the client's page ("sender not verified"),
   // so a SignedScope link cannot be used to borrow trust for someone else's name.
-  if (!project) {
+  if (!user && db.configured() && req.headers.authorization) user = await db.userFrom(req);
+  if (!user) {
     doc.anon = true;
     if (await limited('seal-anon', clientIp(req), { windowMs: 60 * 60 * 1000, max: 30 })) throw httpError(429, 'Too many links this hour. Sign in to create more.');
   }

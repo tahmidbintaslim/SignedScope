@@ -25,16 +25,16 @@ async function send(to, subject, text) {
 }
 
 // The owner's verified sign-in email and notification preferences, or null.
-// The address comes from auth.users, never from the editable profile, and each owner gets
-// at most PER_OWNER_HOUR emails an hour.
+// The address comes from auth.users, never from the editable profile.
 async function owner(ownerId) {
   const { data } = await db.admin().from('profiles').select('name, notify_signed, notify_viewed, notify_overdue').eq('id', ownerId).maybeSingle();
   if (!data) return null;
   const email = await db.userEmail(ownerId);
-  if (!email) return null;
-  if (await limited('notify', ownerId, { windowMs: 60 * 60 * 1000, max: PER_OWNER_HOUR })) return null;
-  return { ...data, email };
+  return email ? { ...data, email } : null;
 }
+
+// Each owner gets at most PER_OWNER_HOUR emails an hour. Call only for an email that will be sent.
+const withinCap = async (ownerId) => !(await limited('notify', ownerId, { windowMs: 60 * 60 * 1000, max: PER_OWNER_HOUR }));
 
 const projectLink = (projectId) => (appUrl() && projectId ? `\n\nOpen the project: ${appUrl()}/app#/projects/${projectId}` : '');
 
@@ -43,6 +43,7 @@ async function documentEvent(event, row, extra = {}) {
   if (!enabled()) return;
   const o = await owner(row.owner);
   if (!o || (event === 'viewed' && !o.notify_viewed) || (event === 'signed' && !o.notify_signed)) return;
+  if (!(await withinCap(row.owner))) return;
   const title = clean(row.title || extra.title || 'your document').slice(0, 160);
   extra = { ...extra, signer: extra.signer ? clean(extra.signer).slice(0, 120) : extra.signer };
   if (event === 'viewed') {
@@ -54,4 +55,4 @@ async function documentEvent(event, row, extra = {}) {
   }
 }
 
-module.exports = { enabled, send, owner, documentEvent, appUrl };
+module.exports = { enabled, send, owner, withinCap, documentEvent, appUrl };

@@ -4,7 +4,7 @@ Accounts add `/login` and the `/app` workspace. Until they are set up, the site 
 
 ## 1. Create the Supabase project
 1. Go to supabase.com and create a project. The free tier is fine to start. Pick the region closest to your users, for example Singapore.
-2. Open **SQL Editor** and run each file in `supabase/migrations/` in name order (`…_init.sql`, `…_vault_notify.sql`, `…_security.sql`, `…_private_helpers.sql`).
+2. Open **SQL Editor** and run each file in `supabase/migrations/` in name order (`…_init.sql`, `…_vault_notify.sql`, `…_security.sql`, `…_private_helpers.sql`, `…_review_fixes.sql`).
    - With the Supabase CLI instead: `supabase link` then `supabase db push`.
 
 ## 2. Sign-in methods

@@ -160,13 +160,12 @@ async function readJson(req) {
   if (req.method !== 'POST') throw httpError(405, 'Use POST');
   const type = String((req.headers || {})['content-type'] || '');
   if (type && !/^application\/json\b/i.test(type)) throw httpError(415, 'Send JSON');
+  // On Vercel, reading req.body parses it (a getter) and throws on malformed JSON.
   let parsed;
-  // On Vercel, reading req.body parses it and throws on malformed JSON.
   try { parsed = req.body; } catch { throw httpError(400, 'Invalid JSON'); }
-  if (parsed && typeof parsed === 'object') req.body = parsed;
-  if (req.body && typeof req.body === 'object') {
-    if (JSON.stringify(req.body).length > MAX_BODY) throw httpError(413, 'Request too large');
-    return req.body;
+  if (parsed && typeof parsed === 'object') {
+    if (JSON.stringify(parsed).length > MAX_BODY) throw httpError(413, 'Request too large');
+    return parsed;
   }
   let size = 0;
   const chunks = [];

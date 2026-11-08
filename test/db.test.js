@@ -26,7 +26,7 @@ ${sql}; commit;`);
 };
 
 test('migration applies and RLS isolates users', opts, () => {
-  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade;');
+  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade; drop schema if exists private cascade;');
   for (const f of ['test/db/supabase-stub.sql', ...require('fs').readdirSync('supabase/migrations').sort().map((m) => 'supabase/migrations/' + m)]) {
     const r = file(path.join(__dirname, '..', f));
     assert.equal(r.status, 0, `${f}: ${r.stderr}`);

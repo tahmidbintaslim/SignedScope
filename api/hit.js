@@ -19,7 +19,7 @@ module.exports = handler(async (body, req) => {
   const ref = cleanRef(body.ref);
   const ip = clientIp(req);
   // Memory-only on purpose: a durable check would double the Blob writes per visit.
-  if (ip && await limited('hit', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW, memoryOnly: true })) return { ok: true }; // silently drop floods; counts are a rough signal, not billing
+  if (await limited('hit', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW, memoryOnly: true })) return { ok: true }; // silently drop floods; counts are a rough signal, not billing
   if (!process.env.BLOB_READ_WRITE_TOKEN) return { ok: true, stored: false };
   // A global daily cap keeps storage writes bounded even from many addresses.
   if (await limited('hit-day', 'all', { windowMs: 24 * 60 * 60 * 1000, max: DAILY_CAP, failOpen: false })) return { ok: true, stored: false };

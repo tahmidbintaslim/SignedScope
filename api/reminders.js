@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
   let sent = 0;
   for (const [ownerId, list] of Object.entries(byOwner)) {
     const o = await notify.owner(ownerId);
-    if (!o || !o.notify_overdue) continue;
+    if (!o || !o.notify_overdue || !(await notify.withinCap(ownerId))) continue;
     const lines = list.map((p) => `- ${p.label}: ${new Intl.NumberFormat('en', { style: 'currency', currency: p.currency }).format(p.amount)}, ${p.late} day${p.late === 1 ? '' : 's'} overdue`);
     const link = notify.appUrl() ? `\n\nSee them in your workspace: ${notify.appUrl()}/app` : '';
     if (await notify.send(o.email, `${list.length} client payment${list.length === 1 ? '' : 's'} overdue`, `These payments are overdue:\n${lines.join('\n')}\n\nSignedScope doesn't contact your client; follow up in your usual way.${link}`)) sent++;

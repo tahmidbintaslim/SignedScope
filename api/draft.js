@@ -80,7 +80,7 @@ async function aiAllowed(ip) {
 
 module.exports = handler(async (body, req) => {
   const ip = clientIp(req);
-  if (ip && await limited('draft', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW })) {
+  if (await limited('draft', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW })) {
     throw httpError(429, 'Too many drafts, try again in a few minutes');
   }
   const text = str(body.text, MAX_INPUT, 'Message');

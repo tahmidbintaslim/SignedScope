@@ -147,7 +147,8 @@ test('security: one-time signing, sender flag, two-step sessions, verified email
   const s = await call(seal, { ...base, title: 'Once', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
   const id = (await call(verify, { token: s.body.token })).body.data.items[0].id;
   assert.equal((await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions: { [id]: { status: 'accepted' } } })).status, 200);
-  await call(sign, { token: s.body.token, name: 'Mallory', agree: true, decisions: { [id]: { status: 'rejected', note: 'no' } } });
+  const again = await call(sign, { token: s.body.token, name: 'Mallory', agree: true, decisions: { [id]: { status: 'rejected', note: 'no' } } });
+  assert.equal(again.status, 409, 'no second receipt for a filed link');
   const doc = store.tables.documents.find((d) => d.id === s.body.documentId);
   assert.equal(doc.status, 'signed'); assert.equal(doc.signer_name, 'Nok');
 
@@ -155,6 +156,8 @@ test('security: one-time signing, sender flag, two-step sessions, verified email
   const anon = (await call(verify, { token: (await call(seal, base)).body.token })).body.data;
   assert.equal(anon.anon, true);
   assert.equal((await call(verify, { token: s.body.token })).body.data.anon, undefined);
+  const signedIn = (await call(seal, base, { authorization: 'Bearer fake-token-' + A.id })).body.token;
+  assert.equal((await call(verify, { token: signedIn })).body.data.anon, undefined, 'signed-in senders are verified without a project');
 
   // A user with a verified authenticator needs a two-step session for the API too.
   store.factors = [{ id: 'f1', user_id: A.id, status: 'verified', factor_type: 'totp' }];

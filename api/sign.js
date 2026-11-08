@@ -10,6 +10,12 @@ module.exports = handler(async (body, req) => {
   const { obj: doc, hash: docHash } = open(body.token, 'doc');
   if (await limited('sign', clientIp(req), { windowMs: 10 * 60 * 1000, max: 20 })) throw httpError(429, 'Too many tries. Wait a few minutes and try again.');
   if (await limited('sign-doc', docHash, { windowMs: 60 * 60 * 1000, max: 10 })) throw httpError(429, 'This link was signed too many times in the last hour.');
+  // A filed document is signed once. Refuse before issuing a receipt, so no valid receipt can
+  // disagree with the sender's record. (Unfiled links are stateless and cannot be tracked.)
+  if (db.configured()) {
+    const { data: filed } = await db.admin().from('documents').select('status').eq('doc_hash', docHash).maybeSingle();
+    if (filed && !['sent', 'viewed'].includes(filed.status)) throw httpError(409, 'This link was already signed. Ask the sender for a new revision if something changed.');
+  }
   const name = str(body.name, 120, 'Your name');
   const signerEmail = email(body.email, 'Your email');
   if (body.agree !== true) throw httpError(400, 'Please confirm the declaration');

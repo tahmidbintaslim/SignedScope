@@ -13,7 +13,7 @@ module.exports = handler(async (body, req) => {
   if (!answer) throw httpError(400, 'Pick an answer');
   const note = str(body.note, 500, 'Note', false);
   const ip = clientIp(req);
-  if (ip && await limited('feedback', ip, { windowMs: 60 * 60 * 1000, max: 20 })) throw httpError(429, 'Too many answers, thank you!');
+  if (await limited('feedback', ip, { windowMs: 60 * 60 * 1000, max: 20 })) throw httpError(429, 'Too many answers, thank you!');
   if (!process.env.BLOB_READ_WRITE_TOKEN) return { ok: true, stored: false };
   const n = (v) => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined);
   const record = {
