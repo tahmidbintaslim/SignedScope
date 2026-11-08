@@ -575,5 +575,87 @@
     "agree": "By continuing you agree to how we handle data in the",
     "privacy": "privacy notice",
     "noFactor": "No authenticator found for this account"
+  },
+  "doc": {
+    "schedule": "Payment schedule",
+    "payNote": "Payment goes straight to {{agency}} through {{host}}. SignedScope never handles the money.",
+    "howToPay": "How to pay",
+    "cutOff": "These links are long. If part of it was cut off when it was copied, ask the sender to share it again.",
+    "howItWorks": "See how SignedScope works",
+    "checkLink": "Check a link",
+    "kind": {
+      "scope": "Scope",
+      "proposal": "Proposal",
+      "agreement": "Agreement"
+    },
+    "items": {
+      "scope": "In scope",
+      "uat": "Tests to pass",
+      "out": "Out of scope"
+    }
+  },
+  "sign": {
+    "cantOpen": "This link can’t be opened",
+    "missing": "Part of this link is missing.",
+    "notDoc": "This is not a sign-off link.",
+    "meta": "From {{agency}}{{email}} to {{client}} · revision {{revision}}",
+    "unverified": "This link was made without a SignedScope account, so the sender’s name and email are not verified. Check with them before you pay.",
+    "crBanner": "Change request against “{{title}}”, signed by {{signer}} on {{when}}. Colored bars show added and changed lines.",
+    "pdf": "Download PDF",
+    "removed": "Removed since the signed version",
+    "diff": {
+      "added": "Added",
+      "changed": "Changed",
+      "removed": "Removed"
+    },
+    "was": "Was: {{text}}",
+    "opt": {
+      "accepted": "Accept",
+      "rejected": "Reject",
+      "acknowledged": "Understood: not included"
+    },
+    "whatChange": "What needs to change?",
+    "totalProposed": "Proposed total",
+    "totalFinal": "Total you are approving",
+    "totalDelta": "Signed before: {{before}} · change: {{delta}}",
+    "totalHint": "Rejecting a priced line removes it from the total.",
+    "signTitle": "Sign off",
+    "name": "Your full name",
+    "email": "Your email",
+    "agree": "I’ve reviewed every line above. My decisions are a record of what I approve for this project, and I understand out-of-scope lines are not included.",
+    "agreeTerms": "I agree to the terms of this agreement.",
+    "recorded": "Your name, email, the time, your country and a short browser fingerprint are recorded in the receipt and sent to the sender.",
+    "undecided_one": "Decide 1 more line before you sign.",
+    "undecided_other": "Decide {{count}} more lines before you sign.",
+    "submit": "Sign off",
+    "doneOk": "Signed: everything approved",
+    "doneChanges": "Signed with requested changes",
+    "doneBody": "Save this receipt link. It’s the signed record of your decisions, and the sender gets a copy.",
+    "receiptLink": "Receipt link",
+    "openReceipt": "Open receipt",
+    "payNow": "Pay now"
+  },
+  "receipt": {
+    "cantOpen": "This receipt can’t be opened",
+    "notReceipt": "This is not a receipt link.",
+    "verified": "Signature verified",
+    "verifyHint": "Check this receipt on the verify page",
+    "approved": "Approved",
+    "changes_requested": "Changes requested",
+    "meta": "Signed by {{name}}{{email}} ({{client}}) on {{when}} · prepared by {{agency}} · revision {{revision}}",
+    "comment": "Comment: {{note}}",
+    "total": "Approved total",
+    "totalDelta": "Signed before {{base}} {{delta}} in approved changes = {{total}}",
+    "pay": "Pay approved amount",
+    "evidence": "Evidence",
+    "docHash": "Document hash",
+    "receiptHash": "Receipt hash",
+    "country": "Country",
+    "ua": "Browser fingerprint",
+    "supersedes": "Replaces receipt",
+    "na": "not known",
+    "notLegal": "A record of what was approved, not a qualified electronic signature.",
+    "print": "Print or save as PDF",
+    "changeRequest": "Start a change request"
   }
 }

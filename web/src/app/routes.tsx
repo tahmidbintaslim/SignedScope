@@ -14,11 +14,13 @@ export const pages: Record<string, Loader> = {
   '/verify': () => import('../pages/legal/Verify'),
   '/privacy': () => import('../pages/legal/Privacy'),
   '/thanks': () => import('../pages/legal/Thanks'),
+  '/sign': () => import('../pages/doc/Sign'),
+  '/receipt': () => import('../pages/doc/Receipt'),
   '/kit': () => import('../pages/Kit'),
 };
 
 /** URLs still served by the old pages in public/ until phases D and E move them. */
-export const LEGACY = ['/new', '/sign', '/receipt', '/login', '/app'];
+export const LEGACY = ['/new', '/login', '/app'];
 export const isLegacy = (to: string) => {
   const path = to.split(/[?#]/)[0] || '/';
   return LEGACY.some((p) => path === p || path.startsWith(p + '/'));
@@ -33,6 +35,8 @@ export const META: Record<string, { title: string; description: string; noindex?
   '/estimate': { title: 'Free AI project estimate for freelancers · SignedScope', description: 'Paste a client brief and get features, user stories, milestones, a timeline and a price range from your own hourly rate. Free, in English, Bengali and Thai.' },
   '/verify': { title: 'Verify a link · SignedScope', description: 'Check that a SignedScope sign-off or receipt link is genuine and unchanged.' },
   '/privacy': { title: 'Privacy · SignedScope', description: 'What SignedScope stores, why, for how long, and your rights.' },
+  '/sign': { title: 'Review and sign · SignedScope', description: 'Review each line, then approve and sign.', noindex: true },
+  '/receipt': { title: 'Sign-off receipt · SignedScope', description: 'A signed record of who approved what and when.', noindex: true },
   '/thanks': { title: 'Thank you · SignedScope', description: 'Your early access is active.', noindex: true },
   '/kit': { title: 'Design system · SignedScope', description: 'Components of the SignedScope app.', noindex: true },
 };
