@@ -22,7 +22,7 @@ createServer(async (req, res) => {
       if ((await stat(file)).isFile()) { res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' }); res.end(await readFile(file)); return; }
     } catch { /* try next */ }
   }
-  // Same as the vercel.json rewrite: every /app/* URL gets the workspace shell.
+  // Same as the vercel.json rewrite (/app/:path* -> /app): every /app/* URL gets the workspace shell.
   if (path.startsWith('/app/')) { res.writeHead(200, { 'content-type': TYPES['.html'] }); res.end(await readFile(join(root, 'app.html'))); return; }
   res.writeHead(404, { 'content-type': TYPES['.html'] }); res.end(await readFile(join(root, '404.html')).catch(() => 'not found'));
 }).listen(port, '127.0.0.1', () => console.log(`site on http://127.0.0.1:${port}`));

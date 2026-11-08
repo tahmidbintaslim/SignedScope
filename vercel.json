@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/app/:path*",
-      "destination": "/app.html"
+      "destination": "/app"
     }
   ],
   "headers": [
