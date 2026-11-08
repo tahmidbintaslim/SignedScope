@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="A change request compared with the signed scope">
+  <clipPath id="clip-change-diff"><rect width="400" height="300" rx="32"/></clipPath>
+  <g clip-path="url(#clip-change-diff)">
+  <rect width="400" height="300" rx="32" fill="#FFEDE8"/>
+  <circle cx="60" cy="56" r="48" fill="#FF5B3A" opacity=".10"/>
+  <!-- Signed baseline (behind) -->
+  <rect x="40" y="40" width="200" height="150" rx="18" fill="#fff" opacity=".7"/>
+  <text x="58" y="66" font-family="JetBrains Mono" font-size="10" fill="#5A6480">SIGNED · REV 1</text>
+  <rect x="58" y="80" width="120" height="8" rx="4" fill="#E3E8F2"/><rect x="58" y="98" width="96" height="8" rx="4" fill="#E3E8F2"/><rect x="58" y="116" width="140" height="8" rx="4" fill="#E3E8F2"/>
+  <text x="58" y="160" font-family="JetBrains Mono" font-size="12" fill="#5A6480">$3,200</text>
+  <!-- Revision (front) -->
+  <rect x="140" y="96" width="232" height="176" rx="18" fill="#0B1230" opacity=".06" transform="translate(0 6)"/>
+  <rect x="140" y="96" width="232" height="176" rx="18" fill="#fff"/>
+  <text x="158" y="122" font-family="JetBrains Mono" font-size="10" fill="#5A6480">REV 2 · VS SIGNED</text>
+  <rect x="152" y="134" width="208" height="26" rx="8" fill="#E9F8F2"/>
+  <text x="162" y="151" font-family="Plus Jakarta Sans" font-weight="700" font-size="12" fill="#0E9F76">+</text>
+  <text x="176" y="151" font-family="Plus Jakarta Sans" font-weight="600" font-size="12" fill="#0B1230">Booking page</text>
+  <text x="350" y="151" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#0E9F76">+$950</text>
+  <rect x="152" y="166" width="208" height="26" rx="8" fill="#FDECEC"/>
+  <text x="162" y="183" font-family="Plus Jakarta Sans" font-weight="700" font-size="12" fill="#E5484D">−</text>
+  <text x="176" y="183" font-family="Plus Jakarta Sans" font-size="12" fill="#5A6480" text-decoration="line-through">Printed menu</text>
+  <text x="350" y="183" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#E5484D">−$300</text>
+  <path d="M158 208h196" stroke="#E3E8F2"/>
+  <text x="158" y="236" font-family="Plus Jakarta Sans" font-size="11" fill="#5A6480">New total</text>
+  <text x="158" y="256" font-family="Plus Jakarta Sans" font-weight="800" font-size="16" fill="#0B1230">$3,850</text>
+  <text x="354" y="256" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#0E9F76">+$650</text>
+  </g>
+</svg>

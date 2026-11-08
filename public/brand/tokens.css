@@ -1,0 +1,68 @@
+/* SignedScope v6 design tokens. Source of truth: Figma "SignedScope v6" collection (Light/Dark).
+   Light is the default; dark follows the OS unless [data-theme] is set on <html>. */
+:root {
+  /* Semantic color */
+  --ss-bg: #FFFFFF;
+  --ss-surface: #F5F7FC;
+  --ss-surface-raised: #FFFFFF;
+  --ss-text: #0B1230;
+  --ss-text-muted: #5A6480;
+  --ss-border: #E3E8F2;
+  --ss-brand: #7C3AED;
+  --ss-brand-soft: #F3EEFF;
+  --ss-on-brand: #FFFFFF;
+  --ss-accent: #FF4FA3;
+  --ss-success: #0E9F76;
+  --ss-warning: #B7791F;
+  --ss-danger: #E5484D;
+  --ss-focus: #7C3AED;
+  --ss-gradient: linear-gradient(135deg, #7C3AED 0%, #FF4FA3 60%, #FF5B3A 100%);
+  --ss-gradient-mark: linear-gradient(135deg, #7C3AED, #FF4FA3);
+
+  /* Space (4px grid) */
+  --ss-space-1: 4px;  --ss-space-2: 8px;  --ss-space-3: 12px; --ss-space-4: 16px;
+  --ss-space-5: 20px; --ss-space-6: 24px; --ss-space-8: 32px; --ss-space-10: 40px;
+  --ss-space-12: 48px; --ss-space-16: 64px; --ss-space-24: 96px;
+
+  /* Radius */
+  --ss-radius-sm: 8px; --ss-radius-md: 12px; --ss-radius-lg: 16px;
+  --ss-radius-xl: 24px; --ss-radius-2xl: 32px; --ss-radius-full: 999px;
+
+  /* Depth */
+  --ss-shadow-sm: 0 1px 2px rgb(11 18 48 / 6%);
+  --ss-shadow-md: 0 4px 12px rgb(11 18 48 / 8%), 0 1px 3px rgb(11 18 48 / 5%);
+  --ss-shadow-lg: 0 16px 40px rgb(11 18 48 / 12%), 0 4px 8px rgb(11 18 48 / 5%);
+  --ss-shadow-brand: 0 12px 32px rgb(124 58 237 / 28%);
+
+  /* Type */
+  --ss-font-sans: "Plus Jakarta Sans", "Anek Bangla", "IBM Plex Sans Thai", system-ui, sans-serif;
+  --ss-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Motion */
+  --ss-duration-fast: 120ms; --ss-duration-base: 200ms;
+  --ss-duration-slow: 320ms; --ss-duration-page: 400ms;
+  --ss-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ss-ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ss-ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ss-bg: #0B1230; --ss-surface: #121A3B; --ss-surface-raised: #1A2350;
+    --ss-text: #F5F7FC; --ss-text-muted: #A3ACC2; --ss-border: #26305A;
+    --ss-brand: #A78BFA; --ss-brand-soft: #2E1065; --ss-on-brand: #0B1230;
+    --ss-accent: #FF7AB8; --ss-success: #34D399; --ss-warning: #FFC233;
+    --ss-danger: #FF8A80; --ss-focus: #C4B5FD;
+  }
+}
+:root[data-theme="dark"] {
+  --ss-bg: #0B1230; --ss-surface: #121A3B; --ss-surface-raised: #1A2350;
+  --ss-text: #F5F7FC; --ss-text-muted: #A3ACC2; --ss-border: #26305A;
+  --ss-brand: #A78BFA; --ss-brand-soft: #2E1065; --ss-on-brand: #0B1230;
+  --ss-accent: #FF7AB8; --ss-success: #34D399; --ss-warning: #FFC233;
+  --ss-danger: #FF8A80; --ss-focus: #C4B5FD;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --ss-duration-base: 120ms; --ss-duration-slow: 120ms; --ss-duration-page: 120ms; }
+}

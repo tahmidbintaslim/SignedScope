@@ -20,12 +20,12 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [ ] Owner: Supabase Auth providers (Google, GitHub), TOTP, redirect URL `https://<domain>/login**`
 - [ ] Later: token expiry and key rotation (`exp`, `kid`); server-side delete paging
 
-### B. Brand system (Figma first)
-- [ ] Logo: mark (seal + signature stroke) and wordmark; app icon, favicon, OG template
-- [ ] Color, type and spacing tokens evolved from v4; light and dark
-- [ ] Illustration set (people at work in TH/BD contexts, abstract seal, change-request bubbles) and the 19-icon set extended
-- [ ] Device mockups (laptop, phone) framing real app screens
-- [ ] Motion principles: durations, easing, hover/press feedback, page transitions, reduced-motion rules
+### B. Brand system (Figma first): done, see docs/BRAND.md
+- [x] Logo: mark (scope corners + signature check) and wordmark; app icons, favicon (OG template moves to D)
+- [x] Color, type and spacing tokens evolved from v4; light and dark
+- [x] Illustration set (product moments: brief to scope, signed, change diff, paid, three empty states) and the icon set extended to 50
+- [x] Device mockups (laptop, phone) framing real app screens
+- [x] Motion principles: durations, easing, hover/press feedback, page transitions, reduced-motion rules
 
 ### C. React + Vite foundation
 - [ ] `web/` app: React 19, TypeScript, Vite, React Router (same URLs: `/`, `/estimate`, `/new`, `/sign`, `/receipt`, `/verify`, `/privacy`, `/thanks`, `/login`, `/app/*`)

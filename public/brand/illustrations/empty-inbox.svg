@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" role="img" aria-label="All caught up">
+  <circle cx="100" cy="84" r="64" fill="#FFF7E0"/>
+  <path d="M74 104V86a26 26 0 0 1 52 0v18l7 9H67z" fill="#fff" stroke="#FFC233" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M92 122h16" stroke="#FFC233" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="128" cy="62" r="14" fill="#0E9F76"/><path d="M122 62l4 4 8-8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
