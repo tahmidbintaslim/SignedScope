@@ -54,7 +54,7 @@ async function aiEstimate(brief, langName, projectType) {
   const client = new Anthropic({ timeout: AI_TIMEOUT_MS, maxRetries: 0 });
   const res = await client.beta.messages.parse({
     model: 'claude-opus-5-5',
-    max_tokens: 16000,
+    max_tokens: 10000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
     output_config: { effort: 'medium', format: zodOutputFormat(aiSchema()) },

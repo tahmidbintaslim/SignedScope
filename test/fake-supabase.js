@@ -76,6 +76,11 @@
     async signInWithOtp({ email }) { store.lastOtp = email; return { data: {}, error: null }; },
     async signInWithOAuth({ provider }) { store.lastOAuth = provider; return { data: {}, error: null }; },
     async signOut() { store.user = null; persist(); listeners.forEach((cb) => cb('SIGNED_OUT', null)); return { error: null }; },
+    // Server-side admin calls (service role): users' verified emails and enrolled factors.
+    admin: {
+      async getUserById(id) { const u = (store.users || []).find((x) => x.id === id) || (store.user && store.user.id === id ? store.user : null); return u ? { data: { user: u }, error: null } : { data: { user: null }, error: { message: 'User not found' } }; },
+      mfa: { async listFactors({ userId }) { return { data: { factors: (store.factors || []).filter((f) => !f.user_id || f.user_id === userId) }, error: null }; } },
+    },
     mfa: {
       async listFactors() { return { data: { totp: store.factors.filter((f) => f.status === 'verified'), all: store.factors }, error: null }; },
       async getAuthenticatorAssuranceLevel() { const v = store.factors.some((f) => f.status === 'verified'); return { data: { currentLevel: store.aal || 'aal1', nextLevel: v ? 'aal2' : 'aal1' }, error: null }; },
@@ -102,6 +107,13 @@
       async remove(paths) { store.files = (store.files || []).filter((f) => !(f.bucket === bucket && paths.includes(f.path))); persist(); return { data: [], error: null }; },
     }),
   };
-  const api = { createClient: () => ({ from: (t) => new Query(t), auth, storage }), __store: store };
+  // Atomic rate counter (public.bump_rate in the real database).
+  async function rpc(name, args) {
+    if (name !== 'bump_rate') return { data: null, error: { message: 'unknown function ' + name } };
+    const c = (store.counters = store.counters || {}); const now = Date.now(); const k = args.k;
+    if (!c[k] || now - c[k].start > args.window_seconds * 1000) c[k] = { n: 0, start: now };
+    c[k].n++; return { data: c[k].n, error: null };
+  }
+  const api = { createClient: () => ({ from: (t) => new Query(t), auth, storage, rpc }), __store: store };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.supabase = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

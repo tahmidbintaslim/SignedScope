@@ -97,7 +97,8 @@ $('#f').addEventListener('submit', async (e) => {
     const body = { title: $('#title').value, client: $('#client').value, agency: $('#agency').value, agencyEmail: $('#agencyEmail').value, notes: $('#notes').value, currency: $('#currency').value, payLink: $('#payLink').value.trim(), payInstructions: $('#payInstructions').value.trim(), items };
     if (parentToken) body.parent = parentToken;
     if (projectId) body.projectId = projectId;
-    const { token, documentId } = await (projectId ? Auth.api('seal', body) : api('seal', body));
+    // Signed-in senders are verified on the client's page, so send the session when there is one.
+    const { token, documentId } = await (typeof Auth !== 'undefined' ? Auth.api('seal', body) : api('seal', body));
     if (documentId) { $('#filed').classList.remove('hidden'); const b = $('#to-project'); b.href = '/app#/projects/' + projectId; b.classList.remove('hidden'); }
     const url = `${location.origin}/sign#${token}`;
     const link = $('#link');

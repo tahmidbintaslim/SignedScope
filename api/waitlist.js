@@ -11,7 +11,7 @@ module.exports = handler(async (body, req) => {
   const blob = require('@vercel/blob');
   const ip = clientIp(req);
   // Fail open: never block real sign-ups on a limiter error.
-  if (ip && await limited('waitlist', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW })) {
+  if (await limited('waitlist', ip, { windowMs: WINDOW_MS, max: MAX_PER_WINDOW })) {
     throw httpError(429, 'Too many requests, try again in a few minutes');
   }
   const addr = email(body.email, 'Email');

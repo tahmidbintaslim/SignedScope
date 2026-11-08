@@ -34,4 +34,4 @@ http.createServer((req, res) => {
     if (err) { res.writeHead(404).end('Not found'); return; }
     res.writeHead(200, { 'content-type': types[path.extname(p)] || 'application/octet-stream' }).end(data);
   });
-}).listen(port, () => console.log(`SignedScope on http://localhost:${port}`));
+}).listen(port, process.env.HOST || '127.0.0.1', () => console.log(`SignedScope on http://localhost:${port}`));

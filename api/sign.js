@@ -3,10 +3,19 @@ const crypto = require('crypto');
 const { seal, open, str, email, acceptedTotal, payable, handler, httpError } = require('./_lib');
 const db = require('./_supabase');
 const notify = require('./_notify');
+const { limited, clientIp } = require('./_limit');
 
 // Client signs off a document. Returns a signed receipt token.
 module.exports = handler(async (body, req) => {
   const { obj: doc, hash: docHash } = open(body.token, 'doc');
+  if (await limited('sign', clientIp(req), { windowMs: 10 * 60 * 1000, max: 20 })) throw httpError(429, 'Too many tries. Wait a few minutes and try again.');
+  if (await limited('sign-doc', docHash, { windowMs: 60 * 60 * 1000, max: 10 })) throw httpError(429, 'This link was signed too many times in the last hour.');
+  // A filed document is signed once. Refuse before issuing a receipt, so no valid receipt can
+  // disagree with the sender's record. (Unfiled links are stateless and cannot be tracked.)
+  if (db.configured()) {
+    const { data: filed } = await db.admin().from('documents').select('status').eq('doc_hash', docHash).maybeSingle();
+    if (filed && !['sent', 'viewed'].includes(filed.status)) throw httpError(409, 'This link was already signed. Ask the sender for a new revision if something changed.');
+  }
   const name = str(body.name, 120, 'Your name');
   const signerEmail = email(body.email, 'Your email');
   if (body.agree !== true) throw httpError(400, 'Please confirm the declaration');
@@ -45,13 +54,14 @@ module.exports = handler(async (body, req) => {
 });
 
 // Updates the freelancer's dashboard when a filed document is signed. Never blocks signing.
+// A filed document is recorded once: a later signature on the same link never overwrites it.
 async function recordSigning(docHash, receipt, token) {
   try {
     const { data } = await db.admin().from('documents').update({
       status: receipt.outcome === 'approved' ? 'signed' : 'changes_requested',
       signed_at: receipt.signedAt, signer_name: receipt.signer.name, receipt_token: token,
       ...(receipt.totals ? { total: receipt.totals.accepted } : {}),
-    }).eq('doc_hash', docHash).select('id, owner, project_id').maybeSingle();
+    }).eq('doc_hash', docHash).in('status', ['sent', 'viewed']).select('id, owner, project_id').maybeSingle();
     if (!data) return;
     if (receipt.outcome === 'approved') {
       await db.admin().from('projects').update({ status: 'approved' }).eq('id', data.project_id).in('status', ['lead', 'estimating', 'proposal_sent']);

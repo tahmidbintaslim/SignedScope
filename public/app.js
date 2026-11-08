@@ -250,13 +250,15 @@ function filesBlock(p) {
         el('td', {}, el('b', { text: shown }), el('div', { class: 'muted small', text: `${fmtSize((f.metadata && f.metadata.size) || 0)} · ${when(f.created_at)}` })),
         el('td', { class: 'num' },
           el('button', { class: 'btn sm ghost', type: 'button', text: 'Open', onclick: async () => { try { const u = await q(vault.createSignedUrl(path, 60)); window.open(u.signedUrl, '_blank', 'noopener'); } catch (e) { toast(e.message); } } }),
-          el('button', { class: 'btn sm ghost', type: 'button', text: 'Share link (7 days)', onclick: async () => { try { const u = await q(vault.createSignedUrl(path, 7 * 86400)); copy(u.signedUrl); } catch (e) { toast(e.message); } } }),
+          el('button', { class: 'btn sm ghost', type: 'button', text: 'Share link (7 days)', onclick: async () => { try { const u = await q(vault.createSignedUrl(path, 7 * 86400, { download: true })); copy(u.signedUrl); } catch (e) { toast(e.message); } } }),
           el('button', { class: 'btn sm ghost', type: 'button', text: 'Delete', onclick: async () => { if (!confirm(`Delete ${shown}?`)) return; try { await q(vault.remove([path])); draw(); } catch (e) { toast(e.message); } } })));
     }))) : el('p', { class: 'empty', text: 'Keep briefs, contracts, designs and invoices for this project here. Only you can see them unless you share a link.' }));
   }
   input.addEventListener('change', async () => {
     for (const file of input.files) {
       if (file.size > MAX_FILE) { toast(`${file.name} is over 25 MB`); continue; }
+      // Pages and scripts are never stored: a share link must not be able to serve a web page.
+      if (/\.(html?|xhtml|svg|xml|js|mjs)$/i.test(file.name) || /html|svg|javascript|xml/i.test(file.type)) { toast(`${file.name}: this file type can't be stored`); continue; }
       const safe = file.name.normalize('NFKD').replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '').slice(-100) || 'file';
       try { await q(vault.upload(`${prefix}/${Date.now()}-${safe}`, file, { contentType: file.type || 'application/octet-stream', upsert: false })); }
       catch (e) { toast(`${file.name}: ${e.message}`); }
@@ -372,9 +374,9 @@ async function settingsPage() {
     el('div', { class: 'inline' }, field('Your name', f.name), field('Business name', f.business_name), field('Default currency', cur), field('Hourly rate', f.hourly_rate), field('Language', lang)),
     field('Default payment instructions (shown to clients after they approve)', payIns), notifs, el('p', {}, btn));
   form.addEventListener('submit', busy(btn, async () => {
-    profile = await q(sb.from('profiles').upsert({ id: user.id, name: f.name.value.trim() || null, business_name: f.business_name.value.trim() || null, currency: cur.value,
+    profile = await q(sb.from('profiles').update({ name: f.name.value.trim() || null, business_name: f.business_name.value.trim() || null, currency: cur.value,
       hourly_rate: f.hourly_rate.value === '' ? null : Number(f.hourly_rate.value), lang: lang.value, pay_instructions: payIns.value.trim() || null,
-      notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).select('*').single());
+      notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).eq('id', user.id).select('*').single());
     toast('Settings saved');
   }));
 

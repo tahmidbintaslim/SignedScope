@@ -19,14 +19,14 @@ function psql(sql) {
 const file = (f) => spawnSync('psql', [URL, '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-f', f], { encoding: 'utf8' });
 // Runs SQL as a signed-in user, the way PostgREST does for a browser request.
 // The first output line is the set_config result, so it is dropped.
-const as = (uid, sql) => {
-  const r = psql(`begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${uid}"}', true) is null;
+const as = (uid, sql, aal = 'aal1') => {
+  const r = psql(`begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${uid}","aal":"${aal}"}', true) is null;
 ${sql}; commit;`);
   return { ...r, out: r.out.split('\n').slice(1).join('\n') };
 };
 
 test('migration applies and RLS isolates users', opts, () => {
-  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade;');
+  psql('drop schema if exists public cascade; create schema public; drop schema if exists auth cascade; drop schema if exists storage cascade; drop schema if exists private cascade;');
   for (const f of ['test/db/supabase-stub.sql', ...require('fs').readdirSync('supabase/migrations').sort().map((m) => 'supabase/migrations/' + m)]) {
     const r = file(path.join(__dirname, '..', f));
     assert.equal(r.status, 0, `${f}: ${r.stderr}`);
@@ -85,10 +85,33 @@ test('migration applies and RLS isolates users', opts, () => {
   assert.equal(as(A, `select count(*) from storage.objects`).out, '1');
   assert.equal(psql(`select notify_signed::text || notify_viewed::text from profiles where id = '${A}'`).out, 'truefalse', 'notification defaults');
 
+  // Security hardening (migration 20261108000000_security.sql).
+  // Profiles: settings are editable, the notification email is not.
+  assert.ok(!as(A, `update profiles set email = 'victim@corp.com'`).ok, 'email is not editable');
+  // Activity: users cannot write server events or mark entries as server-made.
+  assert.ok(!as(A, `insert into activity (project_id, kind) values ('${projectId}', 'document_signed')`).ok, 'no forged server events');
+  assert.ok(!as(A, `insert into activity (project_id, kind, actor) values ('${projectId}', 'note', 'server')`).ok, 'no forged actor');
+  // Payments: amounts cannot be rewritten; status can.
+  assert.ok(!as(A, `update payments set amount = 1`).ok, 'amount is fixed');
+  assert.ok(as(A, `update payments set reference = 'KBank 7781'`).ok, 'reference can be recorded');
+  // Vault: files must be inside a project folder; no overwrite policy exists.
+  assert.ok(!as(A, `insert into storage.objects (bucket_id, name) values ('vault', '${A}/loose.pdf')`).ok, 'no files outside a project');
+  assert.equal(as(A, `update storage.objects set name = name || '.x' returning id`).out.split('\n').filter(Boolean).length, 0, 'no overwrite');
+  // Two-step sign-in: once A has a verified authenticator, an aal1 session sees and changes nothing.
+  assert.ok(psql(`insert into auth.mfa_factors (user_id, status) values ('${A}', 'verified')`).ok);
+  assert.equal(as(A, 'select count(*) from clients').out.split('\n').pop(), '0', 'aal1 reads nothing');
+  assert.ok(!as(A, `insert into clients (name) values ('x')`).ok, 'aal1 writes nothing');
+  assert.equal(as(A, 'select count(*) from storage.objects').out, '0', 'aal1 sees no files');
+  assert.equal(as(A, 'select count(*) from clients', 'aal2').out.split('\n').pop(), '1', 'aal2 works');
+  assert.equal(as(B, 'select count(*) from profiles').out.split('\n').pop(), '1', 'users without MFA are unaffected');
+  // Rate counters: server only, and atomic per window.
+  assert.ok(!as(A, `select public.bump_rate('k', 60)`, 'aal2').ok, 'browser cannot use the counters');
+  assert.equal(psql(`select public.bump_rate('k', 60); select public.bump_rate('k', 60);`).out.split('\n').pop(), '2');
+
   // Anonymous requests see nothing.
   assert.ok(!psql(`begin; set local role anon; select count(*) from clients; commit;`).ok);
 
   // Deleting a project removes its estimates, documents and payments.
-  assert.ok(as(A, `delete from projects where id = '${projectId}'`).ok);
+  assert.ok(as(A, `delete from projects where id = '${projectId}'`, 'aal2').ok);
   assert.equal(psql(`select (select count(*) from documents) + (select count(*) from payments)`).out, '0');
 });

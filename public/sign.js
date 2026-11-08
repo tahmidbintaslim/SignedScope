@@ -38,6 +38,7 @@ async function init() {
   catch (e) { fail(e.message); return; }
   $('#meta').textContent = `From ${data.agency}${data.agencyEmail ? ' <' + data.agencyEmail + '>' : ''} to ${data.client} · revision ${data.revision || 1}`;
   $('#title').textContent = data.title;
+  if (data.anon) $('#unverified').classList.remove('hidden');
   $('#notes').textContent = data.notes || '';
   renderParts(data, $('#parts'));
   if (data.kind === 'agreement') $('#agree-t').textContent += ' I agree to the terms of this agreement.';
