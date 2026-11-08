@@ -34,7 +34,7 @@ function payNote(agency, link) {
 }
 // After approval: the agency's pay link and/or plain-text instructions (bank, PromptPay…).
 function showPayment(d, noteSel = '#pay-host') {
-  if (d.payLink) { const pay = $('#pay'); pay.href = d.payLink; pay.classList.remove('hidden'); $(noteSel).textContent = payNote(d.agency, d.payLink); }
+  if (d.payLink && /^https:\/\//.test(d.payLink)) { const pay = $('#pay'); pay.href = d.payLink; pay.classList.remove('hidden'); $(noteSel).textContent = payNote(d.agency, d.payLink); }
   if (d.payInstructions) { $('#pay-ins-t').textContent = d.payInstructions; $('#pay-ins').classList.remove('hidden'); }
 }
 // Written sections and the payment schedule of a proposal or agreement (plain text only).

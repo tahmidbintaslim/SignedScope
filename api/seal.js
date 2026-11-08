@@ -1,6 +1,7 @@
 'use strict';
 const { seal, open, str, email, items, currency, payLink, sections, schedule, handler, httpError, sha256 } = require('./_lib');
 const db = require('./_supabase');
+const { limited, clientIp } = require('./_limit');
 
 // Agency creates a scope, proposal or agreement. Returns a signed share token for the client.
 const KINDS = ['scope', 'proposal', 'agreement'];
@@ -46,6 +47,12 @@ module.exports = handler(async (body, req) => {
     const { data } = await db.admin().from('projects').select('id, status').eq('id', body.projectId).eq('owner', user.id).maybeSingle();
     if (!data) throw httpError(404, 'Project not found');
     project = data;
+  }
+  // Links made without an account say so on the client's page ("sender not verified"),
+  // so a SignedScope link cannot be used to borrow trust for someone else's name.
+  if (!project) {
+    doc.anon = true;
+    if (await limited('seal-anon', clientIp(req), { windowMs: 60 * 60 * 1000, max: 30 })) throw httpError(429, 'Too many links this hour. Sign in to create more.');
   }
   const token = seal(doc);
   if (token.length > 60_000) throw httpError(413, 'Document too large for a link; trim item text');

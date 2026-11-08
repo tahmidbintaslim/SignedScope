@@ -1,6 +1,9 @@
 'use strict';
 // Sign-in: Google/GitHub OAuth or an emailed one-time link, then the TOTP step if enabled.
-const next = (() => { const n = new URLSearchParams(location.search).get('next') || '/app'; return n.startsWith('/') && !n.startsWith('//') ? n : '/app'; })();
+// Only same-origin paths: parsing with URL catches "/\\evil.com", tabs and other tricks.
+const next = (() => {
+  try { const u = new URL(new URLSearchParams(location.search).get('next') || '/app', location.origin); return u.origin === location.origin ? u.pathname + u.search + u.hash : '/app'; } catch { return '/app'; }
+})();
 const show = (id) => ['start', 'sent', 'mfa', 'off'].forEach((s) => { $('#step-' + s).hidden = s !== id; });
 const fail = (e) => { $('#err').textContent = e.message || String(e); };
 

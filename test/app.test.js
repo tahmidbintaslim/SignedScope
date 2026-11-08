@@ -141,3 +141,38 @@ test('emails: signed by default, viewed only if asked, overdue digest from the d
     for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'APP_URL', 'CRON_SECRET']) delete process.env[k];
   }
 });
+
+test('security: one-time signing, sender flag, two-step sessions, verified email', async () => {
+  // A signed document is never overwritten by a later signature on the same link.
+  const s = await call(seal, { ...base, title: 'Once', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+  const id = (await call(verify, { token: s.body.token })).body.data.items[0].id;
+  assert.equal((await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions: { [id]: { status: 'accepted' } } })).status, 200);
+  await call(sign, { token: s.body.token, name: 'Mallory', agree: true, decisions: { [id]: { status: 'rejected', note: 'no' } } });
+  const doc = store.tables.documents.find((d) => d.id === s.body.documentId);
+  assert.equal(doc.status, 'signed'); assert.equal(doc.signer_name, 'Nok');
+
+  // Links made without an account carry the "sender not verified" flag; filed ones do not.
+  const anon = (await call(verify, { token: (await call(seal, base)).body.token })).body.data;
+  assert.equal(anon.anon, true);
+  assert.equal((await call(verify, { token: s.body.token })).body.data.anon, undefined);
+
+  // A user with a verified authenticator needs a two-step session for the API too.
+  store.factors = [{ id: 'f1', user_id: A.id, status: 'verified', factor_type: 'totp' }];
+  try {
+    const r = await call(seal, { ...base, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+    assert.equal(r.status, 401, 'aal1 token refused');
+  } finally { store.factors = []; }
+
+  // Notification email goes to the verified sign-in address, not the editable profile field.
+  process.env.RESEND_API_KEY = 're_test'; process.env.EMAIL_FROM = 'SignedScope <hi@signedscope.app>';
+  const mails = []; const realFetch = global.fetch;
+  global.fetch = async (url, opts) => { mails.push(JSON.parse(opts.body)); return { ok: true, text: async () => '' }; };
+  try {
+    store.tables.profiles = [{ id: A.id, email: 'victim@corp.com', notify_signed: true, notify_viewed: false, notify_overdue: true }];
+    const t = await call(seal, { ...base, title: 'Spam\r\nBcc: x', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+    const iid = (await call(verify, { token: t.body.token })).body.data.items[0].id;
+    await call(sign, { token: t.body.token, name: 'Nok', agree: true, decisions: { [iid]: { status: 'accepted' } } });
+    assert.deepEqual(mails[0].to, [A.email]);
+    assert.doesNotMatch(mails[0].subject, /[\r\n]/);
+  } finally { global.fetch = realFetch; delete process.env.RESEND_API_KEY; delete process.env.EMAIL_FROM; }
+});

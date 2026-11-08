@@ -150,6 +150,10 @@ async function setup(ctx) {
     await p.waitForURL('**/app'); await p.waitForSelector('.kpis');
     ok(true, 'code accepted, back in the workspace');
     ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'no horizontal scroll');
+
+    // ?next= only ever leads to a page on this site.
+    await p.goto(B + '/login?next=/%5Cevil.example/x'); await p.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 5000 });
+    ok(new URL(p.url()).origin === new URL(B).origin, 'login next cannot leave the site');
     if (process.env.SHOTS) await p.screenshot({ path: path.join(process.env.SHOTS, `app-${name}.png`), fullPage: true });
     await ctx.close();
   }

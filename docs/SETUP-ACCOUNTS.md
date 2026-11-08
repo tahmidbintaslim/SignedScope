@@ -4,7 +4,7 @@ Accounts add `/login` and the `/app` workspace. Until they are set up, the site 
 
 ## 1. Create the Supabase project
 1. Go to supabase.com and create a project. The free tier is fine to start. Pick the region closest to your users, for example Singapore.
-2. Open **SQL Editor**, paste in `supabase/migrations/20261106000000_init.sql`, and run it.
+2. Open **SQL Editor** and run each file in `supabase/migrations/` in name order (`…_init.sql`, `…_vault_notify.sql`, `…_security.sql`).
    - With the Supabase CLI instead: `supabase link` then `supabase db push`.
 
 ## 2. Sign-in methods
@@ -15,7 +15,8 @@ In **Authentication → Providers**:
 
 In **Authentication → URL Configuration**:
 - Site URL: `https://<your domain>`
-- Redirect URLs: `https://<your domain>/login*`, plus your Vercel preview URL pattern if you test on previews.
+- Redirect URLs: `https://<your domain>/login**` (the login page keeps a `?next=` path; never put a wildcard in the host).
+- Previews: never add a pattern such as `https://*.vercel.app/**`, which lets any Vercel deployment receive sign-in tokens. Use a separate Supabase project for previews, or a pattern pinned to your team, e.g. `https://signedscope-*-<team>.vercel.app/login`.
 
 In **Authentication → Multi-Factor**: turn on **TOTP**. Users switch it on for themselves in Settings.
 
@@ -28,6 +29,10 @@ In **Authentication → Multi-Factor**: turn on **TOTP**. Users switch it on for
 
 Accounts switch on only when all three are set. Redeploy after adding them.
 
+**Scope secrets to Production only.** Vercel's default is "All Environments", which would put the service role key in every pull-request preview. Set `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `ANTHROPIC_API_KEY`, `CRON_SECRET` and `SIGNING_SECRET` for Production, and use separate keys (or none) for Preview.
+
+The content security policy in `vercel.json` allows connections only to this project's Supabase host. If you use a different project, update `connect-src` there.
+
 ## 3b. Files and email (optional)
 - **Files:** the second migration (`supabase/migrations/20261106010000_vault_notify.sql`) creates a private `vault` bucket (25 MB per file) with per-user rules. Run it the same way as the first.
 - **Email notifications:** create a Resend account, verify your sending domain, then set:
@@ -37,7 +42,7 @@ Accounts switch on only when all three are set. Redeploy after adding them.
 | `RESEND_API_KEY` | Resend API key | **Yes** |
 | `EMAIL_FROM` | e.g. `SignedScope <hello@yourdomain.com>` (domain verified in Resend) | No |
 | `APP_URL` | `https://<your domain>` (used for links in emails) | No |
-| `CRON_SECRET` | any random string of 16+ characters; Vercel sends it to the daily reminder job | **Yes** |
+| `CRON_SECRET` | `openssl rand -hex 32`; Vercel sends it to the daily reminder job | **Yes** |
 
 The daily job (`/api/reminders`, 02:07 UTC, which is 09:07 in Bangkok) emails each freelancer about client payments that are 1, 7, 14 or 30 days overdue. Emails only ever go to the freelancer, never to their client. Each person chooses which emails they get in Settings.
 
@@ -50,6 +55,7 @@ The daily job (`/api/reminders`, 02:07 UTC, which is 09:07 in Bangkok) emails ea
 6. Sign it there. The project should show **Signed** and **Approved**, with activity.
 
 ## How the data is protected
+- Two-step sign-in is enforced by the database: once a user turns on an authenticator app, a session without the code can read or change nothing (restrictive policies), and the API refuses it too.
 - Every table has Row Level Security. A signed-in user can only read and change their own rows, and can only link them to their own clients and projects. `test/db.test.js` checks this against a real Postgres in CI.
 - Browsers can read documents but cannot create or edit them. The server files a document after checking the user's session, and records "viewed" and "signed" from the sealed link.
 - Payments marked paid by a user are stored as `paid_manual`. `paid_provider` can only be set by the server, which is reserved for verified payment-provider webhooks later.
