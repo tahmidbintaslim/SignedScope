@@ -22,6 +22,9 @@ export function seed(overrides = {}) {
   };
 }
 
+// Column defaults the real tables apply on insert.
+const DEFAULTS = { projects: { status: 'lead', currency: 'USD' }, payments: { status: 'requested' } };
+
 /** Wires the fake into a Playwright page (call before the first goto). Returns the live tables. */
 export async function installFake(page, tables, { signedIn = true } = {}) {
   await page.route('**/api/config', (r) => r.fulfill({ json: { enabled: true, supabaseUrl: 'https://test.supabase.co', supabaseAnonKey: 'anon' } }));
@@ -34,10 +37,29 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
     const req = route.request();
     const url = new URL(req.url());
     if (url.pathname.startsWith('/auth/v1/')) {
-      if (url.pathname.endsWith('/logout')) return route.fulfill({ status: 204, body: '' });
-      if (url.pathname.endsWith('/otp')) return route.fulfill({ json: {} });
-      return route.fulfill({ json: { id: USER.id, email: USER.email, factors: [] } });
+      const path = url.pathname.slice('/auth/v1'.length);
+      if (path === '/logout') return route.fulfill({ status: 204, body: '' });
+      if (path === '/otp') return route.fulfill({ json: {} });
+      // Authenticator-app factors: enroll, challenge, verify (code 123456), unenroll.
+      const factors = tables._factors ?? (tables._factors = []);
+      if (path === '/factors' && req.method() === 'POST') {
+        const f = { id: crypto.randomUUID(), factor_type: 'totp', status: 'unverified', created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        factors.push(f);
+        return route.fulfill({ json: { id: f.id, type: 'totp', totp: { qr_code: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>', secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' } } });
+      }
+      const m = path.match(/^\/factors\/([^/]+)(\/challenge|\/verify)?$/);
+      if (m) {
+        const f = factors.find((x) => x.id === m[1]);
+        if (!f) return route.fulfill({ status: 404, json: { code: 'mfa_factor_not_found', msg: 'Factor not found' } });
+        if (req.method() === 'DELETE') { factors.splice(factors.indexOf(f), 1); return route.fulfill({ json: { id: f.id } }); }
+        if (m[2] === '/challenge') return route.fulfill({ json: { id: 'ch-' + f.id, type: 'totp', expires_at: Math.floor(Date.now() / 1000) + 300 } });
+        if (JSON.parse(req.postData() || '{}').code !== '123456') return route.fulfill({ status: 422, json: { code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' } });
+        f.status = 'verified';
+        return route.fulfill({ json: { access_token: fakeJwt('aal2'), refresh_token: 'r2', token_type: 'bearer', expires_in: 3600, user: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors } } });
+      }
+      return route.fulfill({ json: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors } });
     }
+    if (url.pathname.startsWith('/storage/v1/')) return storage(route, req, url, tables);
     const table = url.pathname.replace('/rest/v1/', '');
     const rows = tables[table] ?? (tables[table] = []);
     const wantsOne = (req.headers()['accept'] || '').includes('vnd.pgrst.object');
@@ -47,7 +69,7 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
     if (req.method() === 'GET') return reply(rows.filter(match));
     if (req.method() === 'POST') {
       const body = JSON.parse(req.postData() || '{}');
-      const list = (Array.isArray(body) ? body : [body]).map((b) => ({ id: b.id ?? crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...b }));
+      const list = (Array.isArray(body) ? body : [body]).map((b) => ({ id: b.id ?? crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...DEFAULTS[table], ...b }));
       if (table === 'activity') list.forEach((a, i) => { a.id = rows.length + i + 1; a.detail = a.detail ?? {}; });
       rows.unshift(...list);
       return reply(Array.isArray(body) ? list : list[0]);
@@ -62,4 +84,27 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
     return route.fulfill({ status: 405, body: '' });
   });
   return tables;
+}
+
+// Supabase Storage: list, upload, signed URL and remove, for the "vault" bucket only.
+function storage(route, req, url, tables) {
+  const files = tables._files ?? (tables._files = []);
+  const path = decodeURIComponent(url.pathname.slice('/storage/v1/object'.length));
+  const body = () => { try { return JSON.parse(req.postData() || '{}'); } catch { return {}; } };
+  if (path === '/list/vault') {
+    const prefix = body().prefix.replace(/\/$/, '') + '/';
+    return route.fulfill({ json: files.filter((f) => f.path.startsWith(prefix)).map((f) => ({ name: f.path.slice(prefix.length), id: f.path, created_at: f.created_at, metadata: { size: f.size } })) });
+  }
+  if (path.startsWith('/sign/vault/')) return route.fulfill({ json: { signedURL: `/object/sign/vault/${path.slice(12)}?token=t` } });
+  if (path === '/vault' && req.method() === 'DELETE') {
+    const gone = body().prefixes || [];
+    tables._files = files.filter((f) => !gone.includes(f.path));
+    return route.fulfill({ json: gone.map((name) => ({ name })) });
+  }
+  if (path.startsWith('/vault/') && req.method() === 'POST') {
+    const p = path.slice(7);
+    files.unshift({ path: p, size: (req.postDataBuffer() || Buffer.alloc(0)).length, created_at: new Date().toISOString() });
+    return route.fulfill({ json: { Key: 'vault/' + p, Id: p } });
+  }
+  return route.fulfill({ status: 404, json: { error: 'not found' } });
 }

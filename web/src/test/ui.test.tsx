@@ -65,7 +65,7 @@ describe('Toast', () => {
     renderUI(<ToastDemo />);
     await userEvent.click(screen.getByRole('button', { name: 'Copy' }));
     const region = screen.getByRole('region', { name: 'Notifications' });
-    expect(region).toHaveAttribute('aria-live', 'polite');
+    expect(region.querySelector('[aria-live="polite"]')).not.toBeNull();
     expect(region).toHaveTextContent('Link copied');
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(region).not.toHaveTextContent('Link copied'));

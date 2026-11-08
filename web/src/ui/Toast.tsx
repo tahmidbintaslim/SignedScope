@@ -46,9 +46,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <Ctx value={value}>
       {children}
       {/* Always in the DOM so screen readers register the live region before the first toast. */}
-      <ol className="ss-toasts" aria-live="polite" aria-relevant="additions" role="region" aria-label="Notifications">
-        <AnimatePresence initial={false}>{items.map((i) => <ToastView key={i.id} item={i} onDone={done} />)}</AnimatePresence>
-      </ol>
+      <div role="region" aria-label="Notifications">
+        <ol className="ss-toasts" aria-live="polite" aria-relevant="additions">
+          <AnimatePresence initial={false}>{items.map((i) => <ToastView key={i.id} item={i} onDone={done} />)}</AnimatePresence>
+        </ol>
+      </div>
     </Ctx>
   );
 }

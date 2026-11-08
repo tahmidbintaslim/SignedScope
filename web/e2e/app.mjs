@@ -120,7 +120,7 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await m.goto(BASE + '/app');
   await m.getByRole('heading', { name: 'Hi, Mai' }).waitFor();
   check(await m.locator('.app-tabs').isVisible() && !(await m.locator('.app-side').isVisible()), 'phone: tab bar instead of sidebar');
-  check(await m.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'phone: no horizontal scroll');
+  check(await m.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'phone: no horizontal scroll');
   await audit(m, 'dashboard phone');
   if (OUT) await m.screenshot({ path: `${OUT}/dashboard-phone.png`, fullPage: true });
 }

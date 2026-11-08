@@ -70,6 +70,8 @@ export default function AppShell() {
     return <div className="app-loading" role="status" aria-label={t('states.loading')}><Spinner size={28} /></div>;
   }
   const name = profile.data?.name || user.email || '';
+  const leave = () => { leaving.current = true; void signOut().then(() => { qc.clear(); window.location.assign('/'); }); };
+  const ctx = { user, profile: profile.data, signOut: leave };
   const account = (
     <Menu
       trigger={(p) => (
@@ -81,13 +83,13 @@ export default function AppShell() {
       align="start"
       items={[
         { label: t('app.nav.settings'), icon: 'settings', onSelect: () => navigate('/app/settings') },
-        { label: t('app.nav.signOut'), icon: 'logout', onSelect: () => { leaving.current = true; void signOut().then(() => { qc.clear(); window.location.assign('/'); }); } },
+        { label: t('app.nav.signOut'), icon: 'logout', onSelect: leave },
       ]}
     />
   );
 
   // Onboarding gets the whole screen.
-  if (pathname === '/app/welcome') return <main id="main" className="app-solo"><Outlet context={{ user, profile: profile.data }} /></main>;
+  if (pathname === '/app/welcome') return <main id="main" className="app-solo"><Outlet context={ctx} /></main>;
 
   return (
     <div className="app">
@@ -112,7 +114,7 @@ export default function AppShell() {
       </header>
 
       <main id="main" className="app-main" tabIndex={-1}>
-        <Outlet context={{ user, profile: profile.data }} />
+        <Outlet context={ctx} />
       </main>
 
       <nav className="app-tabs" aria-label={t('app.nav.main')}>
