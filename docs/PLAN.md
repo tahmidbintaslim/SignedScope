@@ -27,14 +27,14 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [x] Device mockups (laptop, phone) framing real app screens
 - [x] Motion principles: durations, easing, hover/press feedback, page transitions, reduced-motion rules
 
-### C. React + Vite foundation
-- [ ] `web/` app: React 19, TypeScript, Vite, React Router (same URLs: `/`, `/estimate`, `/new`, `/sign`, `/receipt`, `/verify`, `/privacy`, `/thanks`, `/login`, `/app/*`)
-- [ ] Design system components: Button (pressed and loading feedback), Input, Select, Dialog, Sheet, Toast, Tabs, Tooltip, Menu, Card, Table, Empty state, Skeleton
-- [ ] Data: TanStack Query (cache, prefetch on hover and route, optimistic updates), Supabase client, typed API client
-- [ ] i18n: react-i18next for en/bn/th; Intl for dates, numbers and currencies; profile stores language, country, timezone and currency
-- [ ] Motion: Framer Motion with shared variants; respects reduced motion
-- [ ] Performance: route code-splitting, memoized lists, image formats, budgets (LCP < 2.5 s on 4G)
-- [ ] Build to static files so CSP `script-src 'self'` holds; `api/` unchanged
+### C. React + Vite foundation: done, see web/README.md
+- [x] `web/` app: React 19, TypeScript, Vite, React Router (same URLs: `/`, `/estimate`, `/new`, `/sign`, `/receipt`, `/verify`, `/privacy`, `/thanks`, `/login`, `/app/*`)
+- [x] Design system components: Button (pressed and loading feedback), Input, Select, Textarea, Dialog, Sheet, Toast, Tabs, Tooltip, Menu, Card, Badge, Empty state, Skeleton (Table comes with the dashboard in E)
+- [x] Data: TanStack Query client, page-code preload on hover/focus/touch, lazy Supabase client, typed API client (per-page queries and optimistic updates come with D and E)
+- [x] i18n: react-i18next for en/bn/th (bn/th loaded on demand); Intl for dates, numbers and currencies; language, country, time zone and currency detected and stored locally (profile sync in E)
+- [x] Motion: Framer Motion with shared variants; respects reduced motion
+- [x] Performance: route code-splitting, motion features after first paint, 160 KB gzip initial JS budget in CI (currently 144 KB); LCP checks with Lighthouse in G
+- [x] Build to static files so CSP `script-src 'self'` holds; `api/` unchanged
 
 ### D. Public site
 - [ ] Homepage per the blueprint: hero with phone mockup and live demo, the quick-ask problem, interactive demo, one how-it-works, benefits, pricing, FAQ

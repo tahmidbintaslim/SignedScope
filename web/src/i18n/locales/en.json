@@ -1,0 +1,10 @@
+{
+  "app": { "name": "SignedScope", "tagline": "Get the scope signed. Get the extras paid." },
+  "nav": { "skip": "Skip to content", "home": "Home", "estimate": "Free estimate", "pricing": "Pricing", "signIn": "Sign in", "dashboard": "Dashboard", "main": "Main" },
+  "actions": { "close": "Close", "cancel": "Cancel", "save": "Save", "saving": "Saving…", "copy": "Copy", "copied": "Copied", "retry": "Try again", "back": "Back", "continue": "Continue", "open": "Open" },
+  "settings": { "language": "Language", "theme": "Theme", "themeLight": "Light", "themeDark": "Dark", "themeSystem": "System", "currency": "Currency", "country": "Country", "timeZone": "Time zone" },
+  "states": { "loading": "Loading…", "empty": "Nothing here yet", "error": "Something went wrong", "offline": "You're offline. Changes will be sent when you reconnect." },
+  "notFound": { "title": "Page not found", "body": "The link may be old or mistyped.", "home": "Go home" },
+  "placeholder": { "title": "Coming in the new app", "body": "This page still runs on the current site while it moves to the new app." },
+  "kit": { "title": "Design system", "intro": "Every component in the new app, in light and dark, with its states." }
+}
