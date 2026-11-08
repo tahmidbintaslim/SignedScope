@@ -85,3 +85,97 @@ export function sumByCurrency(rows: { currency: string; amount: number | string 
   rows.forEach((r) => by.set(r.currency, (by.get(r.currency) ?? 0) + Number(r.amount || 0)));
   return [...by].map(([currency, amount]) => ({ currency, amount: Math.round(amount * 100) / 100 }));
 }
+
+// ---- Projects, clients, payments, files (phase E part 2) ----
+export interface EstimateRow { id: string; project_id: string; currency: string; rate: number; buffer_pct: number; data: { features?: { name: string; stories: { title: string; hoursLow: number; hoursHigh: number }[] }[]; outOfScope?: string[] }; hours_low: number; hours_high: number; price_low: number; price_high: number; created_at: string }
+export interface VaultFile { name: string; path: string; shown: string; size: number; created_at: string }
+
+export const projectKeys = {
+  one: (id: string) => ['project', id] as const,
+  estimates: (id: string) => ['project', id, 'estimates'] as const,
+  documents: (id: string) => ['project', id, 'documents'] as const,
+  payments: (id: string) => ['project', id, 'payments'] as const,
+  activity: (id: string) => ['project', id, 'activity'] as const,
+  files: (id: string) => ['project', id, 'files'] as const,
+};
+export const clientKeys = { one: (id: string) => ['client', id] as const };
+
+async function log(projectId: string | null, kind: string, detail: Record<string, unknown>) {
+  try { await (await db()).from('activity').insert({ project_id: projectId, kind, detail }); } catch { /* best effort */ }
+}
+
+export async function getProject(id: string): Promise<Project | null> {
+  return ok(await (await db()).from('projects').select('*').eq('id', id).maybeSingle());
+}
+export async function updateProject(p: Project, patch: Partial<Pick<Project, 'status' | 'client_id' | 'title' | 'due_date' | 'notes'>>): Promise<Project> {
+  const row = ok(await (await db()).from('projects').update(patch).eq('id', p.id).select('*').single()) as Project;
+  if (patch.status && patch.status !== p.status) await log(p.id, 'status_changed', { from: p.status, to: patch.status });
+  return row;
+}
+export async function listEstimates(projectId: string): Promise<EstimateRow[]> {
+  return ok(await (await db()).from('estimates').select('*').eq('project_id', projectId).order('created_at', { ascending: false }));
+}
+export async function listProjectDocuments(projectId: string): Promise<Doc[]> {
+  return ok(await (await db()).from('documents').select('*').eq('project_id', projectId).order('created_at', { ascending: false }));
+}
+export async function listProjectPayments(projectId: string): Promise<Payment[]> {
+  return ok(await (await db()).from('payments').select('*').eq('project_id', projectId).order('created_at', { ascending: true }));
+}
+export async function listProjectActivity(projectId: string): Promise<Activity[]> {
+  return ok(await (await db()).from('activity').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(30));
+}
+export async function requestPayment(projectId: string, row: { label: string; amount: number; currency: string; due_date: string | null; document_id: string | null }, shown: string) {
+  ok(await (await db()).from('payments').insert({ project_id: projectId, ...row }).select('id').single());
+  await log(projectId, 'payment_requested', { label: row.label, amount: shown });
+}
+export async function markPaid(p: Payment, reference: string, shown: string) {
+  ok(await (await db()).from('payments').update({ status: 'paid_manual', paid_at: new Date().toISOString(), reference: reference.slice(0, 120) || null, method: 'manual' }).eq('id', p.id).select('id').single());
+  await log(p.project_id, 'payment_paid', { label: p.label, amount: shown });
+}
+
+// Vault: private files under <user id>/<project id>/ in the "vault" bucket.
+export const MAX_FILE = 25 * 1024 * 1024;
+/** Pages and scripts are never stored: a share link must not be able to serve a web page. */
+export const blockedFile = (name: string, type: string) => /\.(html?|xhtml|svg|xml|js|mjs)$/i.test(name) || /html|svg|javascript|xml/i.test(type);
+export const safeFileName = (name: string) => name.normalize('NFKD').replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '').slice(-100) || 'file';
+
+export async function listFiles(userId: string, projectId: string): Promise<VaultFile[]> {
+  const prefix = `${userId}/${projectId}`;
+  const files = ok(await (await db()).storage.from('vault').list(prefix, { sortBy: { column: 'created_at', order: 'desc' } })) as { name: string; created_at: string; metadata?: { size?: number } }[];
+  return files.filter((f) => f.name && f.name !== '.emptyFolderPlaceholder')
+    .map((f) => ({ name: f.name, path: `${prefix}/${f.name}`, shown: f.name.replace(/^\d+-/, ''), size: f.metadata?.size ?? 0, created_at: f.created_at }));
+}
+export async function uploadFile(userId: string, projectId: string, file: File) {
+  ok(await (await db()).storage.from('vault').upload(`${userId}/${projectId}/${Date.now()}-${safeFileName(file.name)}`, file, { contentType: file.type || 'application/octet-stream', upsert: false }));
+}
+export async function fileUrl(path: string, seconds: number, download = false): Promise<string> {
+  return (ok(await (await db()).storage.from('vault').createSignedUrl(path, seconds, download ? { download: true } : undefined)) as { signedUrl: string }).signedUrl;
+}
+export async function removeFile(path: string) { ok(await (await db()).storage.from('vault').remove([path])); }
+
+/** Deletes a project with its rows (cascade) and its vault files (not rows, so removed first). */
+export async function deleteProject(userId: string, projectId: string) {
+  const sb = await db();
+  const files = await listFiles(userId, projectId);
+  if (files.length) ok(await sb.storage.from('vault').remove(files.map((f) => f.path)));
+  ok(await sb.from('projects').delete().eq('id', projectId));
+}
+
+export async function getClient(id: string): Promise<Client | null> {
+  return ok(await (await db()).from('clients').select('*').eq('id', id).maybeSingle());
+}
+export async function updateClient(id: string, patch: Partial<Client>): Promise<Client> {
+  return ok(await (await db()).from('clients').update(patch).eq('id', id).select('*').single());
+}
+export async function deleteClient(id: string) { ok(await (await db()).from('clients').delete().eq('id', id)); }
+
+/** Everything in the workspace as one JSON object (Settings → Export). */
+export async function exportAll(userId: string, profile: Profile | null | undefined) {
+  const sb = await db();
+  const out: Record<string, unknown> = { exportedAt: new Date().toISOString(), profile };
+  for (const t of ['clients', 'projects', 'estimates', 'documents', 'payments', 'activity']) out[t] = ok(await sb.from(t).select('*'));
+  const files: unknown[] = [];
+  for (const p of out.projects as Project[]) files.push(...(await listFiles(userId, p.id)).map((f) => ({ project_id: p.id, name: f.shown, size: f.size })));
+  out.files = files;
+  return out;
+}

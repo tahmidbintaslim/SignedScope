@@ -51,6 +51,11 @@ export const accountRoutes: RouteObject[] = [
     children: [
       { index: true, lazy: lazyPage(() => import('../pages/app/Dashboard')) },
       { path: 'welcome', lazy: lazyPage(() => import('../pages/app/Onboarding')) },
+      { path: 'projects', lazy: lazyPage(() => import('../pages/app/Projects')) },
+      { path: 'projects/:id', lazy: lazyPage(() => import('../pages/app/ProjectDetail')) },
+      { path: 'clients', lazy: lazyPage(() => import('../pages/app/Clients')) },
+      { path: 'clients/:id', lazy: lazyPage(() => import('../pages/app/ClientDetail')) },
+      { path: 'settings', lazy: lazyPage(() => import('../pages/app/Settings')) },
       { path: '*', lazy: lazyPage(() => import('../pages/Placeholder')) },
     ],
   },

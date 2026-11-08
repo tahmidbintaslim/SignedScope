@@ -12,12 +12,8 @@ import { duration, ease } from '../../motion/tokens';
 import { Button, ButtonLink, Card, Field, Input, Logo, Select, Textarea, useToast } from '../../ui';
 import { useApp } from './context';
 import './onboarding.css';
+import { COUNTRIES, COUNTRY_ZONE, LANG_NAME, useRegionName, useZones } from './places';
 
-// Countries we see most, then the rest of the world by name (Intl.DisplayNames).
-const COUNTRIES = ['TH', 'BD', 'SG', 'VN', 'PH', 'MY', 'ID', 'IN', 'JP', 'KR', 'CN', 'HK', 'TW', 'AU', 'NZ', 'US', 'CA', 'GB', 'IE', 'DE', 'FR', 'NL', 'ES', 'IT', 'PT', 'SE', 'NO', 'DK', 'FI', 'CH', 'AT', 'BE', 'PL', 'AE', 'SA', 'PK', 'LK', 'NP', 'KH', 'LA', 'MM', 'BR', 'MX', 'AR', 'ZA', 'NG', 'KE', 'EG'];
-// Main time zone per country, picked when the country changes (people can still choose another).
-const COUNTRY_ZONE: Record<string, string> = { TH: 'Asia/Bangkok', BD: 'Asia/Dhaka', SG: 'Asia/Singapore', VN: 'Asia/Ho_Chi_Minh', PH: 'Asia/Manila', MY: 'Asia/Kuala_Lumpur', ID: 'Asia/Jakarta', IN: 'Asia/Kolkata', JP: 'Asia/Tokyo', KR: 'Asia/Seoul', CN: 'Asia/Shanghai', HK: 'Asia/Hong_Kong', TW: 'Asia/Taipei', AU: 'Australia/Sydney', NZ: 'Pacific/Auckland', US: 'America/New_York', CA: 'America/Toronto', GB: 'Europe/London', IE: 'Europe/Dublin', DE: 'Europe/Berlin', FR: 'Europe/Paris', NL: 'Europe/Amsterdam', ES: 'Europe/Madrid', IT: 'Europe/Rome', AE: 'Asia/Dubai', PK: 'Asia/Karachi', LK: 'Asia/Colombo', NP: 'Asia/Kathmandu', KH: 'Asia/Phnom_Penh', MM: 'Asia/Yangon' };
-const LANG_NAME: Record<Language, string> = { en: 'English', bn: 'বাংলা', th: 'ไทย' };
 const TOTAL = 4;
 const slide = { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0, transition: { duration: duration.slow, ease: ease.enter } }, exit: { opacity: 0, x: -24, transition: { duration: duration.fast } } };
 
@@ -46,12 +42,8 @@ export default function Onboarding() {
   }));
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }));
 
-  const regionName = useMemo(() => { try { return new Intl.DisplayNames([locale.language], { type: 'region' }); } catch { return null; } }, [locale.language]);
-  const zones = useMemo(() => {
-    let list: string[] = [];
-    try { list = Intl.supportedValuesOf('timeZone'); } catch { /* old browser */ }
-    return list.includes(f.time_zone) ? list : [f.time_zone, ...list]; // e.g. "UTC" isn't listed everywhere
-  }, [f.time_zone]);
+  const regionName = useRegionName(locale.language);
+  const zones = useZones(f.time_zone);
 
   const save = useMutation({
     mutationFn: async (patch: ProfilePatch) => updateProfile(user.id, patch),

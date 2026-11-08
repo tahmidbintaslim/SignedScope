@@ -56,3 +56,37 @@
 @media (max-width: 640px) { .hide-sm { display: none; } }
 .card-flush { padding: 8px 12px; }
 .app-solo { min-height: 100dvh; padding: 24px 16px; background: var(--ss-surface); }
+
+/* Workspace pages: detail layout, sections, forms */
+.detail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; max-width: 1040px; }
+.card-flush { overflow-x: auto; }
+.detail > .page-head { margin-bottom: 0; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; width: fit-content; color: var(--ss-text-muted); font-size: 14px; font-weight: 600; text-decoration: none; }
+.back-link:hover { color: var(--ss-brand); }
+.back-link .ss-icon { transform: rotate(180deg); }
+.page-head p a { color: inherit; font-weight: 600; }
+.sect { display: grid; gap: 12px; }
+.sect h2 { font-size: 18px; }
+.sect-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.pad { padding: 12px 0; }
+.small { font-size: 13px; }
+.num { text-align: right; white-space: nowrap; }
+.row-end { justify-content: flex-end; gap: 4px; }
+.break { overflow-wrap: anywhere; }
+.text-danger { color: var(--ss-danger); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.checks { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+.checks label { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.checks input { width: 18px; height: 18px; accent-color: var(--ss-brand); }
+.mfa-qr { width: 180px; height: 180px; padding: 8px; border-radius: var(--ss-radius-md); background: #fff; border: 1px solid var(--ss-border); }
+.tbl td .ss-badge + div { margin-top: 4px; }
+/* Phones: detail tables become one wrapped block per row instead of scrolling sideways. */
+@media (max-width: 640px) {
+  .tbl-stack tr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 0; border-bottom: 1px solid var(--ss-border); }
+  .tbl-stack tr:last-child { border-bottom: 0; }
+  .tbl-stack td { padding: 0; border: 0; }
+  .tbl-stack td:first-child { flex: 1 1 100%; }
+  .tbl-stack td.num { text-align: left; }
+  .tbl-stack td.num:last-child { margin-left: auto; }
+  .tbl-stack .row-end { justify-content: flex-start; }
+}
