@@ -15,10 +15,10 @@ const sign = require('../api/sign');
 const verify = require('../api/verify');
 const config = require('../api/config');
 
-function call(fn, body, headers = {}) {
+function call(fn, body, headers = {}, method = 'POST') {
   return new Promise((resolve) => {
     const res = { setHeader() {}, status(s) { this.s = s; return this; }, json(j) { resolve({ status: this.s, body: j }); } };
-    fn({ method: 'POST', body, headers: { 'user-agent': 'x', ...headers } }, res);
+    fn({ method, body, headers: { 'user-agent': 'x', ...headers } }, res);
   });
 }
 const A = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', email: 'a@x.co' };
@@ -29,8 +29,19 @@ store.tables.projects = [{ id: P, owner: A.id, title: 'Café site', status: 'est
 const base = { title: 'Café site', agency: 'A Studio', client: 'Café', currency: 'THB', payInstructions: 'PromptPay 081-234-5678', items: [{ kind: 'scope', text: 'Menu', price: 9000 }] };
 
 test('config exposes only public keys', async () => {
-  const r = await call(config, {});
+  const r = await call(config, {}, {}, 'GET');
   assert.deepEqual(r.body, { enabled: true, supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'anon' });
+});
+
+test('POST config recreates a missing profile row for the signed-in user only', async () => {
+  assert.equal((await call(config, {})).status, 401);
+  const saved = store.tables.profiles; store.tables.profiles = [];
+  try {
+    assert.equal((await call(config, {}, { authorization: 'Bearer fake-token-' + A.id })).status, 200);
+    assert.deepEqual(store.tables.profiles.map((p) => [p.id, p.email]), [[A.id, A.email]]);
+    assert.equal((await call(config, {}, { authorization: 'Bearer fake-token-' + A.id })).status, 200, 'idempotent');
+    assert.equal(store.tables.profiles.length, 1);
+  } finally { store.tables.profiles = saved; }
 });
 
 test('filing into a project needs the owner’s session', async () => {

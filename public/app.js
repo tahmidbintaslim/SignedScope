@@ -378,7 +378,7 @@ async function settingsPage() {
       hourly_rate: f.hourly_rate.value === '' ? null : Number(f.hourly_rate.value), lang: lang.value, pay_instructions: payIns.value.trim() || null,
       notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).eq('id', user.id).select('*').maybeSingle());
     // No profile row (the sign-up trigger failed): recreate it on the server, then save again.
-    profile = (await save()) || (await Auth.api('profile', {}), await save());
+    profile = (await save()) || (await Auth.api('config', {}), await save());
     if (!profile) throw new Error('Could not save your settings. Please try again.');
     toast('Settings saved');
   }));
