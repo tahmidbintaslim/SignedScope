@@ -1,10 +1,253 @@
 {
-  "app": { "name": "SignedScope", "tagline": "Get the scope signed. Get the extras paid." },
-  "nav": { "skip": "Skip to content", "home": "Home", "estimate": "Free estimate", "pricing": "Pricing", "signIn": "Sign in", "dashboard": "Dashboard", "main": "Main" },
-  "actions": { "close": "Close", "cancel": "Cancel", "save": "Save", "saving": "Saving…", "copy": "Copy", "copied": "Copied", "retry": "Try again", "back": "Back", "continue": "Continue", "open": "Open" },
-  "settings": { "language": "Language", "theme": "Theme", "themeLight": "Light", "themeDark": "Dark", "themeSystem": "System", "currency": "Currency", "country": "Country", "timeZone": "Time zone" },
-  "states": { "loading": "Loading…", "empty": "Nothing here yet", "error": "Something went wrong", "offline": "You're offline. Changes will be sent when you reconnect." },
-  "notFound": { "title": "Page not found", "body": "The link may be old or mistyped.", "home": "Go home" },
-  "placeholder": { "title": "Coming in the new app", "body": "This page still runs on the current site while it moves to the new app." },
-  "kit": { "title": "Design system", "intro": "Every component in the new app, in light and dark, with its states." }
+  "app": {
+    "name": "SignedScope",
+    "tagline": "Get the scope signed. Get the extras paid."
+  },
+  "nav": {
+    "skip": "Skip to content",
+    "home": "Home",
+    "estimate": "Free estimate",
+    "pricing": "Pricing",
+    "signIn": "Sign in",
+    "dashboard": "Dashboard",
+    "main": "Main"
+  },
+  "actions": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Try again",
+    "back": "Back",
+    "continue": "Continue",
+    "open": "Open"
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "currency": "Currency",
+    "country": "Country",
+    "timeZone": "Time zone"
+  },
+  "states": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "offline": "You're offline. Changes will be sent when you reconnect."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be old or mistyped.",
+    "home": "Go home"
+  },
+  "placeholder": {
+    "title": "Coming in the new app",
+    "body": "This page still runs on the current site while it moves to the new app."
+  },
+  "kit": {
+    "title": "Design system",
+    "intro": "Every component in the new app, in light and dark, with its states."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Scope approval and change requests",
+      "title1": "Get the scope signed.",
+      "title2": "Get the extras paid.",
+      "sub": "Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.",
+      "cta": "Create a free scope",
+      "demo": "Try the live demo",
+      "note": "Free during the beta. No card. Your client never signs up.",
+      "brief": "Start from a brief: paste a client message, get priced lines",
+      "art": "Example: a client approves scope lines on a phone, then approves a priced extra and pays."
+    },
+    "phone": {
+      "from": "Mai Studio sent you a scope",
+      "title": "Website redesign",
+      "sub": "For Lumen Café · approve each line",
+      "l1": "Home and menu pages",
+      "l1s": "Design and build",
+      "l2": "Online ordering",
+      "l2s": "Uses your payment link",
+      "l3": "Two rounds of edits",
+      "l3s": "Within 10 working days",
+      "out": "Not included: printed menu, photos",
+      "total": "Total if approved",
+      "sign": "Approve and sign",
+      "ask": "“Can we add a booking page?”",
+      "approved": "Approved",
+      "pay": "Pay with your link"
+    },
+    "payRow": "Clients pay through your own link",
+    "problem": {
+      "label": "The problem",
+      "title": "Small asks add up fast.",
+      "sub": "Each one feels too small to charge for. Together, they eat your margin.",
+      "a1": "Quick one, can the banner rotate?",
+      "a2": "Can we also add online booking?",
+      "a3": "Oh, and a Thai version of the menu?",
+      "a4": "Maybe a gift card option at checkout?",
+      "free": "free",
+      "given": "Given away on one project",
+      "stat": "of projects had scope creep",
+      "source": "PMI Pulse of the Profession, 2018"
+    },
+    "demo": {
+      "label": "Live demo",
+      "title": "Try it. It takes 30 seconds.",
+      "sub": "Add the ask, set a price, then sign as the client. Example data, nothing is sent.",
+      "steps": [
+        "Catch the ask",
+        "Price it",
+        "Client approves",
+        "Signed"
+      ],
+      "signed1": "Signed · revision 1",
+      "rev2": "Revision 2 · waiting for client",
+      "signed2": "Signed · revision 2",
+      "doc": "Lumen Café website",
+      "drop": "Drop the ask here",
+      "signedTotal": "Signed total",
+      "ifApproved": "Total if approved",
+      "newTotal": "Revision 2 total",
+      "msgFrom": "New message from Rafi",
+      "msg": "Can we also add online booking? Should be quick.",
+      "dragHint": "Drag it onto the signed scope, or use the button.",
+      "add": "Add to the scope",
+      "added": "Added",
+      "line": "Online booking page",
+      "priceQ": "It’s a line in revision 2. What does it cost?",
+      "price": "Price",
+      "hours": "About {{hours}} hours at $80. Set your own number.",
+      "send": "Send the change request",
+      "youAre": "You’re Rafi now. Only the change needs a decision.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "toSign": "Continue to sign",
+      "signHint": "Sign with your mouse or finger, or type your name.",
+      "typeName": "Or type your name",
+      "signIt": "Sign revision 2",
+      "clear": "Clear",
+      "done": "Signed. Nobody had to bring up money.",
+      "before": "Signed before",
+      "change": "Approved change",
+      "rejected": "Change rejected",
+      "pay": "Pay {{amount}}",
+      "again": "Play again",
+      "real": "Do this with a real client"
+    },
+    "how": {
+      "label": "How it works",
+      "title": "Three steps. One link.",
+      "s1t": "Write the scope",
+      "s1b": "Paste a brief or a client message. AI drafts priced lines, and you edit them.",
+      "s2t": "Send one link",
+      "s2b": "WhatsApp, email or Slack. It opens on any phone, with no account.",
+      "s3t": "Approve, sign, get paid",
+      "s3b": "Your client says yes or no to each line, signs once, and pays through your link."
+    },
+    "why": {
+      "label": "Why it works",
+      "title": "The price is already on the page.",
+      "sub": "So you never have to bring it up.",
+      "t1t": "Extras become priced changes",
+      "t1b": "Paste their message, set a price, send. They see exactly what changed and tap Approve.",
+      "t2t": "Line by line, not all or nothing",
+      "t2b": "Every item gets a yes, or a no with a reason. Questions come up now, not at handover.",
+      "t3t": "A record both sides trust",
+      "t3b": "Who approved what and when, with a fingerprint anyone can verify.",
+      "t4t": "Paid on the same screen",
+      "t4b": "Add your own pay link. SignedScope never holds or moves your money."
+    },
+    "client": {
+      "label": "For your client",
+      "title": "No account. No app. Just a link.",
+      "sub": "You see every scope, change and payment in one place. Your client opens a link, approves each line and signs with a finger."
+    },
+    "pricing": {
+      "label": "Pricing",
+      "title": "Free during the beta.",
+      "sub": "Everything is free while we are in beta. Starter stays free after. No per-seat fees.",
+      "month": "/month",
+      "soon": "Soon",
+      "starter": "Starter",
+      "starterNote": "For freelancers starting out",
+      "pro": "Pro",
+      "proNote": "For busy freelancers",
+      "agency": "Agency",
+      "agencyNote": "For small studios",
+      "sf": [
+        "3 active scopes at a time",
+        "Unlimited revisions and change requests",
+        "Email when a client opens or signs",
+        "Your own pay link",
+        "Receipts anyone can verify"
+      ],
+      "pf": [
+        "Unlimited scopes",
+        "AI brief to priced scope",
+        "Your logo and colors",
+        "PDF audit export"
+      ],
+      "af": [
+        "Everything in Pro",
+        "5 seats",
+        "Your own domain",
+        "Team templates",
+        "Slack and webhook alerts"
+      ],
+      "start": "Start free",
+      "notify": "Tell me when it opens",
+      "formTitle": "Get one email when paid plans open.",
+      "email": "Work email",
+      "plan": "Plan",
+      "join": "Join the list",
+      "joined": "You’re on the list. We’ll email you once.",
+      "soonNote": "Items marked Soon are being built."
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Good questions.",
+      "items": [
+        {
+          "q": "Is the signature legally binding?",
+          "a": "SignedScope gives you a clear record: who approved which lines, when, their drawn or typed signature, and a SHA-256 fingerprint anyone can check. Many places accept electronic records like this for service work, but rules differ. For large contracts, check your local rules or ask a lawyer."
+        },
+        {
+          "q": "Does my client need an account?",
+          "a": "No. They open the link on any device, approve each line and sign."
+        },
+        {
+          "q": "What happens when the client asks for more?",
+          "a": "Paste their message, set a price, and send a change request. They see what changed against the signed version and approve or reject it."
+        },
+        {
+          "q": "How do I get paid?",
+          "a": "The Pay button opens your own Stripe, Wise, PayPal, Payoneer or Omise link, or shows your bank details. SignedScope never holds or moves your money."
+        },
+        {
+          "q": "What does the AI do with my brief?",
+          "a": "It drafts priced lines for you to edit. The text goes to our AI provider, Anthropic, only to write the draft. The privacy page has the details."
+        },
+        {
+          "q": "Wasn’t this called ScopeLock?",
+          "a": "Yes. We renamed it. Links you already sent still work."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Send your next scope with a price.",
+      "note": "Free during the beta. Your client never signs up."
+    },
+    "footer": {
+      "built": "Open source (MIT). Built in Bangkok.",
+      "privacy": "Privacy",
+      "verify": "Verify a link",
+      "source": "Source code"
+    }
+  }
 }

@@ -2,7 +2,8 @@
 // a spinner in place without changing width, so the layout never jumps.
 import { m } from 'motion/react';
 import type { ComponentProps, ReactNode } from 'react';
-import { Link, type LinkProps } from 'react-router';
+import type { LinkProps } from 'react-router';
+import { AppLink } from '../app/AppLink';
 import { press } from '../motion/tokens';
 import { Icon, type IconName } from './Icon';
 import { Spinner } from './Spinner';
@@ -44,12 +45,13 @@ export function Button({ variant = 'primary', size = 'md', block, icon, iconEnd,
   );
 }
 
-/** A link that looks like a button (navigation, not an action). Press feedback comes from CSS. */
+/** A link that looks like a button (navigation, not an action). Press feedback comes from CSS.
+ *  Anchors (#demo) and pages still on the old site become plain links. */
 export function ButtonLink({ variant = 'primary', size = 'md', block, icon, iconEnd, className, children, ...rest }: Common & LinkProps) {
   return (
-    <Link {...rest} className={cls(variant, size, block, className)}>
+    <AppLink {...rest} className={cls(variant, size, block, className)}>
       <Inner icon={icon} iconEnd={iconEnd}>{children}</Inner>
-    </Link>
+    </AppLink>
   );
 }
 

@@ -6,9 +6,9 @@
   <circle cx="44" cy="262" r="40" fill="#7C3AED" opacity=".10"/>
   <!-- Client message -->
   <circle cx="44" cy="58" r="16" fill="#FFC233"/>
-  <text x="44" y="63" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="800" font-size="13" fill="#0B1230">R</text>
+  <text x="44" y="63" text-anchor="middle" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="13" fill="#0B1230">R</text>
   <path d="M68 40h134a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14H82l-14 10V54a14 14 0 0 1 0 0z" fill="#fff"/>
-  <text font-family="Plus Jakarta Sans" font-size="12" fill="#0B1230"><tspan x="82" y="66">Can we add a booking page</tspan><tspan x="82" y="84">and a Thai version too?</tspan></text>
+  <text font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="12" fill="#0B1230"><tspan x="82" y="66">Can we add a booking page</tspan><tspan x="82" y="84">and a Thai version too?</tspan></text>
   <!-- AI step -->
   <path d="M150 112c0 26 6 40 24 52" fill="none" stroke="#7C3AED" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>
   <circle cx="150" cy="128" r="15" fill="#7C3AED"/>
@@ -16,16 +16,16 @@
   <!-- Scope card -->
   <rect x="170" y="150" width="210" height="130" rx="18" fill="#0B1230" opacity=".06" transform="translate(0 6)"/>
   <rect x="170" y="150" width="210" height="130" rx="18" fill="#fff"/>
-  <text x="188" y="174" font-family="JetBrains Mono" font-size="10" fill="#5A6480">CHANGE REQUEST · REV 2</text>
+  <text x="188" y="174" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#5A6480">CHANGE REQUEST · REV 2</text>
   <rect x="188" y="186" width="10" height="10" rx="3" fill="#7C3AED"/>
-  <text x="206" y="195" font-family="Plus Jakarta Sans" font-weight="600" font-size="12" fill="#0B1230">Booking page</text>
-  <text x="362" y="195" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#0B1230">$950</text>
+  <text x="206" y="195" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="600" font-size="12" fill="#0B1230">Booking page</text>
+  <text x="362" y="195" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#0B1230">$950</text>
   <rect x="188" y="208" width="10" height="10" rx="3" fill="#7C3AED"/>
-  <text x="206" y="217" font-family="Plus Jakarta Sans" font-weight="600" font-size="12" fill="#0B1230">Thai translation</text>
-  <text x="362" y="217" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#0B1230">$400</text>
+  <text x="206" y="217" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="600" font-size="12" fill="#0B1230">Thai translation</text>
+  <text x="362" y="217" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#0B1230">$400</text>
   <path d="M188 232h174" stroke="#E3E8F2"/>
-  <text x="188" y="256" font-family="Plus Jakarta Sans" font-weight="800" font-size="14" fill="#0B1230">+$1,350</text>
+  <text x="188" y="256" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="14" fill="#0B1230">+$1,350</text>
   <rect x="270" y="242" width="92" height="22" rx="11" fill="#FFF4D6"/>
-  <text x="316" y="257" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="700" font-size="10" fill="#8A5A00">Needs approval</text>
+  <text x="316" y="257" text-anchor="middle" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="700" font-size="10" fill="#8A5A00">Needs approval</text>
   </g>
 </svg>

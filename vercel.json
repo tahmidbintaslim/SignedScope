@@ -1,6 +1,6 @@
 {
   "cleanUrls": true,
-  "outputDirectory": "public",
+  "outputDirectory": "site",
   "headers": [
     {
       "source": "/(.*)",
@@ -38,6 +38,15 @@
           "value": "same-origin"
         }
       ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "functions": {
@@ -56,5 +65,6 @@
       "path": "/api/reminders",
       "schedule": "7 2 * * *"
     }
-  ]
+  ],
+  "buildCommand": "npm run build:site"
 }

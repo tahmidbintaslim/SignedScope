@@ -37,7 +37,8 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [x] Build to static files so CSP `script-src 'self'` holds; `api/` unchanged
 
 ### D. Public site
-- [ ] Homepage per the blueprint: hero with phone mockup and live demo, the quick-ask problem, interactive demo, one how-it-works, benefits, pricing, FAQ
+- [x] Pre-rendering and the Vercel build (`npm run build:site` → `site/`): React pages replace their old HTML, other URLs keep the old pages
+- [x] Homepage per the blueprint: hero with phone mockup, the quick-ask problem, interactive demo, how it works, benefits, client view, pricing with waitlist, FAQ (pre-rendered, hydrated, en/bn/th)
 - [ ] `/estimate` as the main free tool, with its own SEO metadata
 - [ ] `/templates/[slug]` (5 seed templates) and `/compare/[slug]` pages
 - [ ] `/verify` as a trust badge and growth loop on receipts

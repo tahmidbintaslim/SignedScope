@@ -9,6 +9,7 @@ import { Logo, Menu, IconButton, Select } from '../ui';
 import { LANGUAGES, type Language } from '../lib/locale';
 import { AppLink, AppNavLink } from './AppLink';
 import { usePrefs, type Theme } from './preferences';
+import { META } from './routes';
 
 const LANG_NAME: Record<Language, string> = { en: 'English', bn: 'বাংলা', th: 'ไทย' };
 
@@ -53,6 +54,8 @@ export function Layout() {
   const main = useRef<HTMLElement>(null);
   const first = useRef(true);
   const pendingFocus = useRef(false);
+
+  useEffect(() => { const m = META[location.pathname]; if (m) document.title = m.title; }, [location.pathname]);
 
   // After a client-side navigation, focus the new page's h1 (or main) once it has entered.
   useEffect(() => {

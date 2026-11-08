@@ -9,41 +9,41 @@
   <g clip-path="url(#ph-screen)">
     <rect x="12" y="12" width="296" height="636" fill="#F5F7FC"/>
     <!-- Status bar -->
-    <text x="40" y="44" font-family="Plus Jakarta Sans" font-weight="700" font-size="13" fill="#0B1230">9:41</text>
+    <text x="40" y="44" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="700" font-size="13" fill="#0B1230">9:41</text>
     <rect x="128" y="26" width="64" height="22" rx="11" fill="#0B1230"/>
     <rect x="252" y="34" width="22" height="10" rx="3" fill="none" stroke="#0B1230" stroke-width="1.4"/><rect x="254" y="36" width="15" height="6" rx="1.5" fill="#0B1230"/>
     <!-- Header -->
     <rect x="32" y="70" width="24" height="24" rx="7" fill="url(#ph-btn)"/>
     <path d="M38.5 83.5c1.3-1.7 2.6-1.8 3.5-.2L43.6 86 49.5 78.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="64" y="87" font-family="Plus Jakarta Sans" font-weight="600" font-size="12" fill="#5A6480">Mai Studio sent you a scope</text>
-    <text x="32" y="130" font-family="Plus Jakarta Sans" font-weight="800" font-size="22" fill="#0B1230">Website redesign</text>
-    <text x="32" y="152" font-family="Plus Jakarta Sans" font-size="12" fill="#5A6480">For Lumen Café · approve each line</text>
+    <text x="64" y="87" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="600" font-size="12" fill="#5A6480">Mai Studio sent you a scope</text>
+    <text x="32" y="130" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="22" fill="#0B1230">Website redesign</text>
+    <text x="32" y="152" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="12" fill="#5A6480">For Lumen Café · approve each line</text>
     <!-- Lines -->
-    <g font-family="Plus Jakarta Sans" font-size="13" fill="#0B1230">
+    <g font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="13" fill="#0B1230">
       <rect x="24" y="172" width="272" height="56" rx="16" fill="#fff"/>
       <rect x="40" y="190" width="20" height="20" rx="6" fill="#0E9F76"/><path d="M45 200l3.5 3.5 6.5-6.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       <text x="72" y="198" font-weight="600">Home and menu pages</text><text x="72" y="215" font-size="11" fill="#5A6480">Design and build</text>
-      <text x="280" y="205" text-anchor="end" font-family="JetBrains Mono" font-size="12">$1,800</text>
+      <text x="280" y="205" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12">$1,800</text>
       <rect x="24" y="236" width="272" height="56" rx="16" fill="#fff"/>
       <rect x="40" y="254" width="20" height="20" rx="6" fill="#0E9F76"/><path d="M45 264l3.5 3.5 6.5-6.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       <text x="72" y="262" font-weight="600">Online ordering</text><text x="72" y="279" font-size="11" fill="#5A6480">Uses your payment link</text>
-      <text x="280" y="269" text-anchor="end" font-family="JetBrains Mono" font-size="12">$1,100</text>
+      <text x="280" y="269" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12">$1,100</text>
       <rect x="24" y="300" width="272" height="56" rx="16" fill="#fff" stroke="#7C3AED" stroke-width="1.5"/>
       <rect x="40" y="318" width="20" height="20" rx="6" fill="#fff" stroke="#7C3AED" stroke-width="1.6"/>
       <text x="72" y="326" font-weight="600">Two rounds of edits</text><text x="72" y="343" font-size="11" fill="#5A6480">Within 10 working days</text>
-      <text x="280" y="333" text-anchor="end" font-family="JetBrains Mono" font-size="12">$300</text>
+      <text x="280" y="333" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12">$300</text>
       <rect x="24" y="364" width="272" height="44" rx="16" fill="#FDECEC"/>
       <text x="40" y="391" font-size="12" fill="#B4232A" font-weight="600">Not included: printed menu, photos</text>
     </g>
     <!-- Total -->
-    <text x="32" y="446" font-family="Plus Jakarta Sans" font-size="12" fill="#5A6480">Total if approved</text>
-    <text x="288" y="448" text-anchor="end" font-family="Plus Jakarta Sans" font-weight="800" font-size="22" fill="#0B1230">$3,200</text>
+    <text x="32" y="446" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="12" fill="#5A6480">Total if approved</text>
+    <text x="288" y="448" text-anchor="end" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="22" fill="#0B1230">$3,200</text>
     <!-- Signature pad -->
     <rect x="24" y="466" width="272" height="96" rx="16" fill="#fff" stroke="#E3E8F2" stroke-dasharray="5 5"/>
     <path d="M52 534c8-18 14-20 16-10s-3 18 3 8 8-21 13-11-2 16 6 6 8-11 13-3 10 3 18-5" fill="none" stroke="#2E1065" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="280" y="552" text-anchor="end" font-family="Plus Jakarta Sans" font-size="10" fill="#5A6480">Draw or type your name</text>
+    <text x="280" y="552" text-anchor="end" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="10" fill="#5A6480">Draw or type your name</text>
     <!-- CTA -->
     <rect x="24" y="578" width="272" height="52" rx="16" fill="url(#ph-btn)"/>
-    <text x="160" y="609" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="700" font-size="15" fill="#fff">Approve and sign</text>
+    <text x="160" y="609" text-anchor="middle" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="700" font-size="15" fill="#fff">Approve and sign</text>
   </g>
 </svg>
