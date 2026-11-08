@@ -7,24 +7,15 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { usePrefs } from '../../app/preferences';
 import {
   MAX_FILE, blockedFile, deleteProject, fileUrl, getProject, keys, listClients, listEstimates, listFiles, listProjectActivity, listProjectDocuments,
-  listProjectPayments, markPaid, projectKeys, removeFile, requestPayment, sumByCurrency, updateProject, uploadFile, type Doc, type EstimateRow, type Payment, type Project, type VaultFile,
+  listProjectPayments, markPaid, projectKeys, removeFile, requestPayment, sumByCurrency, updateProject, uploadFile, type Doc, type Payment, type Project, type VaultFile,
 } from '../../lib/db';
+import { linesFromEstimate, saveDraft } from '../../lib/draft';
 import { CURRENCIES } from '../../lib/locale';
 import { Button, ButtonLink, Card, Dialog, EmptyState, Field, Icon, Input, Select, Skeleton, useToast } from '../../ui';
 import { useApp } from './context';
 import { useActivityText } from './Dashboard';
 import { STATUSES } from './Projects';
 import { Confirm, DocStatus, PayStatus, errText, fmtSize, today, useCopy } from './shared';
-
-/** Same hand-off the estimator uses: one priced scope line per feature, then the exclusions. */
-function draftFromEstimate(p: Project, e: EstimateRow, clientName?: string) {
-  const f = 1 + Number(e.buffer_pct) / 100, rate = Number(e.rate);
-  const items = (e.data.features ?? []).map((ft) => ({
-    kind: 'scope', text: `${ft.name}: ${ft.stories.map((s) => s.title).join('; ')}`.slice(0, 600),
-    price: Math.round(ft.stories.reduce((a, s) => a + (s.hoursLow + s.hoursHigh) / 2, 0) * rate * f),
-  })).concat((e.data.outOfScope ?? []).map((x) => ({ kind: 'out', text: x.slice(0, 600), price: 0 })));
-  return { title: p.title, currency: e.currency, notes: '', items, client: clientName };
-}
 
 export default function ProjectDetail() {
   const { id = '' } = useParams();
@@ -74,7 +65,7 @@ export default function ProjectDetail() {
   const latest = estimates.data?.[0];
   const signed = docs.data?.find((d) => d.status === 'signed' && d.receipt_token);
   const newScope = () => {
-    if (latest) { try { sessionStorage.setItem('ss-draft', JSON.stringify(draftFromEstimate(p, latest, client?.name))); } catch { /* private mode */ } }
+    if (latest) saveDraft({ title: p.title, currency: latest.currency, notes: '', items: linesFromEstimate(latest), client: client?.name });
     window.location.assign('/new?project=' + encodeURIComponent(p.id));
   };
 

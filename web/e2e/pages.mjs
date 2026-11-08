@@ -46,6 +46,7 @@ const page = async (opts = {}) => {
   if (OUT) await p.screenshot({ path: `${OUT}/estimate.png`, fullPage: true });
   await p.getByRole('button', { name: 'Turn into a scope link' }).click();
   await p.waitForURL('**/new');
+  check(await p.getByText('Filled in from your AI estimate.').waitFor({ timeout: 8000 }).then(() => true, () => false), 'estimate: /new shows the estimate draft');
   check(await p.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('ss-draft') || 'null') === null; } catch { return false; } }), 'estimate: /new picked up the draft (it clears it after reading)');
   check(p.errors.length === 0, `estimate: console ${p.errors.join(' | ') || 'clean'}`);
 }

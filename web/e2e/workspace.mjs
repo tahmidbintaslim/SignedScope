@@ -194,6 +194,34 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   check(p.errors.length === 0, `settings: console ${p.errors.join(' | ') || 'clean'}`);
 }
 
+// Composer: proposal from the latest estimate, AI sections, schedule, terms, then the link.
+{
+  const p = await page(t);
+  let sealed = null;
+  await p.route('**/api/proposal', (r) => r.fulfill({ json: { intro: 'AI intro text.', approach: 'AI approach.', nextSteps: 'AI next steps.' } }));
+  await p.route('**/api/seal', (r) => { sealed = JSON.parse(r.request().postData()); return r.fulfill({ json: { token: 'v1.test.sig', documentId: 'doc1' } }); });
+  await p.goto(BASE + `/app/projects/${P}/compose`);
+  await p.getByRole('heading', { name: 'Proposal or agreement' }).waitFor();
+  check(await p.getByLabel('Line 1', { exact: true }).inputValue() === 'Menu: See the menu' && await p.getByLabel('Line 1 price').inputValue() === '5400', 'compose: lines from the latest estimate');
+  check(await p.getByRole('textbox', { name: 'Payment 1' }).inputValue() === 'Deposit 50%' && await p.getByLabel('Amount').first().inputValue() === '2700', 'compose: 50/50 schedule from the total');
+  await p.getByRole('button', { name: 'Write with AI' }).click();
+  check(await visible(p.getByText('Draft written. Check it before sending.')) && await p.getByLabel('Section 1 text').inputValue() === 'AI intro text.', 'compose: AI writes the sections');
+  await p.getByLabel('Document type').selectOption('agreement');
+  check(await p.getByLabel('Title').inputValue() === 'Lumen Café website: Agreement' && await p.getByLabel('Include terms').isChecked(), 'compose: agreement turns on terms');
+  check(await p.getByText('not legal advice').isVisible(), 'compose: terms carry the not-legal-advice note');
+  await p.getByLabel('Payment schedule').selectOption('30-40-30');
+  check(await p.locator('.comp-pay').count() === 3, 'compose: schedule preset');
+  await audit(p, 'compose');
+  if (OUT) await p.screenshot({ path: `${OUT}/compose.png`, fullPage: true });
+  await p.getByRole('button', { name: 'Preview' }).click();
+  check(await visible(p.locator('.comp-preview').getByRole('heading', { name: 'Terms' })), 'compose: preview shows the terms');
+  await p.getByRole('button', { name: 'Create link for client' }).click();
+  check(await visible(p.getByRole('heading', { name: 'Your link is ready' })), 'compose: link created');
+  check(sealed && sealed.kind === 'agreement' && sealed.projectId === P && sealed.schedule.length === 3 && sealed.items.some((i) => i.kind === 'out') && sealed.sections.some((x) => x.heading === 'Terms' && /Governing law/.test(x.body)), 'compose: sealed payload (kind, project, schedule, lines, terms)');
+  check(!sealed.items.find((i) => i.kind === 'out').price, 'compose: exclusions sent without a price');
+  check(p.errors.length === 0, `compose: console ${p.errors.join(' | ') || 'clean'}`);
+}
+
 // Phone: detail page fits.
 {
   const m = await page(t, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
