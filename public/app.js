@@ -374,9 +374,12 @@ async function settingsPage() {
     el('div', { class: 'inline' }, field('Your name', f.name), field('Business name', f.business_name), field('Default currency', cur), field('Hourly rate', f.hourly_rate), field('Language', lang)),
     field('Default payment instructions (shown to clients after they approve)', payIns), notifs, el('p', {}, btn));
   form.addEventListener('submit', busy(btn, async () => {
-    profile = await q(sb.from('profiles').update({ name: f.name.value.trim() || null, business_name: f.business_name.value.trim() || null, currency: cur.value,
+    const save = () => q(sb.from('profiles').update({ name: f.name.value.trim() || null, business_name: f.business_name.value.trim() || null, currency: cur.value,
       hourly_rate: f.hourly_rate.value === '' ? null : Number(f.hourly_rate.value), lang: lang.value, pay_instructions: payIns.value.trim() || null,
-      notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).eq('id', user.id).select('*').single());
+      notify_signed: nt.boxes.notify_signed.checked, notify_viewed: nt.boxes.notify_viewed.checked, notify_overdue: nt.boxes.notify_overdue.checked }).eq('id', user.id).select('*').maybeSingle());
+    // No profile row (the sign-up trigger failed): recreate it on the server, then save again.
+    profile = (await save()) || (await Auth.api('profile', {}), await save());
+    if (!profile) throw new Error('Could not save your settings. Please try again.');
     toast('Settings saved');
   }));
 

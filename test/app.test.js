@@ -161,10 +161,11 @@ test('security: one-time signing, sender flag, two-step sessions, verified email
 
   // A user with a verified authenticator needs a two-step session for the API too.
   store.factors = [{ id: 'f1', user_id: A.id, status: 'verified', factor_type: 'totp' }];
+  require('../api/_supabase').clearFactorCache(); // the earlier calls cached "no factor" for 30s
   try {
     const r = await call(seal, { ...base, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
     assert.equal(r.status, 401, 'aal1 token refused');
-  } finally { store.factors = []; }
+  } finally { store.factors = []; require('../api/_supabase').clearFactorCache(); }
 
   // Notification email goes to the verified sign-in address, not the editable profile field.
   process.env.RESEND_API_KEY = 're_test'; process.env.EMAIL_FROM = 'SignedScope <hi@signedscope.app>';
