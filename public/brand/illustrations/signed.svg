@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="A scope signed by the client, with the SignedScope seal">
+  <defs><linearGradient id="sg-signed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#FF4FA3"/></linearGradient></defs>
+  <clipPath id="clip-signed"><rect width="400" height="300" rx="32"/></clipPath>
+  <g clip-path="url(#clip-signed)">
+  <rect width="400" height="300" rx="32" fill="#E9F8F2"/>
+  <circle cx="340" cy="250" r="60" fill="#0E9F76" opacity=".10"/>
+  <rect x="96" y="34" width="208" height="244" rx="20" fill="#0B1230" opacity=".06" transform="translate(0 6)"/>
+  <rect x="96" y="34" width="208" height="244" rx="20" fill="#fff"/>
+  <text x="116" y="62" font-family="Plus Jakarta Sans" font-weight="800" font-size="14" fill="#0B1230">Website redesign</text>
+  <text x="116" y="80" font-family="Plus Jakarta Sans" font-size="11" fill="#5A6480">Lumen Café · 6 lines</text>
+  <g font-family="Plus Jakarta Sans" font-size="11" fill="#0B1230">
+    <path d="M116 100l3 3 6-6M116 120l3 3 6-6M116 140l3 3 6-6" fill="none" stroke="#0E9F76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="134" y="104">Home and menu pages</text><text x="134" y="124">Online ordering</text><text x="134" y="144">Two rounds of edits</text>
+  </g>
+  <path d="M116 162h168" stroke="#E3E8F2"/>
+  <!-- Signature -->
+  <path d="M120 214c10-22 18-26 20-12s-4 22 4 10 10-26 16-14-2 20 8 8 10-14 16-4 12 4 22-6" fill="none" stroke="#2E1065" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 226h168" stroke="#0B1230" stroke-width="1"/>
+  <text x="116" y="244" font-family="Plus Jakarta Sans" font-size="10" fill="#5A6480">Rafi Ahmed · 8 Nov 2026, 14:32</text>
+  <text x="116" y="260" font-family="JetBrains Mono" font-size="9" fill="#5A6480">sha256 9f2c…a71e</text>
+  <!-- Seal -->
+  <g transform="translate(262 176) rotate(-12)">
+    <circle r="34" fill="url(#sg-signed)"/>
+    <circle r="28" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 3" opacity=".7"/>
+    <path d="M-12 -2c3.5-4.5 7-4.8 9.5-.6L2 5 16-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <rect x="24" y="30" width="78" height="26" rx="13" fill="#0E9F76"/>
+  <text x="63" y="47" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="700" font-size="11" fill="#fff">Signed</text>
+  </g>
+</svg>
