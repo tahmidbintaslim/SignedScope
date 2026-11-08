@@ -1,0 +1,60 @@
+/* Client sign-off and receipt pages */
+.doc { display: grid; gap: 20px; max-width: 760px; padding-block: clamp(24px, 5vw, 48px); }
+.doc h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.doc h2 { font-size: 18px; }
+.doc .pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.doc .small { font-size: 13px; }
+.doc-banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: var(--ss-radius-md); background: var(--ss-brand-soft); color: var(--ss-text); }
+.doc-banner .ss-icon { flex: none; margin-top: 2px; color: var(--ss-brand); }
+.doc-banner.is-warn { background: color-mix(in srgb, var(--ss-warning) 12%, transparent); }
+.doc-banner.is-warn .ss-icon { color: var(--ss-warning); }
+.doc-sec { display: grid; gap: 8px; }
+.doc-sched { width: 100%; border-collapse: collapse; }
+.doc-sched td { padding: 8px 0; border-bottom: 1px solid var(--ss-border); }
+.doc-sched .num, .doc .num { text-align: right; white-space: nowrap; }
+.doc-group { display: grid; gap: 10px; }
+.decide { display: grid; gap: 12px; margin: 0; padding: 16px; border: 1px solid var(--ss-border); border-left-width: 4px; border-radius: var(--ss-radius-md); background: var(--ss-surface-raised); min-width: 0; }
+.decide.is-added { border-left-color: var(--ss-success); }
+.decide.is-changed { border-left-color: var(--ss-warning); }
+.decide.is-removed { border-left-color: var(--ss-danger); color: var(--ss-text-muted); }
+.decide.is-missing { border-color: var(--ss-danger); }
+.decide-head { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; }
+.decide-head > div { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.decide-text { margin: 0; }
+.decide-price { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.decide-price.is-struck { text-decoration: line-through; opacity: 0.6; }
+.decide-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.decide-opt { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 1px solid var(--ss-border); border-radius: var(--ss-radius-full); font-weight: 600; cursor: pointer; transition: background var(--ss-duration-fast), border-color var(--ss-duration-fast); }
+.decide-opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.decide-opt:has(input:focus-visible) { outline: 2px solid var(--ss-focus); outline-offset: 2px; }
+.decide-opt:has(input:checked) { border-color: var(--ss-brand); background: var(--ss-brand-soft); color: var(--ss-brand); }
+.decide-opt.is-rejected:has(input:checked) { border-color: var(--ss-danger); background: color-mix(in srgb, var(--ss-danger) 10%, transparent); color: var(--ss-danger); }
+.doc-total { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--ss-radius-md); background: var(--ss-surface); }
+.doc-total-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600; }
+.doc-total-row b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.doc-agree { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.doc-agree input { width: 18px; height: 18px; margin-top: 3px; flex: none; accent-color: var(--ss-brand); }
+.doc-share { display: flex; gap: 8px; }
+.doc-share input { flex: 1; min-width: 0; }
+.doc-done h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+.doc-done .ss-badge, .doc .row .ss-badge { width: fit-content; }
+.doc-pay h3 { font-size: 16px; margin-bottom: 4px; }
+.doc-pay > a { width: fit-content; }
+.doc-verified { text-decoration: none; }
+.doc-verified:hover .ss-badge { text-decoration: underline; }
+.doc-evidence dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0; font-size: 14px; }
+.doc-evidence dt { color: var(--ss-text-muted); }
+.doc-evidence dd { margin: 0; overflow-wrap: anywhere; }
+.doc-empty { padding-block: 32px; }
+@media (max-width: 520px) {
+  .doc-evidence dl { grid-template-columns: 1fr; }
+  .doc-evidence dd { margin-bottom: 6px; }
+  .doc-share { flex-direction: column; }
+}
+@media print {
+  .site-header, .site-footer, .noprint, .skip-link, .ss-toasts { display: none !important; }
+  .doc { padding: 0; max-width: none; }
+  .decide { break-inside: avoid; }
+  .decide-opts input:not(:checked) + .ss-icon, .decide-opt:not(:has(input:checked)) { display: none; }
+}
