@@ -10,7 +10,7 @@ import { DEFAULT_LOCALE } from './lib/locale';
 import { makeQueryClient } from './lib/query';
 
 const routes: RouteObject[] = [{ path: '/', Component: Layout, children: childRoutes }];
-export { META, PRERENDER } from "./app/routes";
+export { META, PRERENDER, SHELLS } from "./app/routes";
 
 export async function render(url: string): Promise<string> {
   initI18n('en');

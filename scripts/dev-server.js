@@ -1,5 +1,6 @@
 'use strict';
-// Minimal local server: static files from public/ (clean URLs) and Vercel-style handlers from api/.
+// Minimal local server: Vercel-style handlers from api/ (the web app's dev server proxies /api here),
+// plus static files from public/ (clean URLs).
 // Usage: SIGNING_SECRET=$(openssl rand -base64 32) npm run dev
 const http = require('http');
 const fs = require('fs');

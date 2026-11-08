@@ -76,6 +76,9 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
     }
     if (req.method() === 'PATCH') {
       const patch = JSON.parse(req.postData() || '{}');
+      // tables._missing = ['country', …] acts like a database without those columns (migration not applied).
+      const unknown = (tables._missing ?? []).find((c) => c in patch);
+      if (unknown) return route.fulfill({ status: 400, json: { code: 'PGRST204', message: `Could not find the '${unknown}' column of '${table}' in the schema cache` } });
       const hit = rows.filter(match);
       hit.forEach((r) => Object.assign(r, patch, { updated_at: new Date().toISOString() }));
       return reply(hit);

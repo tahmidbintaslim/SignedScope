@@ -270,10 +270,6 @@
     "body": "The link may be old or mistyped.",
     "home": "Go home"
   },
-  "placeholder": {
-    "title": "Coming in the new app",
-    "body": "This page still runs on the current site while it moves to the new app."
-  },
   "kit": {
     "title": "Design system",
     "intro": "Every component in the new app, in light and dark, with its states."
