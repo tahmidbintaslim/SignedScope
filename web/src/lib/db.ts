@@ -87,7 +87,7 @@ export function sumByCurrency(rows: { currency: string; amount: number | string 
 }
 
 // ---- Projects, clients, payments, files (phase E part 2) ----
-export interface EstimateRow { id: string; project_id: string; currency: string; rate: number; buffer_pct: number; data: { features?: { name: string; stories: { title: string; hoursLow: number; hoursHigh: number }[] }[]; outOfScope?: string[] }; hours_low: number; hours_high: number; price_low: number; price_high: number; created_at: string }
+export interface EstimateRow { id: string; project_id: string; currency: string; rate: number; buffer_pct: number; data: { summary?: string; features?: { name: string; stories: { title: string; hoursLow: number; hoursHigh: number }[] }[]; milestones?: { name: string; weeks: number }[]; assumptions?: string[]; outOfScope?: string[] }; hours_low: number; hours_high: number; price_low: number; price_high: number; created_at: string }
 export interface VaultFile { name: string; path: string; shown: string; size: number; created_at: string }
 
 export const projectKeys = {

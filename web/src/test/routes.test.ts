@@ -6,9 +6,9 @@ describe('routes', () => {
     expect(childRoutes.some((r) => r.path === '*')).toBe(true);
   });
   it('sends links to old pages through a normal page load', () => {
-    expect(isLegacy('/new')).toBe(true);
     expect(isLegacy('/app/projects/1')).toBe(true);
-    expect(isLegacy('/new#cr=v1.abc')).toBe(true);
+    expect(isLegacy('/login?next=/app')).toBe(true);
+    expect(isLegacy('/new#cr=v1.abc')).toBe(false);
     expect(isLegacy('/sign#v1.abc')).toBe(false); // the sign page is React now
     expect(isLegacy('/')).toBe(false);
     expect(isLegacy('/newsletter')).toBe(false);
