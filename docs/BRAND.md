@@ -19,7 +19,7 @@ Tokens live in `brand/tokens.css` as `--ss-*` custom properties with light and d
 | border | #E3E8F2 | #26305A | Dividers, inputs |
 | brand / brand-soft / on-brand | #7C3AED / #F3EEFF / #FFFFFF | #A78BFA / #2E1065 / #0B1230 | Primary actions, selection |
 | accent | #FF4FA3 | #FF7AB8 | Highlights, gradient end |
-| success / warning / danger | #0E9F76 / #B7791F / #E5484D | #34D399 / #FFC233 / #FF8A80 | Status |
+| success / warning / danger | #047857 / #8A5A00 / #C62A31 | #34D399 / #FFC233 / #FF8A80 | Status |
 
 The brand gradient (violet → pink → coral) appears once per view: the logo, one hero accent, or the main call to action. Sun, mint and sky are for small accents and charts.
 

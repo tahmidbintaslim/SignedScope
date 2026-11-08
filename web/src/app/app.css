@@ -1,0 +1,16 @@
+.site-header { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--ss-bg) 86%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--ss-border); }
+.site-header-row { display: flex; align-items: center; gap: var(--ss-space-4); min-height: 64px; }
+.site-logo { text-decoration: none; }
+.site-nav { display: flex; gap: var(--ss-space-1); margin-left: auto; }
+.site-nav a { padding: 8px 12px; border-radius: var(--ss-radius-md); color: var(--ss-text-muted); font-weight: 600; text-decoration: none; transition: color var(--ss-duration-fast), background var(--ss-duration-fast); }
+.site-nav a:hover { color: var(--ss-text); background: var(--ss-surface); }
+.site-nav a.active { color: var(--ss-text); }
+.site-tools { display: flex; align-items: center; gap: var(--ss-space-2); }
+.site-lang { min-height: 40px; padding-block: 6px; width: auto; }
+.site-main { min-height: calc(100dvh - 64px); padding-block: var(--ss-space-12); }
+.site-main:focus, .site-main h1:focus { outline: none; }
+@media (max-width: 640px) { .site-nav { display: none; } .site-tools { margin-left: auto; } }
+
+.nav-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 70; height: 3px; background: var(--ss-gradient); transform: scaleX(0); transform-origin: left; opacity: 0; transition: opacity var(--ss-duration-base); }
+.nav-progress.is-active { opacity: 1; animation: ss-progress 1.2s var(--ss-ease-standard) forwards; }
+@keyframes ss-progress { from { transform: scaleX(0); } to { transform: scaleX(0.85); } }
