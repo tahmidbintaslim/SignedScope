@@ -16,6 +16,22 @@ function admin() {
 // The token's claims, after Supabase has verified it (used only to read "aal").
 const claims = (jwt) => { try { return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString('utf8')); } catch { return {}; } };
 
+// Whether a user has a verified authenticator app. Cached for 30 seconds per warm instance so an
+// aal1 session doesn't cost an extra Auth API call on every request; errors are not cached.
+// Trade-off: for up to 30 seconds after someone enrolls a factor, an older aal1 token still passes
+// here (the database's own aal2 policies still apply to every table read through RLS).
+const factorCache = new Map();
+async function hasVerifiedFactor(id) {
+  const hit = factorCache.get(id);
+  if (hit && hit.until > Date.now()) return hit.value;
+  const f = await admin().auth.admin.mfa.listFactors({ userId: id });
+  if (f.error) return true; // fail closed
+  const value = (f.data.factors || []).some((x) => x.status === 'verified');
+  if (factorCache.size > 5000) factorCache.clear();
+  factorCache.set(id, { value, until: Date.now() + 30 * 1000 });
+  return value;
+}
+
 // Returns the signed-in user for a request with "Authorization: Bearer <access token>", or null.
 // A user with a verified authenticator app must present a two-step (aal2) session, as the database requires.
 async function userFrom(req) {
@@ -24,11 +40,7 @@ async function userFrom(req) {
   if (!m) return null;
   const { data, error } = await admin().auth.getUser(m[1]);
   if (error || !data || !data.user) return null;
-  if (claims(m[1]).aal !== 'aal2') {
-    const f = await admin().auth.admin.mfa.listFactors({ userId: data.user.id });
-    if (f.error) return null;
-    if ((f.data.factors || []).some((x) => x.status === 'verified')) return null;
-  }
+  if (claims(m[1]).aal !== 'aal2' && (await hasVerifiedFactor(data.user.id))) return null;
   return data.user;
 }
 
@@ -43,4 +55,4 @@ async function logActivity(owner, projectId, kind, detail = {}) {
   try { await admin().from('activity').insert({ owner, project_id: projectId || null, kind, detail, actor: 'server' }); } catch (e) { console.error('activity', e.message); }
 }
 
-module.exports = { configured, admin, userFrom, userEmail, logActivity };
+module.exports = { clearFactorCache: () => factorCache.clear(), configured, admin, userFrom, userEmail, logActivity };
