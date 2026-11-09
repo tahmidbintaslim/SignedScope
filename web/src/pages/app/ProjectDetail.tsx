@@ -53,6 +53,7 @@ export default function ProjectDetail() {
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: keys.projects });
       void qc.invalidateQueries({ queryKey: projectKeys.activity(id) });
+      void qc.invalidateQueries({ queryKey: ['activity'] }); // dashboard feed
     },
   });
 
@@ -101,7 +102,7 @@ export default function ProjectDetail() {
             <table className="tbl tbl-stack"><tbody>
               {estimates.data.map((e) => (
                 <tr key={e.id}>
-                  <td><Link to={`/estimate?estimate=${e.id}`}>{money(Number(e.price_low), e.currency)} – {money(Number(e.price_high), e.currency)}</Link></td>
+                  <td>{money(Number(e.price_low), e.currency)} – {money(Number(e.price_high), e.currency)}</td>
                   <td className="muted">{t('app.proj.hours', { low: Number(e.hours_low), high: Number(e.hours_high) })}</td>
                   <td className="muted hide-sm">{date(e.created_at)}</td>
                 </tr>
@@ -144,7 +145,9 @@ export default function ProjectDetail() {
       <section className="sect">
         <h2>{t('app.dash.activity')}</h2>
         <Card className="card-flush">
-          {acts.data?.length ? <ul className="feed">{acts.data.map((a) => <li key={a.id}><span>{actText(a)}</span><time dateTime={a.created_at}>{date(a.created_at, 'datetime')}</time></li>)}</ul>
+          {acts.isPending ? <div className="pad"><Skeleton height={48} /></div>
+            : acts.isError ? <p className="text-danger pad" role="alert">{(acts.error as Error).message}</p>
+            : acts.data.length ? <ul className="feed">{acts.data.map((a) => <li key={a.id}><span>{actText(a)}</span><time dateTime={a.created_at}>{date(a.created_at, 'datetime')}</time></li>)}</ul>
             : <p className="muted pad">{t('app.dash.noActivity')}</p>}
         </Card>
       </section>
@@ -156,7 +159,8 @@ export default function ProjectDetail() {
         onConfirm={async () => {
           await deleteProject(user.id, p.id);
           qc.removeQueries({ queryKey: ['project', p.id] });
-          void qc.invalidateQueries({ queryKey: keys.projects });
+          // Its documents, payments and activity went with it; the dashboard must not link to them.
+          for (const k of [keys.projects, keys.documents, keys.payments, ['activity']]) void qc.invalidateQueries({ queryKey: k });
           toast({ title: t('app.proj.deleted'), tone: 'success' });
           navigate('/app/projects', { replace: true });
         }} />
@@ -187,6 +191,7 @@ function Questions({ projectId, docs }: { projectId: string; docs: Doc[] }) {
   const { t } = useTranslation();
   const ids = docs.map((d) => d.id);
   const qs = useQuery({ queryKey: [...projectKeys.questions(projectId), ids.join()], queryFn: () => listQuestions(ids), enabled: ids.length > 0 });
+  if (qs.isError) return <section className="sect"><h2>{t('app.q.title')}</h2><p className="text-danger" role="alert">{(qs.error as Error).message}</p></section>;
   if (!qs.data?.length) return null;
   const title = (q: Question) => docs.find((d) => d.id === q.document_id)?.title ?? '';
   const open = qs.data.filter((q) => !q.answer).length;
@@ -234,7 +239,7 @@ function QuestionRow({ q, title, projectId }: { q: Question; title: string; proj
 
 function Payments({ p, pays, docs }: { p: Project; pays: Payment[]; docs: Doc[] }) {
   const { t } = useTranslation();
-  const { money, date } = usePrefs();
+  const { money, date, locale } = usePrefs();
   const qc = useQueryClient();
   const toast = useToast();
   const [asking, setAsking] = useState(false);
@@ -249,6 +254,7 @@ function Payments({ p, pays, docs }: { p: Project; pays: Payment[]; docs: Doc[] 
     void qc.invalidateQueries({ queryKey: projectKeys.payments(p.id) });
     void qc.invalidateQueries({ queryKey: projectKeys.activity(p.id) });
     void qc.invalidateQueries({ queryKey: keys.payments });
+    void qc.invalidateQueries({ queryKey: ['activity'] });
   };
   const ask = useMutation({
     mutationFn: () => {
@@ -275,7 +281,7 @@ function Payments({ p, pays, docs }: { p: Project; pays: Payment[]; docs: Doc[] 
           <table className="tbl tbl-stack"><tbody>
             {pays.map((x) => (
               <tr key={x.id}>
-                <td><b>{x.label}</b>{x.due_date && <div className="muted small">{t('app.pay.due', { date: date(x.due_date) })}{x.status === 'requested' && x.due_date < today() && <> · <span className="text-danger">{t('app.pay.overdue')}</span></>}</div>}</td>
+                <td><b>{x.label}</b>{x.due_date && <div className="muted small">{t('app.pay.due', { date: date(x.due_date) })}{x.status === 'requested' && x.due_date < today(locale.timeZone) && <> · <span className="text-danger">{t('app.pay.overdue')}</span></>}</div>}</td>
                 <td className="num">{money(Number(x.amount), x.currency)}</td>
                 <td><PayStatus status={x.status} />{x.reference && <div className="muted small">{x.reference}</div>}</td>
                 <td className="num">{x.status === 'requested' && <Button variant="ghost" size="sm" icon="check" onClick={() => setPaying(x)}>{t('app.pay.markPaid')}</Button>}</td>

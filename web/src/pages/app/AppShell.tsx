@@ -9,7 +9,7 @@ import { usePrefs } from '../../app/preferences';
 import type { Currency } from '../../lib/locale';
 import { getProfile, keys, listActivity, listClients, listDocuments, listPayments, listProjects } from '../../lib/db';
 import { signOut, useSession } from '../../lib/session';
-import { ButtonLink, Icon, IconButton, Logo, Menu, Spinner, type IconName } from '../../ui';
+import { Button, ButtonLink, EmptyState, Icon, Logo, Menu, Spinner, type IconName } from '../../ui';
 import './app.css';
 import '../../i18n/pages';
 
@@ -44,11 +44,12 @@ export default function AppShell() {
     if (session.isSuccess && !session.data && !leaving.current) window.location.replace('/login?next=' + encodeURIComponent(pathname + window.location.search + hash));
   }, [session.isSuccess, session.data, pathname, hash]);
 
-  // First visit: onboarding. "undefined" means the column isn't there yet (migration not applied).
+  // First visit: onboarding, remembering where the person was going. "undefined" means the column
+  // isn't there yet (migration not applied).
+  const needsOnboarding = profile.data?.onboarded_at === null && pathname !== '/app/welcome';
   useEffect(() => {
-    const p = profile.data;
-    if (p && p.onboarded_at === null && pathname !== '/app/welcome') navigate('/app/welcome', { replace: true });
-  }, [profile.data, pathname, navigate]);
+    if (needsOnboarding) navigate('/app/welcome', { replace: true, state: { from: pathname + window.location.search } });
+  }, [needsOnboarding, pathname, navigate]);
 
   // The profile's language, country, time zone and currency follow the account to any device.
   const { setLocale } = usePrefs();
@@ -67,8 +68,18 @@ export default function AppShell() {
     void qc.prefetchQuery({ queryKey: keys.clients, queryFn: listClients });
   };
 
-  if (!user || profile.isPending) {
+  // Wait for the profile (and the onboarding redirect) so no page renders or fetches with a
+  // missing profile, and nothing can save defaults over the real one.
+  if (!user || profile.isPending || needsOnboarding) {
     return <div className="app-loading" role="status" aria-label={t('states.loading')}><Spinner size={28} /></div>;
+  }
+  if (profile.isError || !profile.data) {
+    return (
+      <div className="app-loading">
+        <EmptyState art="inbox" title={t('app.dash.error')} body={profile.error ? (profile.error as Error).message : ''}
+          action={<Button onClick={() => void profile.refetch()}>{t('actions.retry')}</Button>} />
+      </div>
+    );
   }
   const name = profile.data?.name || user.email || '';
   const leave = () => { leaving.current = true; void signOut().then(() => { qc.clear(); window.location.assign('/'); }); };
@@ -81,7 +92,7 @@ export default function AppShell() {
           <span className="app-account-text"><b>{profile.data?.business_name || profile.data?.name || t('app.nav.account')}</b><small>{user.email}</small></span>
         </button>
       )}
-      align="start"
+      align="end"
       items={[
         { label: t('app.nav.settings'), icon: 'settings', onSelect: () => navigate('/app/settings') },
         { label: t('app.nav.signOut'), icon: 'logout', onSelect: leave },
@@ -110,7 +121,7 @@ export default function AppShell() {
 
       <header className="app-top">
         <AppLink to="/app" className="app-logo"><Logo size={26} /></AppLink>
-        <IconButton icon="spark" label={t('app.nav.estimate')} onClick={() => window.location.assign('/estimate')} />
+        <ButtonLink to="/estimate" variant="ghost" size="sm" icon="spark" className="app-top-est">{t('app.nav.estimate')}</ButtonLink>
         {account}
       </header>
 
@@ -125,6 +136,7 @@ export default function AppShell() {
           </NavLink>
         ))}
       </nav>
+      <ButtonLink to="/new" icon="plus" className="app-fab"><span className="app-fab-text">{t('app.nav.newScope')}</span></ButtonLink>
     </div>
   );
 }

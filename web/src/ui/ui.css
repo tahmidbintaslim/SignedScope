@@ -25,6 +25,11 @@
 .ss-btn--lg { min-height: 52px; padding: 0 24px; font-size: 16px; }
 .ss-btn--block { width: 100%; }
 .ss-btn--icon { padding: 0; aspect-ratio: 1; }
+/* Touch screens: small buttons still get a 44px target. */
+@media (pointer: coarse) {
+  .ss-btn--sm { min-height: 44px; }
+  .ss-btn--sm.ss-btn--icon { min-width: 44px; }
+}
 .ss-btn--primary { background: #6D28D9; color: #fff; } /* fixed violet: white text is 7:1 in both themes */
 .ss-btn--primary:hover { background: #5B21B6; }
 .ss-btn--secondary { background: var(--ss-surface-raised); color: var(--ss-text); border-color: var(--ss-border); box-shadow: var(--ss-shadow-sm); }
@@ -58,7 +63,7 @@
 .ss-card { background: var(--ss-surface-raised); border: 1px solid var(--ss-border); border-radius: var(--ss-radius-lg); padding: var(--ss-space-6); box-shadow: var(--ss-shadow-sm); }
 .ss-card--interactive { transition: transform var(--ss-duration-base) var(--ss-ease-standard), box-shadow var(--ss-duration-base) var(--ss-ease-standard); cursor: pointer; }
 .ss-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--ss-shadow-md); }
-.ss-badge { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 10px; border-radius: var(--ss-radius-full); font-size: 12px; font-weight: 700; }
+.ss-badge { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 10px; border-radius: var(--ss-radius-full); font-size: 12px; font-weight: 700; white-space: nowrap; }
 .ss-badge--neutral { background: var(--ss-surface); color: var(--ss-text-muted); }
 .ss-badge--brand { background: var(--ss-brand-soft); color: var(--ss-brand); }
 .ss-badge--success { background: color-mix(in srgb, var(--ss-success) 10%, transparent); color: var(--ss-success); }
@@ -75,12 +80,21 @@
 .ss-overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
 .ss-overlay--sheet { place-items: end center; padding: 0; }
 .ss-backdrop { position: absolute; inset: 0; background: rgb(7 11 31 / 48%); backdrop-filter: blur(2px); }
-.ss-modal { position: relative; width: min(520px, 100%); max-height: calc(100dvh - 32px); overflow: auto; background: var(--ss-surface-raised); color: var(--ss-text); border-radius: var(--ss-radius-xl); box-shadow: var(--ss-shadow-lg); padding: var(--ss-space-6); display: grid; gap: var(--ss-space-4); }
-.ss-modal--sheet { width: min(640px, 100%); border-radius: var(--ss-radius-xl) var(--ss-radius-xl) 0 0; padding-bottom: max(var(--ss-space-6), env(safe-area-inset-bottom)); max-height: 90dvh; }
+.ss-modal { --ss-modal-pad: var(--ss-space-6); --ss-modal-pad-b: var(--ss-modal-pad); position: relative; width: min(520px, 100%); max-height: calc(100dvh - 32px); overflow: auto; overscroll-behavior: contain; background: var(--ss-surface-raised); color: var(--ss-text); border-radius: var(--ss-radius-xl); box-shadow: var(--ss-shadow-lg); padding: var(--ss-modal-pad) var(--ss-modal-pad) var(--ss-modal-pad-b); display: grid; gap: var(--ss-space-4); }
+.ss-modal--sheet { --ss-modal-pad-b: max(var(--ss-space-6), env(safe-area-inset-bottom)); width: min(640px, 100%); border-radius: var(--ss-radius-xl) var(--ss-radius-xl) 0 0; max-height: 90dvh; }
 .ss-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .ss-modal-title { font-size: 20px; font-weight: 750; letter-spacing: -0.01em; }
 .ss-modal-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
-@media (max-width: 560px) { .ss-modal-foot > * { flex: 1; } }
+/* The footer stays in view while a long dialog scrolls, so the main action is always reachable. */
+.ss-modal-foot { position: sticky; bottom: calc(-1 * var(--ss-modal-pad-b)); z-index: 1; margin: 0 calc(-1 * var(--ss-modal-pad)) calc(-1 * var(--ss-modal-pad-b)); padding: 12px var(--ss-modal-pad) var(--ss-modal-pad-b); background: var(--ss-surface-raised); }
+/* Phones: every dialog opens as a bottom sheet, with full-width footer buttons. */
+@media (max-width: 560px) {
+  .ss-overlay--dialog { place-items: end center; padding: 0; }
+  .ss-modal--dialog { --ss-modal-pad: 20px; --ss-modal-pad-b: max(20px, env(safe-area-inset-bottom)); width: 100%; max-height: 92dvh; border-radius: var(--ss-radius-xl) var(--ss-radius-xl) 0 0; }
+  .ss-modal--sheet { --ss-modal-pad: 20px; }
+  .ss-modal-foot { border-top: 1px solid var(--ss-border); }
+  .ss-modal-foot > * { flex: 1; min-height: 48px; }
+}
 
 /* Toasts */
 .ss-toasts { position: fixed; z-index: 60; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; width: min(380px, calc(100% - 32px)); }

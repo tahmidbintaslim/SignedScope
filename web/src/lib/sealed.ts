@@ -28,8 +28,11 @@ export interface LineQuestion { id: string; itemId: string; question: string; an
 
 export const KINDS: ItemKind[] = ['scope', 'uat', 'out'];
 
+/** decodeURIComponent that returns the raw text for malformed input (a cut-off link) instead of throwing. */
+export const safeDecode = (s: string) => { try { return decodeURIComponent(s); } catch { return s; } };
+
 /** Reads the token after "#", as sent in sign-off and receipt links. */
-export const hashToken = () => (typeof window === 'undefined' ? '' : decodeURIComponent(window.location.hash.slice(1)));
+export const hashToken = () => (typeof window === 'undefined' ? '' : safeDecode(window.location.hash.slice(1)));
 
 /** The token from the URL hash: null while pre-rendering, then kept in sync when the hash changes. */
 export function useHashToken() {

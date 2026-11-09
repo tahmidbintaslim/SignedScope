@@ -8,8 +8,9 @@ const path = require('path');
 
 const URL = process.env.PGTEST_URL;
 const opts = { skip: !URL && 'PGTEST_URL not set' };
-const A = '00000000-0000-0000-0000-00000000000a';
-const B = '00000000-0000-0000-0000-00000000000b';
+// Clerk user ids (the "sub" of a Clerk session token).
+const A = 'user_2aaaaaaaaaaaaaaaaaaaaaaaaaa';
+const B = 'user_2bbbbbbbbbbbbbbbbbbbbbbbbbb';
 
 // SQL goes in on stdin so every statement's result prints (psql -c shows only the last).
 function psql(sql) {
@@ -19,8 +20,8 @@ function psql(sql) {
 const file = (f) => spawnSync('psql', [URL, '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-f', f], { encoding: 'utf8' });
 // Runs SQL as a signed-in user, the way PostgREST does for a browser request.
 // The first output line is the set_config result, so it is dropped.
-const as = (uid, sql, aal = 'aal1') => {
-  const r = psql(`begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${uid}","aal":"${aal}"}', true) is null;
+const as = (uid, sql) => {
+  const r = psql(`begin; set local role authenticated; select set_config('request.jwt.claims', '{"sub":"${uid}","role":"authenticated"}', true) is null;
 ${sql}; commit;`);
   return { ...r, out: r.out.split('\n').slice(1).join('\n') };
 };
@@ -31,9 +32,11 @@ test('migration applies and RLS isolates users', opts, () => {
     const r = file(path.join(__dirname, '..', f));
     assert.equal(r.status, 0, `${f}: ${r.stderr}`);
   }
-  // Sign-up creates a profile.
-  assert.ok(psql(`insert into auth.users (id, email) values ('${A}', 'a@x.co'), ('${B}', 'b@x.co')`).ok);
-  assert.equal(psql('select count(*) from public.profiles').out, '2');
+  // The server creates profiles on first sign-in; browsers can't.
+  assert.ok(!as(A, `insert into profiles (id, email) values ('${A}', 'a@x.co')`).ok, 'browser cannot create a profile');
+  assert.ok(psql(`insert into profiles (id, email) values ('${A}', 'a@x.co'), ('${B}', 'b@x.co')`).ok);
+  // Rows can't belong to someone without a profile.
+  assert.ok(!psql(`insert into clients (owner, name) values ('user_nobody', 'Ghost')`).ok, 'owner must have a profile');
 
   // A creates a client and project; B sees nothing of A's.
   const c = as(A, `insert into clients (name) values ('Acme') returning id`);
@@ -110,21 +113,16 @@ test('migration applies and RLS isolates users', opts, () => {
   // Vault: files must be inside a project folder; no overwrite policy exists.
   assert.ok(!as(A, `insert into storage.objects (bucket_id, name) values ('vault', '${A}/loose.pdf')`).ok, 'no files outside a project');
   assert.equal(as(A, `update storage.objects set name = name || '.x' returning id`).out.split('\n').filter(Boolean).length, 0, 'no overwrite');
-  // Two-step sign-in: once A has a verified authenticator, an aal1 session sees and changes nothing.
-  assert.ok(psql(`insert into auth.mfa_factors (user_id, status) values ('${A}', 'verified')`).ok);
-  assert.equal(as(A, 'select count(*) from clients').out.split('\n').pop(), '0', 'aal1 reads nothing');
-  assert.ok(!as(A, `insert into clients (name) values ('x')`).ok, 'aal1 writes nothing');
-  assert.equal(as(A, 'select count(*) from storage.objects').out, '0', 'aal1 sees no files');
-  assert.equal(as(A, 'select count(*) from clients', 'aal2').out.split('\n').pop(), '1', 'aal2 works');
-  assert.equal(as(B, 'select count(*) from profiles').out.split('\n').pop(), '1', 'users without MFA are unaffected');
+  // No session, no rows: a token without a subject sees nothing.
+  assert.equal(as('', 'select count(*) from clients').out.split('\n').pop(), '0', 'empty subject reads nothing');
   // Rate counters: server only, and atomic per window.
-  assert.ok(!as(A, `select public.bump_rate('k', 60)`, 'aal2').ok, 'browser cannot use the counters');
+  assert.ok(!as(A, `select public.bump_rate('k', 60)`).ok, 'browser cannot use the counters');
   assert.equal(psql(`select public.bump_rate('k', 60); select public.bump_rate('k', 60);`).out.split('\n').pop(), '2');
 
   // Anonymous requests see nothing.
   assert.ok(!psql(`begin; set local role anon; select count(*) from clients; commit;`).ok);
 
   // Deleting a project removes its estimates, documents and payments.
-  assert.ok(as(A, `delete from projects where id = '${projectId}'`, 'aal2').ok);
+  assert.ok(as(A, `delete from projects where id = '${projectId}'`).ok);
   assert.equal(psql(`select (select count(*) from documents) + (select count(*) from payments) + (select count(*) from questions)`).out, '0');
 });

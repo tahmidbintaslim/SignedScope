@@ -4,12 +4,13 @@ import { renderToString } from 'react-dom/server';
 import { createStaticHandler, createStaticRouter, StaticRouterProvider, type RouteObject } from 'react-router';
 import { Layout } from './app/Layout';
 import { Root } from './app/Root';
+import { RouteError } from './app/RouteError';
 import { childRoutes } from './app/routes';
 import { initI18n } from './i18n';
 import { DEFAULT_LOCALE } from './lib/locale';
 import { makeQueryClient } from './lib/query';
 
-const routes: RouteObject[] = [{ path: '/', Component: Layout, children: childRoutes }];
+const routes: RouteObject[] = [{ path: '/', Component: Layout, ErrorBoundary: RouteError, HydrateFallback: () => null, children: childRoutes }];
 export { META, PRERENDER, SHELLS } from "./app/routes";
 
 export async function render(url: string): Promise<string> {

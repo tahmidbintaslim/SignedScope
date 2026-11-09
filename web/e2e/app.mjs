@@ -34,20 +34,10 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.goto(BASE + '/app/projects');
   await p.waitForURL('**/login?next=*');
   check(new URL(p.url()).searchParams.get('next') === '/app/projects', 'signed out: /app redirects to /login with next');
-  await visible(p.getByLabel('Work email'));
-  await p.waitForTimeout(300);
-  check(await p.getByRole('button', { name: /Continue with/ }).count() === 0, 'login: no buttons for providers that are switched off');
+  check(await visible(p.getByTestId('clerk-sign-in')), 'login: Clerk sign-in mounted (Google, GitHub, email)');
   await audit(p, 'login');
   if (OUT) await p.screenshot({ path: `${OUT}/login.png` });
-  await p.getByLabel('Work email').fill('mai@studio.test');
-  await p.getByRole('button', { name: 'Email me a sign-in link' }).click();
-  check(await visible(p.getByText('We sent a sign-in link to mai@studio.test')), 'login: email link sent');
   check(p.errors.length === 0, `login: console ${p.errors.join(' | ') || 'clean'}`);
-}
-{
-  const p = await page(seed(), { signedIn: false, providers: { google: true, github: true } });
-  await p.goto(BASE + '/login');
-  check(await visible(p.getByRole('button', { name: 'Continue with Google' })) && await p.getByRole('button', { name: 'Continue with GitHub' }).isVisible(), 'login: buttons for providers that are switched on');
 }
 
 // New account: onboarding runs once, saves each step and creates the first project.
@@ -77,6 +67,10 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.getByLabel('Client name').fill('Lumen Café');
   await p.getByLabel('Project title').fill('Café website');
   await p.getByRole('button', { name: 'Go to my workspace' }).click();
+  // With a first project, onboarding opens it; the dashboard then lists it.
+  await p.waitForURL(/\/app\/projects\/[^/]+$/);
+  check(await visible(p.getByRole('heading', { name: 'Café website' })), 'onboarding: opens the new project');
+  await p.locator('.app-tabs, .app-side').first().getByRole('link', { name: 'Home' }).click();
   await p.waitForURL(/\/app$/);
   check(!!t.profiles[0].onboarded_at, 'onboarding: marked done');
   check(t.projects.length === 1 && t.clients.length === 1 && t.projects[0].client_id === t.clients[0].id && t.projects[0].currency === 'THB', 'onboarding: client and project created');
@@ -120,7 +114,7 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.getByRole('menuitem', { name: 'Sign out' }).click();
   await p.waitForURL((u) => u.pathname === '/', { waitUntil: 'commit' }).catch(() => {});
   await p.waitForLoadState('load');
-  check(await p.evaluate(() => !localStorage.getItem('sb-test-auth-token')), 'sign out: session cleared');
+  check(await p.evaluate(() => !sessionStorage.getItem('fake-user')), 'sign out: session cleared');
   check(p.errors.length === 0, `dashboard: console ${p.errors.join(' | ') || 'clean'}`);
 
   const m = await page(t, {}, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

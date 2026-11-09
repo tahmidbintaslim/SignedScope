@@ -19,7 +19,7 @@ export interface LocalePrefs {
 const KEY = 'ss-locale';
 /** What pre-rendered HTML is rendered with (hydration must match it). */
 export const DEFAULT_LOCALE: LocalePrefs = { language: 'en', country: 'US', timeZone: 'UTC', currency: 'USD' };
-const COUNTRY_CURRENCY: Record<string, Currency> = {
+export const COUNTRY_CURRENCY: Record<string, Currency> = {
   US: 'USD', GB: 'GBP', AU: 'AUD', CA: 'CAD', NZ: 'NZD', SG: 'SGD', TH: 'THB', BD: 'BDT', VN: 'VND',
   PH: 'PHP', IN: 'INR', MY: 'MYR', ID: 'IDR', JP: 'JPY', DE: 'EUR', FR: 'EUR', NL: 'EUR', ES: 'EUR', IT: 'EUR', IE: 'EUR',
 };

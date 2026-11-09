@@ -1,7 +1,7 @@
 // AI estimator: paste a brief, get features, stories, milestones and a price range from your rate.
 // The API returns hours only; every price here is computed from the rate and buffer, so edits
 // to hours, rate or buffer update all totals at once. Nothing is stored unless you save it.
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
@@ -210,6 +210,7 @@ function SaveToWorkspace({ est, brief, rate, buffer, currency, preferProject }: 
   const { t } = useTranslation();
   const { locale } = usePrefs();
   const toast = useToast();
+  const qc = useQueryClient();
   const session = useQuery({ queryKey: ['session'], queryFn: fullySignedIn, staleTime: 60_000 });
   const projects = useQuery({
     queryKey: ['projects', 'titles'],
@@ -242,7 +243,12 @@ function SaveToWorkspace({ est, brief, rate, buffer, currency, preferProject }: 
       await sb.from('activity').insert({ project_id: id, kind: 'estimate_saved', detail: { range: `${s.priceLow}–${s.priceHigh} ${currency}` } });
       return id;
     },
-    onSuccess: (id) => { setSavedTo(id); toast({ title: t('estimate.saved'), tone: 'success' }); },
+    onSuccess: (id) => {
+      // Saving again goes to the same project instead of creating another one.
+      setProjectId(id); setSavedTo(id);
+      for (const k of [['projects'], ['project', id], ['activity']]) void qc.invalidateQueries({ queryKey: k });
+      toast({ title: t('estimate.saved'), tone: 'success' });
+    },
     onError: (e) => toast({ title: (e as Error).message, tone: 'danger' }),
   });
 

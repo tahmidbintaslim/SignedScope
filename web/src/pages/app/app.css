@@ -18,27 +18,50 @@
 .app-main:focus { outline: none; }
 .app-top, .app-tabs { display: none; }
 @media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; }
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-content: start; }
+  .app-main { padding-bottom: calc(160px + env(safe-area-inset-bottom)); }
   .app-side { display: none; }
   .app-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 4px; padding: 8px 12px; background: color-mix(in srgb, var(--ss-surface-raised) 90%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ss-border); }
-  .app-top .app-logo { margin-right: auto; }
+  .app-top .app-logo { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; margin-right: auto; }
   .app-top .app-account-text { display: none; }
-  .app-top .app-account { width: auto; }
+  .app-top .app-account { width: auto; min-height: 44px; }
+  /* The account menu opens toward the screen's inside edge, not off its right side. */
+  .app-top .ss-menu { left: auto; right: 0; }
+  .app-top-est { flex: none; }
   .app-tabs { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 8px max(6px, env(safe-area-inset-bottom)); background: var(--ss-surface-raised); border-top: 1px solid var(--ss-border); }
-  .app-tabs a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; border-radius: var(--ss-radius-md); color: var(--ss-text-muted); font-size: 11px; font-weight: 600; text-decoration: none; }
+  .app-tabs a { display: grid; justify-items: center; gap: 2px; min-width: 0; min-height: 52px; padding: 4px 2px; border-radius: var(--ss-radius-md); color: var(--ss-text-muted); font-size: 12px; font-weight: 600; line-height: 1.3; text-align: center; text-decoration: none; }
+  .app-tabs a span { max-width: 100%; overflow-wrap: anywhere; }
+  .app-tabs a .ss-icon { box-sizing: content-box; padding: 3px 16px; border-radius: var(--ss-radius-full); transition: background var(--ss-duration-fast); }
   .app-tabs a.active { color: var(--ss-brand); }
+  .app-tabs a.active .ss-icon { background: var(--ss-brand-soft); }
+  /* New scope stays one tap away on phones: a floating button above the tab bar. */
+  .app-fab { position: fixed; z-index: 19; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); display: inline-flex; min-height: 52px; border-radius: var(--ss-radius-full); box-shadow: var(--ss-shadow-lg); }
+  /* Toasts sit above the tab bar instead of covering it. */
+  body:has(.app-tabs) .ss-toasts { bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+.app-fab { display: none; }
+@media (max-width: 900px) { .app-fab { display: inline-flex; } }
+@media (max-width: 479px) {
+  .app-fab { width: 56px; min-height: 56px; padding: 0; }
+  .app-fab-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* Narrow phones: the logo shows its mark only (the name stays for screen readers) so labeled actions fit. */
+@media (max-width: 439px) {
+  .app-top .ss-logo-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
 /* Shared page pieces */
 .page-head { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; }
 .page-head h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); }
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-.kpi { display: grid; gap: 4px; }
-.kpi b { font-size: clamp(1.4rem, 3vw, 1.9rem); letter-spacing: -0.02em; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.kpi b { font-size: clamp(1.15rem, 5vw, 1.9rem); letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: anywhere; }
 .kpi small { color: var(--ss-text-muted); }
-@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-.cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
-@media (max-width: 1000px) { .cols { grid-template-columns: 1fr; } }
+.kpi .ss-badge { justify-self: start; }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi b { font-size: clamp(1.15rem, 3.4vw, 1.9rem); } }
+@media (max-width: 420px) { .kpis { gap: 10px; } .kpis > .kpi { padding: 14px; } .kpi b { font-size: clamp(1rem, 4.4vw, 1.25rem); } }
+.cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 1100px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 .cols > section { display: grid; gap: 16px; }
 .cols h2 { font-size: 18px; }
 .feed { display: grid; margin: 0; padding: 0; list-style: none; }
@@ -46,12 +69,17 @@
 .feed li:last-child { border-bottom: 0; }
 .feed time, .feed small { color: var(--ss-text-muted); font-size: 13px; }
 .feed a { font-weight: 600; text-decoration: none; color: var(--ss-text); }
+.feed > li > a { display: flex; align-items: center; min-height: 44px; margin-block: -9px; }
 .feed a:hover { color: var(--ss-brand); }
 .tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ss-text-muted); padding: 8px 12px; border-bottom: 1px solid var(--ss-border); }
+.tbl th { white-space: nowrap; text-align: left; font-size: 12px; font-weight: 600; color: var(--ss-text-muted); padding: 8px 12px; border-bottom: 1px solid var(--ss-border); }
 .tbl td { padding: 12px; border-bottom: 1px solid var(--ss-border); }
 .tbl tr:last-child td { border-bottom: 0; }
 .tbl a { font-weight: 600; color: var(--ss-text); text-decoration: none; }
+/* Row links fill the cell's height so the whole row is an easy tap target. */
+.tbl td > a { display: block; padding-block: 11px; margin-block: -11px; }
+.tbl td > a:has(+ *) { margin-bottom: 0; padding-bottom: 2px; }
+.tbl td.muted:last-child { white-space: nowrap; }
 .tbl a:hover { color: var(--ss-brand); }
 @media (max-width: 640px) { .hide-sm { display: none; } }
 .card-flush { padding: 8px 12px; }
@@ -76,7 +104,7 @@
 .text-danger { color: var(--ss-danger); }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .checks { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
-.checks label { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.checks label { display: flex; gap: 10px; align-items: center; min-height: 44px; cursor: pointer; }
 .checks input { width: 18px; height: 18px; accent-color: var(--ss-brand); }
 .mfa-qr { width: 180px; height: 180px; padding: 8px; border-radius: var(--ss-radius-md); background: #fff; border: 1px solid var(--ss-border); }
 .tbl td .ss-badge + div { margin-top: 4px; }
@@ -90,3 +118,6 @@
   .tbl-stack td.num:last-child { margin-left: auto; }
   .tbl-stack .row-end { justify-content: flex-start; }
 }
+/* Destructive actions at the end of a page: set apart and easy to hit. */
+.detail > .sect:has(> .ss-btn:only-child) { padding-top: 20px; border-top: 1px solid var(--ss-border); }
+.detail > .sect:has(> .ss-btn:only-child) > .ss-btn { width: fit-content; min-height: 44px; color: var(--ss-danger); }

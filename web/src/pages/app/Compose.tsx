@@ -2,14 +2,14 @@
 // drafted by AI from the project's estimate), the lines the client approves, a payment
 // schedule, optional terms from the clause library, and how the client pays. Sealed into the
 // same kind of sign-off link as a scope, filed to the project.
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
 import { CLAUSES, CLAUSE_VARS, LAW, LAW_COUNTRIES, LAW_DISPUTES, fillClause, type ClauseVar } from '../../lib/clauses';
-import { getClient, getProject, listEstimates, projectKeys, clientKeys } from '../../lib/db';
+import { getClient, getProject, keys, listEstimates, projectKeys, clientKeys } from '../../lib/db';
 import { linesFromEstimate } from '../../lib/draft';
 import { LANGUAGES, type Language } from '../../lib/locale';
 import { Button, ButtonLink, Card, EmptyState, Field, Icon, IconButton, Input, Select, Skeleton, Textarea, useToast } from '../../ui';
@@ -52,6 +52,7 @@ function Composer({ p, est, client }: { p: NonNullable<Awaited<ReturnType<typeof
   const { user, profile } = useApp();
   const { money } = usePrefs();
   const toast = useToast();
+  const qc = useQueryClient();
   const me = profile?.business_name || profile?.name || '';
   const clientName = client?.company || client?.name || '';
   const cur = est?.currency ?? p.currency;
@@ -138,6 +139,8 @@ function Composer({ p, est, client }: { p: NonNullable<Awaited<ReturnType<typeof
       if (!d.items.length) throw new Error(t('compose.needLines'));
       return api<{ token: string }>('seal', d);
     },
+    // The new document shows on the project and the dashboard without a reload.
+    onSuccess: () => { for (const k of [projectKeys.documents(p.id), projectKeys.activity(p.id), keys.documents, ['activity']]) void qc.invalidateQueries({ queryKey: k }); },
     onError: (e) => toast({ title: errText(e), tone: 'danger' }),
   });
 

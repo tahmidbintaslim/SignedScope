@@ -80,7 +80,7 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   const p = await page(t);
   await p.goto(BASE + `/app/projects/${P}`);
   await p.getByRole('heading', { name: 'Lumen Café website' }).waitFor();
-  check(await visible(p.getByRole('link', { name: /3,600/ })), 'detail: estimate listed');
+  check(await visible(p.getByText(/3,600/).first()), 'detail: estimate listed');
   check(await visible(p.getByRole('link', { name: 'Change request' })), 'detail: change request offered for a signed scope');
   await p.getByLabel('Project status').selectOption('completed');
   check(await visible(p.getByText('Status updated')) && t.projects.find((x) => x.id === P).status === 'completed', 'detail: status saved');
@@ -177,17 +177,8 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   await audit(p, 'settings');
   if (OUT) await p.screenshot({ path: `${OUT}/settings.png`, fullPage: true });
 
-  await p.getByRole('button', { name: 'Set up authenticator app' }).click();
-  check(await visible(p.getByRole('img', { name: 'QR code for your authenticator app' })) && await p.getByText('JBSWY3DPEHPK3PXP').isVisible(), 'mfa: QR and key shown');
-  await p.getByLabel('6-digit code from the app').fill('000000');
-  await p.getByRole('button', { name: 'Verify and turn on' }).click();
-  check(await visible(p.getByText('Invalid TOTP code entered')), 'mfa: wrong code refused');
-  await p.getByLabel('6-digit code from the app').fill('123456');
-  await p.getByRole('button', { name: 'Verify and turn on' }).click();
-  check(await visible(p.getByText('A code from your authenticator app is needed when you sign in.')), 'mfa: turned on');
-  await p.getByRole('button', { name: 'Turn off' }).click();
-  await p.getByRole('dialog', { name: 'Turn off two-step sign-in?' }).getByRole('button', { name: 'Turn off' }).click();
-  check(await visible(p.getByRole('button', { name: 'Set up authenticator app' })) && t._factors.length === 0, 'mfa: turned off');
+  await p.getByRole('button', { name: 'Sign-in and security' }).click();
+  check(await until(() => p.evaluate(() => window.__ssOpenedProfile === true)), 'security: opens the Clerk account panel (2-step, sign-in methods)');
 
   const [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Export my data' }).click()]);
   const data = JSON.parse(readFileSync(await dl.path(), 'utf8'));

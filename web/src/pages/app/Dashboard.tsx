@@ -9,7 +9,7 @@ import { Badge, ButtonLink, Card, EmptyState, Skeleton } from '../../ui';
 import { useApp } from './context';
 
 const STATUS_TONE: Record<string, 'neutral' | 'brand' | 'success' | 'warning'> = { lead: 'neutral', estimating: 'neutral', proposal_sent: 'brand', approved: 'success', in_progress: 'warning', completed: 'success', cancelled: 'neutral' };
-const today = () => new Date().toISOString().slice(0, 10);
+import { dayIn, today } from './shared';
 
 export function ProjectStatus({ status }: { status: Project['status'] }) {
   const { t } = useTranslation();
@@ -30,7 +30,7 @@ export function useActivityText() {
 export default function Dashboard() {
   const { t } = useTranslation();
   const { profile } = useApp();
-  const { money, date } = usePrefs();
+  const { money, date, locale } = usePrefs();
   const projects = useQuery({ queryKey: keys.projects, queryFn: listProjects });
   const docs = useQuery({ queryKey: keys.documents, queryFn: listDocuments });
   const pays = useQuery({ queryKey: keys.payments, queryFn: listPayments });
@@ -69,9 +69,10 @@ export default function Dashboard() {
   const active = projects.data.filter((p) => !['completed', 'cancelled'].includes(p.status));
   const waiting = docs.data.filter((d) => d.status === 'sent' || d.status === 'viewed');
   const open = pays.data.filter((p) => p.status === 'requested');
-  const overdue = open.filter((p) => p.due_date && p.due_date < today());
-  const month = today().slice(0, 7);
-  const paidMonth = pays.data.filter((p) => p.status.startsWith('paid') && String(p.paid_at || '').slice(0, 7) === month);
+  // Dates in the user's own time zone: due dates are calendar days, paid_at is a timestamp.
+  const now = today(locale.timeZone);
+  const overdue = open.filter((p) => p.due_date && p.due_date < now);
+  const paidMonth = pays.data.filter((p) => p.status.startsWith('paid') && p.paid_at && dayIn(locale.timeZone, p.paid_at).slice(0, 7) === now.slice(0, 7));
   const todo = [
     ...overdue.map((p) => ({ id: 'p' + p.id, text: t('app.dash.overdueItem', { label: p.label, amount: money(Number(p.amount), p.currency) }), project: p.project_id })),
     ...waiting.map((d) => ({ id: 'd' + d.id, text: t(d.status === 'viewed' ? 'app.dash.openedItem' : 'app.dash.waitingItem', { title: d.title }), project: d.project_id })),

@@ -1,8 +1,8 @@
-// The signed-in user for React: one cached query, kept fresh by Supabase auth events.
+// The signed-in user for React: one cached query, kept fresh by Clerk's session events.
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { fullySignedIn } from './auth';
-import { supabase } from './supabase';
+import { clerk } from './clerk';
 
 export const SESSION_KEY = ['session'] as const;
 
@@ -10,19 +10,28 @@ export function useSession() {
   const qc = useQueryClient();
   useEffect(() => {
     let off = () => {};
-    supabase().then((sb) => {
-      if (!sb) return;
-      const { data } = sb.auth.onAuthStateChange(() => { void qc.invalidateQueries({ queryKey: SESSION_KEY }); });
-      off = () => data.subscription.unsubscribe();
+    let cancelled = false;
+    let last: string | null | undefined;
+    clerk().then((c) => {
+      if (!c || cancelled) return;
+      // Fires on sign-in, sign-out, user switch and token refresh; only the user change matters.
+      // A different account must never see the last one's cached rows, so the cache is dropped.
+      off = c.addListener(({ user }) => {
+        const id = user?.id ?? null;
+        if (last !== undefined && id !== last) { qc.clear(); void qc.invalidateQueries({ queryKey: SESSION_KEY }); }
+        last = id;
+      });
     }).catch(() => {});
-    return () => off();
+    return () => { cancelled = true; off(); };
   }, [qc]);
-  return useQuery({ queryKey: SESSION_KEY, queryFn: fullySignedIn, staleTime: 5 * 60_000 });
+  return useQuery({ queryKey: SESSION_KEY, queryFn: fullySignedIn, staleTime: Infinity });
 }
 
-export async function signOut() {
-  const sb = await supabase();
-  await sb?.auth.signOut();
+/** Signs out and drops every cached query, so the next account never sees the last one's data. */
+export async function signOut(qc?: { clear: () => void }) {
+  const c = await clerk().catch(() => null);
+  await c?.signOut();
+  qc?.clear();
 }
 
 /** Same-origin path to return to after sign-in; anything else falls back to /app. */

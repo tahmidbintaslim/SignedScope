@@ -1,6 +1,6 @@
 // Locale (language, country, time zone, currency) and theme for the whole app.
 // Both persist locally; the signed-in profile will sync them in phase E.
-import { createContext, use, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import i18n from '../i18n';
 import { formatDate, formatMoney, formatNumber, formatRelative, loadLocale, saveLocale, type LocalePrefs } from '../lib/locale';
 
@@ -26,10 +26,17 @@ function readTheme(): Theme {
 
 export function PreferencesProvider({ children, initial, adoptStored }: { children: ReactNode; initial?: LocalePrefs; adoptStored?: boolean }) {
   const [locale, setLocaleState] = useState<LocalePrefs>(() => initial ?? loadLocale());
-  const [theme, setThemeState] = useState<Theme>(() => (typeof window === 'undefined' ? 'system' : readTheme()));
+  // Pre-rendered pages were rendered with the 'system' theme; hydrate with the same value (React
+  // won't patch attribute mismatches), then switch to the stored one.
+  const [theme, setThemeState] = useState<Theme>(() => (typeof window === 'undefined' || adoptStored ? 'system' : readTheme()));
+  const themeReady = useRef(!adoptStored);
 
   // After hydrating pre-rendered HTML (rendered with defaults), switch to the visitor's settings.
-  useEffect(() => { if (adoptStored) setLocaleState(loadLocale()); }, [adoptStored]);
+  useEffect(() => {
+    if (!adoptStored) return;
+    setLocaleState(loadLocale());
+    setThemeState(readTheme());
+  }, [adoptStored]);
 
   const setLocale = useCallback((patch: Partial<LocalePrefs>) => {
     setLocaleState((prev) => { const next = { ...prev, ...patch }; saveLocale(next); return next; });
@@ -47,6 +54,9 @@ export function PreferencesProvider({ children, initial, adoptStored }: { childr
   }, [locale.language]);
 
   useEffect(() => {
+    // First run after hydration: <html data-theme> is already right (set before paint), and the
+    // state still says 'system' until the stored theme is read, so leave it alone.
+    if (!themeReady.current) { themeReady.current = true; return; }
     if (theme === 'system') document.documentElement.removeAttribute('data-theme');
     else document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);

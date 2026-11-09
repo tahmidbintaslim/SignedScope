@@ -30,6 +30,7 @@ function Header() {
           <AppNavLink to="/login">{t('nav.signIn')}</AppNavLink>
         </nav>
         <div className="site-tools">
+          <AppLink to="/login" className="site-signin">{t('nav.signIn')}</AppLink>
           <label className="visually-hidden" htmlFor="lang">{t('settings.language')}</label>
           <Select id="lang" value={locale.language} onChange={(e) => setLocale({ language: e.target.value as Language })} className="site-lang">
             {LANGUAGES.map((l) => <option key={l} value={l}>{LANG_NAME[l]}</option>)}
