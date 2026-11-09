@@ -7,7 +7,7 @@ import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
 import { KINDS, useHashToken, isPayable, type SealedReceipt, type Verified } from '../../lib/sealed';
 import { Badge, Button, ButtonLink, Card, Icon, Skeleton } from '../../ui';
-import { CantOpen, DocParts, PayBox } from './parts';
+import { CantOpen, DocParts, DueBox, PayBox } from './parts';
 import './doc.css';
 import '../../i18n/pages';
 
@@ -78,6 +78,7 @@ export default function Receipt() {
         </div>
       )}
 
+      {r.due && <DueBox due={r.due} currency={r.due.currency} changeRequest={Boolean(d.parent)} />}
       {payable && <PayBox d={d} label={t('receipt.pay')} />}
 
       <Card className="doc-evidence">

@@ -1,5 +1,5 @@
 'use strict';
-const { seal, open, str, email, items, currency, payLink, sections, schedule, handler, httpError, sha256 } = require('./_lib');
+const { seal, open, str, email, items, currency, payLink, sections, schedule, depositPct, handler, httpError, sha256 } = require('./_lib');
 const db = require('./_supabase');
 const { limited, clientIp } = require('./_limit');
 
@@ -19,10 +19,16 @@ module.exports = handler(async (body, req) => {
     currency: currency(body.currency),
     schedule: schedule(body.schedule),
     payLink: payLink(body.payLink),
+    deposit: depositPct(body.deposit),
     // Plain-text payment details such as bank transfer or PromptPay, shown after approval.
     payInstructions: str(body.payInstructions, 800, 'Payment instructions', false),
     createdAt: new Date().toISOString(),
   };
+  // A deposit is a share of the approved price, so it needs priced lines; a written schedule
+  // (proposals and agreements) already says what is due when, so the two don't mix.
+  if (doc.deposit && !doc.items.some((it) => it.price != null)) throw httpError(400, 'Add a price to at least one line to ask for a deposit');
+  if (doc.deposit && doc.schedule.length) throw httpError(400, 'Use either a deposit or a payment schedule, not both');
+  if (!doc.deposit) delete doc.deposit;
   if (body.parent) {
     // Change request: link to the previously signed receipt (baseline).
     const { obj: r, hash } = open(body.parent, 'receipt');

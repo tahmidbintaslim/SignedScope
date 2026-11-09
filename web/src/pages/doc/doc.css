@@ -54,3 +54,5 @@
   .decide { break-inside: avoid; }
   .decide-opts input:not(:checked) + .ss-icon, .decide-opt:not(:has(input:checked)) { display: none; }
 }
+.doc-due { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--ss-radius-md); background: var(--ss-brand-soft); }
+.doc-due .doc-total-row b { font-size: 1.25rem; }

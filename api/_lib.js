@@ -150,6 +150,25 @@ function payable(items, decisions) {
   return items.some((it) => it.price != null) ? acceptedTotal(items, decisions) > 0 : true;
 }
 
+// Optional deposit: a whole percentage (1-100) of the approved amount, due when the client signs.
+function depositPct(v) {
+  if (v == null || v === '' || v === 0 || v === '0') return undefined;
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 1 || n > 100) throw httpError(400, 'Deposit must be a whole percentage from 1 to 100');
+  return n;
+}
+
+// What the client owes on signing under a deposit rule. The base is the approved total, or on a
+// change request only the approved increase over the signed baseline (nothing is due for a cut).
+function amountDue(doc, totals) {
+  if (!doc.deposit || !totals) return undefined;
+  const cents = (n) => Math.round(n * 100);
+  const base = cents(totals.accepted) - (totals.baseline != null ? cents(totals.baseline) : 0);
+  if (base <= 0) return undefined;
+  const now = Math.round((base * doc.deposit) / 100);
+  return { pct: doc.deposit, base: base / 100, now: now / 100, later: (base - now) / 100, currency: totals.currency };
+}
+
 // Sum of prices for items the client accepted (exclusions never carry a price).
 function acceptedTotal(items, decisions) {
   const cents = items.reduce((t, it) => t + (it.price != null && decisions[it.id] && decisions[it.id].status === 'accepted' ? Math.round(it.price * 100) : 0), 0);
@@ -196,4 +215,4 @@ function handler(fn) {
   };
 }
 
-module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, payable, sections, schedule, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES, REF_RE };
+module.exports = { seal, open, str, email, items, price, currency, payLink, acceptedTotal, payable, depositPct, amountDue, sections, schedule, handler, httpError, sha256, MAX_BODY, PAY_HOSTS, CURRENCIES, REF_RE };

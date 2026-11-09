@@ -6,13 +6,13 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
-import { KINDS, diffStatus, useHashToken, proposedTotal, type Decision, type DecisionStatus, type SealedDoc, type SealedItem, type Verified } from '../../lib/sealed';
+import { KINDS, depositDue, diffStatus, useHashToken, proposedTotal, type Decision, type DecisionStatus, type SealedDoc, type SealedItem, type Verified, type Due } from '../../lib/sealed';
 import { Badge, Button, Card, Field, Icon, Input, Skeleton } from '../../ui';
-import { CantOpen, DocParts, LinkBox, PayBox } from './parts';
+import { CantOpen, DocParts, DueBox, LinkBox, PayBox } from './parts';
 import './doc.css';
 import '../../i18n/pages';
 
-interface Signed { receipt: string; outcome: 'approved' | 'changes_requested'; payable: boolean }
+interface Signed { receipt: string; outcome: 'approved' | 'changes_requested'; payable: boolean; due?: Due }
 
 export default function Sign() {
   const { t } = useTranslation();
@@ -58,6 +58,7 @@ function SignForm({ token, d }: { token: string; d: SealedDoc }) {
   const base = d.parent?.total ?? null;
   const removed = d.parent ? d.parent.items.filter((p) => !d.items.some((i) => i.id === p.id)) : [];
   const undecided = d.items.filter((i) => !decisions[i.id]).length;
+  const due = total.priced > 0 ? depositDue(d.deposit, total.amount, base) : null;
 
   const sign = useMutation({
     mutationFn: () => api<Signed>('sign', { token, name: who.name, email: who.email, agree: who.agree, decisions }, { auth: false }),
@@ -81,6 +82,7 @@ function SignForm({ token, d }: { token: string; d: SealedDoc }) {
           <LinkBox url={url} label={t('sign.receiptLink')} />
           <div className="row"><a className="ss-btn ss-btn--secondary ss-btn--md" href={url}><span className="ss-btn-label"><Icon name="receipt" size={18} />{t('sign.openReceipt')}</span></a></div>
         </Card>
+        {sign.data.due && <Card><DueBox due={sign.data.due} currency={sign.data.due.currency} changeRequest={Boolean(d.parent)} /></Card>}
         {sign.data.payable && <PayBox d={d} label={t('sign.payNow')} />}
       </div>
     );
@@ -122,6 +124,7 @@ function SignForm({ token, d }: { token: string; d: SealedDoc }) {
               : t('sign.totalHint')}</p>
           </div>
         )}
+        {due && <DueBox due={due} currency={cur} live changeRequest={Boolean(d.parent)} />}
 
         <Card className="stack doc-signer">
           <h2>{t('sign.signTitle')}</h2>

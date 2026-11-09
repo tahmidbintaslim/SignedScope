@@ -36,7 +36,7 @@ async function page(ctxOpts = {}) {
 
 const token = await seal({
   title: 'Lumen Café website: Phase 1', client: 'Lumen Café', agency: 'Mai Studio', agencyEmail: 'mai@studio.test', currency: 'THB', notes: 'Launch by March.',
-  payLink: 'https://buy.stripe.com/test_123', payInstructions: 'PromptPay: 081-234-5678',
+  payLink: 'https://buy.stripe.com/test_123', payInstructions: 'PromptPay: 081-234-5678', deposit: 30,
   items: [
     { kind: 'scope', text: 'Home page with menu', price: '20000' },
     { kind: 'scope', text: 'Online booking', price: '15000' },
@@ -53,6 +53,7 @@ let receipt;
   check(await visible(p.getByRole('heading', { name: 'Lumen Café website: Phase 1' })), 'sign: document shown');
   check(await p.getByRole('note').filter({ hasText: 'not verified' }).isVisible(), 'sign: unverified sender warning for links made without an account');
   check(/35,000/.test(await p.locator('.doc-total').innerText()), 'sign: proposed total starts at the full price');
+  check(/Due when you sign \(30%\)[\s\S]*10,500/.test(await p.locator('.doc-due').innerText()), 'sign: deposit shown live (30% of 35,000)');
   await audit(p, 'sign');
   if (OUT) await p.screenshot({ path: `${OUT}/sign.png`, fullPage: true });
   // Signing with undecided lines is blocked with a count.
@@ -64,6 +65,7 @@ let receipt;
   await group('Home page with menu').getByLabel('Accept').check();
   await group('Online booking').getByLabel('Reject').check();
   check(/20,000/.test(await p.locator('.doc-total').innerText()), 'sign: rejecting a priced line lowers the total');
+  check(/6,000/.test(await p.locator('.doc-due').innerText()), 'sign: deposit follows the approved total');
   await group('Online booking').getByLabel('What needs to change?').fill('Next phase please');
   await group('Booking works on iPhone Safari').getByLabel('Accept').check();
   await group('Hosting and domain').getByLabel('Understood: not included').check();
@@ -73,6 +75,7 @@ let receipt;
   const pay = p.getByRole('link', { name: /Pay now/ });
   check(await pay.getAttribute('href') === 'https://buy.stripe.com/test_123' && await p.getByText('through buy.stripe.com').isVisible(), 'sign: pay link with its host named');
   check(await p.getByText('PromptPay: 081-234-5678').isVisible(), 'sign: payment instructions shown');
+  check(/Due now \(30%\)[\s\S]*6,000[\s\S]*Balance later:.*14,000/.test(await p.locator('.doc-due').innerText()), 'sign: due now and balance after signing');
   receipt = new URL(await p.getByLabel('Receipt link').inputValue()).hash.slice(1);
   check(receipt.startsWith('v1.'), 'sign: receipt link given');
   await audit(p, 'sign done');
@@ -87,6 +90,7 @@ let receipt;
   check(await p.getByText('Changes requested', { exact: true }).isVisible(), 'receipt: outcome');
   check(await p.getByText('Comment: Next phase please').isVisible(), 'receipt: rejection comment');
   check(/20,000/.test(await p.locator('.doc-total').innerText()), 'receipt: approved total');
+  check(/Due now \(30%\)[\s\S]*6,000/.test(await p.locator('.doc-due').innerText()), 'receipt: what is due now');
   const badge = p.getByRole('link', { name: /Signature verified/ });
   check((await badge.getAttribute('href')).startsWith('/verify#v1.'), 'receipt: verify badge links to /verify');
   check(await p.getByRole('link', { name: /Pay approved amount/ }).isVisible(), 'receipt: pay button when something payable was approved');
@@ -104,7 +108,7 @@ let receipt;
   const base = (await (await fetch(BASE + '/api/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: receipt }) })).json()).data.doc.items;
   const id = (text) => base.find((i) => i.text === text).id;
   const cr = await seal({
-    title: 'Lumen Café website: Phase 1', client: 'Lumen Café', agency: 'Mai Studio', currency: 'THB', parent: receipt,
+    title: 'Lumen Café website: Phase 1', client: 'Lumen Café', agency: 'Mai Studio', currency: 'THB', parent: receipt, deposit: 100,
     items: [
       { id: id('Home page with menu'), kind: 'scope', text: 'Home page with menu', price: '20000' },
       { kind: 'scope', text: 'LINE booking button', price: '4000' },
@@ -116,6 +120,7 @@ let receipt;
   check(await visible(p.getByText(/Change request against “Lumen Café website: Phase 1”, signed by Rafi Ahmed/)), 'change request: baseline banner');
   check(await p.locator('.decide.is-added').count() === 1, 'change request: added line marked');
   check(await p.getByText('Removed since the signed version').isVisible(), 'change request: removed lines listed');
+  check(/Due when you sign \(100%\)[\s\S]*4,000[\s\S]*of the approved increase/.test(await p.locator('.doc-due').innerText()), 'change request: 100% of the increase is due');
   check(/Signed before: THB\s?20,000|Signed before: ฿20,000/.test(await p.locator('.doc-total').innerText()), `change request: total against the baseline (${(await p.locator('.doc-total').innerText()).replace(/\n/g, ' ')})`);
   check(await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'phone: no horizontal scroll');
   await audit(p, 'change request phone');
