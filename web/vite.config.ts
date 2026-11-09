@@ -13,6 +13,8 @@ export default defineConfig({
     assetsInlineLimit: 0,
     modulePreload: { polyfill: false },
     sourcemap: true,
+    // Read by scripts/prerender.mjs to link each page's CSS in its HTML (no flash of unstyled page).
+    manifest: true,
     copyPublicDir: false,
   },
   test: {

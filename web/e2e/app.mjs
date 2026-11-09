@@ -34,13 +34,20 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.goto(BASE + '/app/projects');
   await p.waitForURL('**/login?next=*');
   check(new URL(p.url()).searchParams.get('next') === '/app/projects', 'signed out: /app redirects to /login with next');
-  check(await visible(p.getByRole('button', { name: 'Continue with Google' })), 'login: provider buttons');
+  await visible(p.getByLabel('Work email'));
+  await p.waitForTimeout(300);
+  check(await p.getByRole('button', { name: /Continue with/ }).count() === 0, 'login: no buttons for providers that are switched off');
   await audit(p, 'login');
   if (OUT) await p.screenshot({ path: `${OUT}/login.png` });
   await p.getByLabel('Work email').fill('mai@studio.test');
   await p.getByRole('button', { name: 'Email me a sign-in link' }).click();
   check(await visible(p.getByText('We sent a sign-in link to mai@studio.test')), 'login: email link sent');
   check(p.errors.length === 0, `login: console ${p.errors.join(' | ') || 'clean'}`);
+}
+{
+  const p = await page(seed(), { signedIn: false, providers: { google: true, github: true } });
+  await p.goto(BASE + '/login');
+  check(await visible(p.getByRole('button', { name: 'Continue with Google' })) && await p.getByRole('button', { name: 'Continue with GitHub' }).isVisible(), 'login: buttons for providers that are switched on');
 }
 
 // New account: onboarding runs once, saves each step and creates the first project.

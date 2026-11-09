@@ -1,4 +1,4 @@
-// Sign in: Google or GitHub, or a one-time email link; then the authenticator code when the
+// Sign in: a one-time email link, or Google / GitHub when switched on in Supabase; then the authenticator code when the
 // account has two-step sign-in. Returns to ?next= (same-origin paths only).
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
@@ -22,6 +22,8 @@ export default function Login() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
+  // Only the sign-in providers switched on in Supabase get a button (others answer 400).
+  const [providers, setProviders] = useState<{ google: boolean; github: boolean }>({ google: false, github: false });
 
   // A full page load: the app may live on the old site until phase E ships.
   const done = () => { void qc.invalidateQueries({ queryKey: SESSION_KEY }); window.location.replace(next); };
@@ -32,6 +34,11 @@ export default function Login() {
       const cfg = await getConfig().catch(() => ({ enabled: false }));
       const sb = cfg.enabled ? await supabase() : null;
       if (!sb) { setStep('off'); return; }
+      if ('supabaseUrl' in cfg && cfg.supabaseUrl && cfg.supabaseAnonKey) {
+        void fetch(`${cfg.supabaseUrl}/auth/v1/settings`, { headers: { apikey: cfg.supabaseAnonKey } })
+          .then((r) => r.json()).then((j: { external?: Record<string, boolean> }) => setProviders({ google: !!j.external?.google, github: !!j.external?.github }))
+          .catch(() => { /* email sign-in still works */ });
+      }
       const afterSession = async () => {
         const { data } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
         if (data && data.nextLevel === 'aal2' && data.currentLevel !== 'aal2') setStep('mfa');
@@ -83,11 +90,15 @@ export default function Login() {
           <>
             <h1>{t('auth.title')}</h1>
             <p className="muted">{t('auth.lede')}</p>
-            <div className="auth-oauth">
-              <Button variant="secondary" block loading={busy === 'google'} onClick={() => void oauth('google')}><GoogleMark />{t('auth.google')}</Button>
-              <Button variant="secondary" block loading={busy === 'github'} onClick={() => void oauth('github')}><GithubMark />{t('auth.github')}</Button>
-            </div>
-            <p className="auth-or"><span>{t('auth.or')}</span></p>
+            {(providers.google || providers.github) && (
+              <>
+                <div className="auth-oauth">
+                  {providers.google && <Button variant="secondary" block loading={busy === 'google'} onClick={() => void oauth('google')}><GoogleMark />{t('auth.google')}</Button>}
+                  {providers.github && <Button variant="secondary" block loading={busy === 'github'} onClick={() => void oauth('github')}><GithubMark />{t('auth.github')}</Button>}
+                </div>
+                <p className="auth-or"><span>{t('auth.or')}</span></p>
+              </>
+            )}
             <form onSubmit={sendLink} className="stack">
               <Field label={t('auth.email')} hint={t('auth.noPassword')}>
                 <Input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@studio.com" />
