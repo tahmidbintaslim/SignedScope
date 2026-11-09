@@ -67,6 +67,10 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.getByLabel('Client name').fill('Lumen Café');
   await p.getByLabel('Project title').fill('Café website');
   await p.getByRole('button', { name: 'Go to my workspace' }).click();
+  // With a first project, onboarding opens it; the dashboard then lists it.
+  await p.waitForURL(/\/app\/projects\/[^/]+$/);
+  check(await visible(p.getByRole('heading', { name: 'Café website' })), 'onboarding: opens the new project');
+  await p.locator('.app-tabs, .app-side').first().getByRole('link', { name: 'Home' }).click();
   await p.waitForURL(/\/app$/);
   check(!!t.profiles[0].onboarded_at, 'onboarding: marked done');
   check(t.projects.length === 1 && t.clients.length === 1 && t.projects[0].client_id === t.clients[0].id && t.projects[0].currency === 'THB', 'onboarding: client and project created');

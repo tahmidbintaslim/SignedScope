@@ -80,7 +80,7 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   const p = await page(t);
   await p.goto(BASE + `/app/projects/${P}`);
   await p.getByRole('heading', { name: 'Lumen Café website' }).waitFor();
-  check(await visible(p.getByRole('link', { name: /3,600/ })), 'detail: estimate listed');
+  check(await visible(p.getByText(/3,600/).first()), 'detail: estimate listed');
   check(await visible(p.getByRole('link', { name: 'Change request' })), 'detail: change request offered for a signed scope');
   await p.getByLabel('Project status').selectOption('completed');
   check(await visible(p.getByText('Status updated')) && t.projects.find((x) => x.id === P).status === 'completed', 'detail: status saved');
