@@ -18,7 +18,7 @@ const check = (ok, msg) => { console.log((ok ? 'ok   ' : 'FAIL ') + msg); if (!o
   const p = await ctx.newPage();
   await p.goto(BASE + '/');
   check(await p.getByRole('heading', { level: 1 }).innerText().then((t) => t.includes('Get the scope signed')), 'no-JS: hero heading present');
-  check(await p.getByText('Good questions.').isVisible(), 'no-JS: lower sections visible');
+  check(await p.getByRole('heading', { name: 'Questions', exact: true }).isVisible(), 'no-JS: lower sections visible');
   check((await p.title()).startsWith('SignedScope'), 'no-JS: title set');
   await ctx.close();
 }
