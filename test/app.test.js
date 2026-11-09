@@ -124,6 +124,25 @@ test('deposit: a share of the approved amount, due on signing; change requests c
   assert.equal(r3.body.due, undefined);
 });
 
+test('Starter limit: off by default; when set, counts only links still waiting for a signature', async () => {
+  const auth = { authorization: 'Bearer fake-token-' + A.id };
+  const open = () => (store.tables.documents || []).filter((d) => d.owner === A.id && ['sent', 'viewed'].includes(d.status)).length;
+  assert.equal((await call(seal, { ...base, projectId: P }, auth)).status, 200, 'no limit while STARTER_SCOPE_LIMIT is unset');
+  process.env.STARTER_SCOPE_LIMIT = String(open() + 1);
+  try {
+    const last = await call(seal, { ...base, title: 'Last slot', projectId: P }, auth);
+    assert.equal(last.status, 200, 'up to the limit');
+    const over = await call(seal, { ...base, projectId: P }, auth);
+    assert.equal(over.status, 402);
+    assert.match(over.body.error, /open sign-off links at a time/);
+    assert.equal((await call(seal, base)).status, 200, 'unfiled links are not counted');
+    // Signing one frees a slot.
+    const d = (await call(verify, { token: last.body.token })).body.data;
+    await call(sign, { token: last.body.token, name: 'Nok', agree: true, decisions: { [d.items[0].id]: { status: 'accepted' } } });
+    assert.equal((await call(seal, { ...base, projectId: P }, auth)).status, 200, 'a signed link frees a slot');
+  } finally { delete process.env.STARTER_SCOPE_LIMIT; }
+});
+
 test('proposal writer: signed-in only, never asked for prices, input fenced', async () => {
   const proposal = require('../api/proposal');
   const body = { project: 'Café site', client: 'Café Lumi', features: ['Menu', 'Booking'], milestones: ['1. Design (1 week)'], lang: 'th' };

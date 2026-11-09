@@ -53,6 +53,7 @@ module.exports = handler(async (body, req) => {
     const { data } = await db.admin().from('projects').select('id, status').eq('id', body.projectId).eq('owner', user.id).maybeSingle();
     if (!data) throw httpError(404, 'Project not found');
     project = data;
+    await checkOpenLimit(user.id);
   }
   // Links made without an account say so on the client's page ("sender not verified"),
   // so a SignedScope link cannot be used to borrow trust for someone else's name.
@@ -76,3 +77,15 @@ module.exports = handler(async (body, req) => {
   await db.logActivity(user.id, project.id, 'document_sent', { title: doc.title, revision: doc.revision });
   return { token, documentId: row.id };
 });
+
+// Starter plan: at most N filed links waiting for a signature at once (sent or viewed). Off unless
+// STARTER_SCOPE_LIMIT is set, so the beta stays unlimited; signed and changed links don't count.
+async function checkOpenLimit(owner) {
+  const max = Number(process.env.STARTER_SCOPE_LIMIT || 0);
+  if (!Number.isInteger(max) || max <= 0) return;
+  const { data } = await db.admin().from('documents').select('id').eq('owner', owner).in('status', ['sent', 'viewed']);
+  if ((data || []).length >= max) {
+    throw httpError(402, `Your plan includes ${max} open sign-off links at a time. When a client signs one, you can send the next.`);
+  }
+}
+
