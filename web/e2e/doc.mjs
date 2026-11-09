@@ -26,7 +26,7 @@ const seal = async (body) => {
   return j.token;
 };
 async function page(ctxOpts = {}) {
-  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'], ...ctxOpts });
+  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', bypassCSP: true, permissions: ['clipboard-read', 'clipboard-write'], ...ctxOpts });
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', (e) => p.errors.push(e.message));
