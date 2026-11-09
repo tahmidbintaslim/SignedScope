@@ -48,8 +48,15 @@
   .doc-evidence dd { margin-bottom: 6px; }
   .doc-share { flex-direction: column; }
 }
+/* Print / PDF: the receipt prints as an audit record (all decisions, hashes, verify steps). */
+.print-only { display: none; }
 @media print {
   .site-header, .site-footer, .noprint, .skip-link, .ss-toasts { display: none !important; }
+  .print-only { display: block; }
+  .doc-pay > a { display: none; }
+  .doc-evidence { break-inside: avoid; border: 1px solid #999; box-shadow: none; }
+  .doc-evidence dl { grid-template-columns: max-content 1fr; }
+  .doc a { color: inherit; text-decoration: none; }
   .doc { padding: 0; max-width: none; }
   .decide { break-inside: avoid; }
   .decide-opts input:not(:checked) + .ss-icon, .decide-opt:not(:has(input:checked)) { display: none; }

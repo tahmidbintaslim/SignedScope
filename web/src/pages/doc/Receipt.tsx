@@ -11,6 +11,14 @@ import { CantOpen, DocParts, DueBox, PayBox } from './parts';
 import './doc.css';
 import '../../i18n/pages';
 
+/** Print to PDF with a useful file name (browsers use the page title), then restore the title. */
+function auditPdf(name: string) {
+  const before = document.title;
+  document.title = name.replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 120);
+  window.addEventListener('afterprint', () => { document.title = before; }, { once: true });
+  window.print();
+}
+
 export default function Receipt() {
   const { t } = useTranslation();
   const { money, date } = usePrefs();
@@ -83,18 +91,25 @@ export default function Receipt() {
 
       <Card className="doc-evidence">
         <h2>{t('receipt.evidence')}</h2>
+        <p className="print-only small">{t('receipt.auditPrinted', { when: new Date().toISOString() })}</p>
         <dl>
+          <dt>{t('receipt.signer')}</dt><dd>{r.signer.name}{r.signer.email ? ` <${r.signer.email}>` : ''}</dd>
+          <dt>{t('receipt.signedAt')}</dt><dd className="mono">{r.signedAt}</dd>
+          {d.createdAt && <><dt>{t('receipt.createdAt')}</dt><dd className="mono">{d.createdAt}</dd></>}
+          <dt>{t('receipt.outcomeLabel')}</dt><dd>{t(`receipt.${r.outcome}`)} · {t('receipt.revisionN', { n: d.revision || 1 })}</dd>
+          <dt>{t('receipt.preparedBy')}</dt><dd>{d.agency}{d.agencyEmail ? ` <${d.agencyEmail}>` : ''}{d.anon ? ` · ${t('receipt.unverifiedSender')}` : ''}</dd>
           <dt>{t('receipt.docHash')}</dt><dd className="mono">{r.docHash}</dd>
           <dt>{t('receipt.receiptHash')}</dt><dd className="mono">{q.data.hash}</dd>
           <dt>{t('receipt.country')}</dt><dd>{r.evidence.country || t('receipt.na')}</dd>
           <dt>{t('receipt.ua')}</dt><dd className="mono">{r.evidence.uaHash}</dd>
-          {d.parent && <><dt>{t('receipt.supersedes')}</dt><dd className="mono">{d.parent.receiptHash.slice(0, 16)}…</dd></>}
+          {d.parent && <><dt>{t('receipt.supersedes')}</dt><dd className="mono">{d.parent.receiptHash}</dd></>}
         </dl>
+        <p className="small">{t('receipt.howToVerify', { url: `${window.location.origin}/verify` })}</p>
         <p className="muted small">{t('receipt.notLegal')}</p>
       </Card>
 
       <div className="row noprint">
-        <Button variant="secondary" icon="download" onClick={() => window.print()}>{t('receipt.print')}</Button>
+        <Button variant="secondary" icon="download" onClick={() => auditPdf(`SignedScope receipt - ${d.title} - ${r.signedAt.slice(0, 10)}`)}>{t('receipt.print')}</Button>
         <ButtonLink to={`/new#cr=${encodeURIComponent(token!)}`} variant="ghost" icon="change">{t('receipt.changeRequest')}</ButtonLink>
       </div>
     </article>
