@@ -146,7 +146,11 @@ let receipt;
   const asked = [{ id: 'q1', itemId: '', question: 'Is the menu bilingual?', answer: 'Yes, Thai and English.', answeredAt: '2026-11-09T00:00:00Z', createdAt: '2026-11-08T00:00:00Z' }];
   await p.route('**/api/verify', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
-    if (body.action === 'ask') return route.fulfill({ json: { ok: true, questions: [...asked, { id: 'q2', itemId: body.itemId, question: body.question, answer: null, answeredAt: null, createdAt: '2026-11-09T01:00:00Z' }] } });
+    // Stored like the real API, so a background refetch of the link still lists it.
+    if (body.action === 'ask') {
+      asked.push({ id: 'q2', itemId: body.itemId, question: body.question, answer: null, answeredAt: null, createdAt: '2026-11-09T01:00:00Z' });
+      return route.fulfill({ json: { ok: true, questions: asked } });
+    }
     const real = await (await route.fetch()).json();
     asked[0].itemId = real.data.items[0].id;
     return route.fulfill({ json: { ...real, questions: asked } });
@@ -157,8 +161,9 @@ let receipt;
   await line.getByRole('button', { name: 'Ask about this line' }).click();
   await line.getByLabel('Your question').fill('Can we add a gallery?');
   await line.getByRole('button', { name: 'Send question' }).click();
-  check(await visible(line.getByText('Can we add a gallery?')) && await line.getByText('Waiting for an answer from the sender.').isVisible(), 'questions: new question listed, waiting');
-  check(await line.getByRole('status').filter({ hasText: 'Question sent' }).isVisible(), 'questions: sent confirmation');
+  // Both wait: on a slow network the list and the status can land a frame apart.
+  check(await visible(line.getByText('Can we add a gallery?', { exact: true })) && await visible(line.getByText('Waiting for an answer from the sender.')), 'questions: new question listed, waiting');
+  check(await visible(line.getByRole('status').filter({ hasText: 'Question sent' })), 'questions: sent confirmation');
   await audit(p, 'sign with questions');
   check(p.errors.length === 0, `questions: console ${p.errors.join(' | ') || 'clean'}`);
 }
