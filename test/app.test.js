@@ -243,3 +243,32 @@ test('security: one-time signing, sender flag, two-step sessions, verified email
     assert.doesNotMatch(mails[0].subject, /[\r\n]/);
   } finally { global.fetch = realFetch; delete process.env.RESEND_API_KEY; delete process.env.EMAIL_FROM; }
 });
+
+test('per-line questions: only on filed, unsigned links; answers come back to the link holder', async () => {
+  const unfiled = await call(seal, base);
+  const ud = (await call(verify, { token: unfiled.body.token, viewed: true })).body;
+  assert.equal(ud.questions, undefined, 'no questions on unfiled links');
+  const no = await call(verify, { action: 'ask', token: unfiled.body.token, itemId: ud.data.items[0].id, question: 'Is this mobile?' });
+  assert.equal(no.status, 409);
+
+  const s = await call(seal, { ...base, title: 'Q test', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+  const v = (await call(verify, { token: s.body.token, viewed: true })).body;
+  assert.deepEqual(v.questions, []);
+  const itemId = v.data.items[0].id;
+  assert.equal((await call(verify, { action: 'ask', token: s.body.token, itemId: 'nope', question: 'x' })).status, 400);
+  assert.equal((await call(verify, { action: 'ask', token: s.body.token, itemId, question: '  ' })).status, 400);
+  const r = await call(verify, { action: 'ask', token: s.body.token, itemId, question: 'Does the menu include photos?', name: 'Nok' });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.deepEqual(r.body.questions.map((q) => [q.itemId, q.question, q.answer ?? null]), [[itemId, 'Does the menu include photos?', null]]);
+  assert.equal(Object.keys(r.body.questions[0]).includes('owner'), false, 'owner never returned');
+  const row = store.tables.questions.find((q) => q.question === 'Does the menu include photos?');
+  assert.equal(row.owner, A.id); assert.equal(row.item_text, 'Menu'); assert.equal(row.asker_name, 'Nok');
+  assert.ok(store.tables.activity.some((a) => a.kind === 'question_asked' && a.detail.title === 'Q test'));
+
+  row.answer = 'Yes, up to 20 photos.'; row.answered_at = new Date().toISOString();
+  const again = (await call(verify, { token: s.body.token, viewed: true })).body;
+  assert.equal(again.questions[0].answer, 'Yes, up to 20 photos.');
+
+  await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions: { [itemId]: { status: 'accepted' } } });
+  assert.equal((await call(verify, { action: 'ask', token: s.body.token, itemId, question: 'Late?' })).status, 409, 'closed once signed');
+});

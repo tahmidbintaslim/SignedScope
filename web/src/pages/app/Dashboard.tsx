@@ -23,7 +23,7 @@ export function useActivityText() {
     if (a.kind === 'document_signed') return t(d.outcome === 'approved' ? 'app.act.signed_ok' : 'app.act.signed_changes', { signer: d.signer || 'Client', title: d.title || '' });
     if (a.kind === 'status_changed') return t('app.act.status_changed', { from: t(`app.status.${d.from}`, { defaultValue: String(d.from) }), to: t(`app.status.${d.to}`, { defaultValue: String(d.to) }) });
     const key = `app.act.${a.kind}`;
-    return t(key, { defaultValue: a.kind, title: d.title ?? '', name: d.name ?? '', range: d.range ?? '', revision: d.revision ?? 1, label: d.label ?? '', amount: d.amount ?? '' });
+    return t(key, { defaultValue: a.kind, title: d.title ?? '', name: d.name ?? '', range: d.range ?? '', revision: d.revision ?? 1, label: d.label ?? '', amount: d.amount ?? '', question: d.question ?? '' });
   };
 }
 

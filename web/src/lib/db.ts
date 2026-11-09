@@ -14,6 +14,7 @@ export interface Client { id: string; name: string; company: string | null; emai
 export interface Project { id: string; client_id: string | null; title: string; status: ProjectStatus; currency: string; start_date: string | null; due_date: string | null; notes: string | null; created_at: string; updated_at: string }
 export interface Doc { id: string; project_id: string | null; kind: string; title: string; revision: number; status: 'sent' | 'viewed' | 'signed' | 'changes_requested'; currency: string | null; total: number | null; created_at: string; signed_at: string | null; signer_name: string | null; token?: string; receipt_token?: string | null }
 export interface Payment { id: string; project_id: string; document_id: string | null; label: string; amount: number; currency: string; due_date: string | null; status: 'requested' | 'paid_manual' | 'paid_provider' | 'cancelled'; method: string | null; reference: string | null; paid_at: string | null; created_at: string }
+export interface Question { id: string; document_id: string; item_id: string; item_text: string; question: string; asker_name: string | null; answer: string | null; answered_at: string | null; created_at: string }
 export interface Activity { id: number; project_id: string | null; kind: string; detail: Record<string, string | number | undefined>; created_at: string }
 
 /** Profile fields the browser may change (column grants in the security and onboarding migrations). */
@@ -107,6 +108,7 @@ export const projectKeys = {
   payments: (id: string) => ['project', id, 'payments'] as const,
   activity: (id: string) => ['project', id, 'activity'] as const,
   files: (id: string) => ['project', id, 'files'] as const,
+  questions: (id: string) => ['project', id, 'questions'] as const,
 };
 export const clientKeys = { one: (id: string) => ['client', id] as const };
 
@@ -127,6 +129,15 @@ export async function listEstimates(projectId: string): Promise<EstimateRow[]> {
 }
 export async function listProjectDocuments(projectId: string): Promise<Doc[]> {
   return ok(await (await db()).from('documents').select('*').eq('project_id', projectId).order('created_at', { ascending: false }));
+}
+/** Questions clients asked on this project's links (written by the server; the owner only answers). */
+export async function listQuestions(documentIds: string[]): Promise<Question[]> {
+  if (!documentIds.length) return [];
+  return ok(await (await db()).from('questions').select('*').in('document_id', documentIds).order('created_at', { ascending: false }).limit(100));
+}
+export async function answerQuestion(id: string, answer: string): Promise<void> {
+  const text = answer.trim();
+  ok(await (await db()).from('questions').update({ answer: text || null, answered_at: text ? new Date().toISOString() : null }).eq('id', id).select('id').single());
 }
 export async function listProjectPayments(projectId: string): Promise<Payment[]> {
   return ok(await (await db()).from('payments').select('*').eq('project_id', projectId).order('created_at', { ascending: true }));
@@ -183,7 +194,7 @@ export async function deleteClient(id: string) { ok(await (await db()).from('cli
 export async function exportAll(userId: string, profile: Profile | null | undefined) {
   const sb = await db();
   const out: Record<string, unknown> = { exportedAt: new Date().toISOString(), profile };
-  for (const t of ['clients', 'projects', 'estimates', 'documents', 'payments', 'activity']) out[t] = ok(await sb.from(t).select('*'));
+  for (const t of ['clients', 'projects', 'estimates', 'documents', 'payments', 'activity', 'questions']) out[t] = ok(await sb.from(t).select('*'));
   const files: unknown[] = [];
   for (const p of out.projects as Project[]) files.push(...(await listFiles(userId, p.id)).map((f) => ({ project_id: p.id, name: f.shown, size: f.size })));
   out.files = files;

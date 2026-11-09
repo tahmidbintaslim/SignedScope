@@ -55,4 +55,15 @@ async function documentEvent(event, row, extra = {}) {
   }
 }
 
-module.exports = { enabled, send, owner, withinCap, documentEvent, appUrl };
+// A client asked about one line before signing. Sent with the "signed" preference: both are
+// the client waiting on you.
+async function question(row, { item, question: q, name }) {
+  if (!enabled()) return;
+  const o = await owner(row.owner);
+  if (!o || !o.notify_signed || !(await withinCap(row.owner))) return;
+  const title = clean(row.title || 'your document').slice(0, 160);
+  await send(o.email, `Question on "${title}"`,
+    `${clean(name).slice(0, 120) || 'Your client'} asked about a line in "${title}":\n\nLine: ${clean(item).slice(0, 300)}\nQuestion: ${clean(q).slice(0, 600)}\n\nAnswer it from the project page; your client sees the answer when they open the link again.${projectLink(row.project_id)}`);
+}
+
+module.exports = { enabled, send, owner, withinCap, documentEvent, question, appUrl };

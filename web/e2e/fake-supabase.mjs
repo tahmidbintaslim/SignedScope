@@ -64,7 +64,7 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
     const rows = tables[table] ?? (tables[table] = []);
     const wantsOne = (req.headers()['accept'] || '').includes('vnd.pgrst.object');
     const filters = [...url.searchParams].filter(([k]) => !['select', 'order', 'limit', 'columns', 'on_conflict'].includes(k));
-    const match = (row) => filters.every(([k, v]) => !v.startsWith('eq.') || String(row[k]) === v.slice(3));
+    const match = (row) => filters.every(([k, v]) => (v.startsWith('eq.') ? String(row[k]) === v.slice(3) : v.startsWith('in.(') ? v.slice(4, -1).split(',').map((x) => x.replace(/^"|"$/g, '')).includes(String(row[k])) : true));
     const reply = (data) => route.fulfill({ status: 200, contentType: 'application/json', json: wantsOne ? (Array.isArray(data) ? data[0] ?? null : data) : data });
     if (req.method() === 'GET') return reply(rows.filter(match));
     if (req.method() === 'POST') {
