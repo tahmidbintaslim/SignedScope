@@ -7,6 +7,8 @@ export interface SealedItem { id: string; kind: ItemKind; text: string; price?: 
 export interface SealedDoc {
   type: 'doc'; kind?: 'scope' | 'proposal' | 'agreement'; title: string; client: string; agency: string; agencyEmail?: string; notes?: string;
   currency?: string; payLink?: string; payInstructions?: string; items: SealedItem[]; revision?: number; createdAt?: string; anon?: boolean;
+  /** Share (1-100) of the approved amount due when the client signs. */
+  deposit?: number;
   sections?: { heading: string; body: string }[]; schedule?: { label: string; amount: number; due?: string }[];
   parent?: { receiptHash: string; docHash: string; title: string; signedAt: string; signer: string; items: SealedItem[]; total?: number; currency?: string };
 }
@@ -16,7 +18,10 @@ export interface SealedReceipt {
   type: 'receipt'; docHash: string; doc: Omit<SealedDoc, 'type'>; signer: { name: string; email?: string }; decisions: Record<string, Decision>;
   totals?: { currency: string; accepted: number; baseline: number | null }; outcome: 'approved' | 'changes_requested'; signedAt: string;
   evidence: { country?: string; uaHash: string };
+  due?: Due;
 }
+/** What is due on signing under a deposit rule (computed by the server; mirrored by depositDue). */
+export interface Due { pct: number; base: number; now: number; later: number; currency: string }
 export interface Verified<T> { valid: true; hash: string; data: T }
 
 export const KINDS: ItemKind[] = ['scope', 'uat', 'out'];
@@ -68,3 +73,12 @@ export const payHost = (link?: string) => {
   if (!link || !/^https:\/\//.test(link)) return null;
   try { return new URL(link).hostname; } catch { return null; }
 };
+
+/** Same rule as amountDue() in api/_lib.js: a share of the approved amount, or of the increase on a change request. */
+export function depositDue(pct: number | undefined, approved: number, baseline: number | null | undefined) {
+  if (!pct) return null;
+  const base = Math.round(approved * 100) - (baseline != null ? Math.round(baseline * 100) : 0);
+  if (base <= 0) return null;
+  const now = Math.round((base * pct) / 100);
+  return { pct, base: base / 100, now: now / 100, later: (base - now) / 100 };
+}

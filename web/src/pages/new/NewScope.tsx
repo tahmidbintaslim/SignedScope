@@ -16,7 +16,7 @@ import { CURRENCIES } from '../../lib/locale';
 import type { SealedReceipt, Verified } from '../../lib/sealed';
 import { Button, Card, Field, Icon, Input, Select, Textarea } from '../../ui';
 import { LinkBox } from '../doc/parts';
-import { ItemsEditor, newItem, toSealItems, type EditItem } from './ItemsEditor';
+import { ItemsEditor, itemsTotal, newItem, toSealItems, type EditItem } from './ItemsEditor';
 import './new.css';
 import '../../i18n/pages';
 
@@ -29,6 +29,8 @@ export default function NewScope() {
   const [f, setF] = useState<Form>({ title: '', client: '', agency: '', agencyEmail: '', currency: locale.currency, payLink: '', payInstructions: '', notes: '' });
   const [items, setItems] = useState<EditItem[]>(() => [newItem('scope'), newItem('uat'), newItem('out')]);
   const [parent, setParent] = useState<string | null>(null);
+  // Share of the approved amount due on signing; change requests default to 100% of the increase.
+  const [deposit, setDeposit] = useState('');
   const [heading, setHeading] = useState('');
   const [banner, setBanner] = useState<Banner>(null);
   const [paste, setPaste] = useState('');
@@ -47,6 +49,7 @@ export default function NewScope() {
         if (data.type !== 'receipt') throw new Error(t('receipt.notReceipt'));
         const d = data.doc;
         setParent(token);
+        setDeposit('100');
         setHeading(t('new.crTitle', { n: (d.revision || 1) + 1 }));
         setBanner({ tone: 'info', text: t('new.crBanner', { title: d.title, signer: data.signer.name, when: date(data.signedAt, 'datetime') }) });
         setF({ title: d.title, client: d.client, agency: d.agency, agencyEmail: d.agencyEmail ?? '', currency: d.currency || 'USD', payLink: d.payLink ?? '', payInstructions: d.payInstructions ?? '', notes: '' });
@@ -87,6 +90,7 @@ export default function NewScope() {
     mutationFn: () => api<{ token: string; documentId?: string }>('seal', {
       ...f, payLink: f.payLink.trim(), payInstructions: f.payInstructions.trim(), items: toSealItems(items),
       ...(parent ? { parent } : {}), ...(projectId ? { projectId } : {}),
+      ...(Number(deposit) > 0 && itemsTotal(items) > 0 ? { deposit: Number(deposit) } : {}),
     }),
     onSuccess: () => window.scrollTo({ top: 0 }),
   });
@@ -142,6 +146,12 @@ export default function NewScope() {
         <div className="new-grid">
           <Field label={t('new.currency')} hint={parent ? t('new.currencyLocked') : undefined}>
             <Select value={f.currency} onChange={set('currency')} disabled={Boolean(parent)}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</Select>
+          </Field>
+          <Field label={t('new.deposit')} hint={!itemsTotal(items) ? t('new.depositNeedsPrice') : t(parent ? 'new.depositHintCr' : 'new.depositHint')}>
+            <Select value={deposit} onChange={(e) => setDeposit(e.target.value)} disabled={!itemsTotal(items)}>
+              <option value="">{t('new.depositNone')}</option>
+              {[25, 30, 50, 100].map((p) => <option key={p} value={p}>{t('new.depositPct', { pct: p })}</option>)}
+            </Select>
           </Field>
           <Field label={t('new.payLink')} optional hint={t('new.payLinkHint')}>
             <Input type="url" maxLength={500} value={f.payLink} onChange={set('payLink')} placeholder="https://buy.stripe.com/…" />

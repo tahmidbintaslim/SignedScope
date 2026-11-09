@@ -266,6 +266,13 @@
       "scope": "In scope",
       "uat": "Tests to pass",
       "out": "Out of scope"
+    },
+    "due": {
+      "onSigning": "Due when you sign ({{pct}}%)",
+      "now": "Due now ({{pct}}%)",
+      "ofApproved": "{{pct}}% of the approved {{base}}.",
+      "ofIncrease": "{{pct}}% of the approved increase, {{base}}.",
+      "later": "Balance later: {{amount}}."
     }
   },
   "sign": {
@@ -375,7 +382,13 @@
     "linkLabel": "Sign-off link",
     "preview": "Preview as client",
     "backToProject": "Back to the project",
-    "filed": "Saved to your project. You’ll see when your client opens and signs it."
+    "filed": "Saved to your project. You’ll see when your client opens and signs it.",
+    "deposit": "Due when the client signs",
+    "depositNone": "Nothing upfront",
+    "depositPct": "{{pct}}% deposit",
+    "depositHint": "A share of the total your client approves. The rest becomes a balance request.",
+    "depositHintCr": "A share of the increase your client approves over the signed scope.",
+    "depositNeedsPrice": "Add a price to a line to ask for a deposit."
   },
   "compose": {
     "type": "Document type",

@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { seal, open, str, email, acceptedTotal, payable, handler, httpError } = require('./_lib');
+const { seal, open, str, email, acceptedTotal, payable, amountDue, handler, httpError } = require('./_lib');
 const db = require('./_supabase');
 const notify = require('./_notify');
 const { limited, clientIp } = require('./_limit');
@@ -47,10 +47,13 @@ module.exports = handler(async (body, req) => {
       uaHash: crypto.createHash('sha256').update(ua).digest('hex').slice(0, 16),
     },
   };
+  // Deposit due now (and the balance later), from the approved amount.
+  receipt.due = amountDue(doc, receipt.totals);
+  if (!receipt.due) delete receipt.due;
   const token = seal(receipt);
   if (db.configured()) await recordSigning(docHash, receipt, token);
   const canPay = (Boolean(doc.payLink) || Boolean(doc.payInstructions)) && payable(doc.items, decisions);
-  return { receipt: token, outcome: receipt.outcome, payable: canPay };
+  return { receipt: token, outcome: receipt.outcome, payable: canPay, ...(receipt.due ? { due: receipt.due } : {}) };
 });
 
 // Updates the freelancer's dashboard when a filed document is signed. Never blocks signing.
@@ -66,6 +69,10 @@ async function recordSigning(docHash, receipt, token) {
     if (receipt.outcome === 'approved') {
       await db.admin().from('projects').update({ status: 'approved' }).eq('id', data.project_id).in('status', ['lead', 'estimating', 'proposal_sent']);
       await scheduleToPayments(data, receipt);
+    } else if (receipt.due) {
+      // A deposit follows what was approved, so it is requested even when some lines were rejected
+      // (the client was shown it as due). A fixed schedule assumes the whole scope, so it waits.
+      await scheduleToPayments(data, receipt);
     }
     await db.logActivity(data.owner, data.project_id, 'document_signed', { outcome: receipt.outcome, signer: receipt.signer.name, title: receipt.doc.title });
     await notify.documentEvent('signed', { ...data, title: receipt.doc.title }, { outcome: receipt.outcome, signer: receipt.signer.name,
@@ -73,9 +80,17 @@ async function recordSigning(docHash, receipt, token) {
   } catch (e) { console.error('recordSigning', e.message); }
 }
 
+// A deposit rule becomes two payment requests: the deposit now and the balance later.
+function depositPlan(receipt) {
+  const d = receipt.due;
+  if (!d) return [];
+  if (d.pct === 100) return [{ label: receipt.doc.parent ? 'Approved changes (100%)' : 'Full payment (100%)', amount: d.now }];
+  return [{ label: `Deposit ${d.pct}%`, amount: d.now }, ...(d.later > 0 ? [{ label: `Balance ${100 - d.pct}%`, amount: d.later }] : [])];
+}
+
 // An approved payment schedule becomes payment requests on the project, once per document.
 async function scheduleToPayments(row, receipt) {
-  const plan = receipt.doc.schedule || [];
+  const plan = (receipt.doc.schedule || []).length ? receipt.doc.schedule : depositPlan(receipt);
   if (!plan.length || !row.project_id) return;
   const { data: existing } = await db.admin().from('payments').select('id').eq('document_id', row.id).limit(1);
   if (existing && existing.length) return;

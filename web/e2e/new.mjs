@@ -51,12 +51,13 @@ async function page(ctxOpts = {}) {
   check(await p.locator('.item.is-out').count() === 2, 'new: pasted list becomes one line per row');
   check(/15,000/.test(await p.locator('.items-total').innerText()), 'new: running total');
   await p.getByLabel('Currency').selectOption('THB');
+  await p.getByLabel('Due when the client signs').selectOption('50');
   await p.getByRole('button', { name: 'Create sign-off link' }).click();
   check(await visible(p.getByRole('heading', { name: 'Your link is ready' })), 'new: link created');
   const link = await p.getByLabel('Sign-off link').inputValue();
   check(/\/sign#v1\./.test(link), 'new: sign link given');
   const { data } = await post('verify', { token: new URL(link).hash.slice(1) });
-  check(data.items.length === 4 && data.currency === 'THB' && data.items.filter((i) => i.price != null).length === 2 && data.anon === true, `new: sealed lines, prices and currency (${data.items.length} lines)`);
+  check(data.items.length === 4 && data.currency === 'THB' && data.items.filter((i) => i.price != null).length === 2 && data.anon === true && data.deposit === 50, `new: sealed lines, prices, currency and deposit (${data.items.length} lines)`);
   if (OUT) await p.screenshot({ path: `${OUT}/new-done.png` });
   check(p.errors.length === 0, `new: console ${p.errors.join(' | ') || 'clean'}`);
 }
@@ -90,6 +91,7 @@ async function page(ctxOpts = {}) {
   check(await visible(p.getByRole('heading', { name: 'Your link is ready' })), 'change request: link created');
   const { data: cr } = await post('verify', { token: new URL(await p.getByLabel('Sign-off link').inputValue()).hash.slice(1) });
   check(cr.parent && cr.revision === 2 && cr.parent.total === 800 && cr.items[0].id === d.items[0].id, 'change request: sealed against the baseline, ids kept');
+  check(cr.deposit === 100, 'change request: 100% of the increase due on signing by default');
   check(await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'phone: no horizontal scroll');
   await audit(p, 'new phone');
   if (OUT) await p.screenshot({ path: `${OUT}/new-cr-phone.png`, fullPage: true });

@@ -91,6 +91,39 @@ test('agreement: sections and schedule are sealed; signing creates the payment r
     ['Deposit 50%', 4500, 'THB', A.id, P], ['Final 50%', 4500, 'THB', A.id, P]], 'created once, even if signed twice');
 });
 
+test('deposit: a share of the approved amount, due on signing; change requests charge the increase', async () => {
+  const body = { ...base, title: 'Deposit test', items: [{ kind: 'scope', text: 'Site', price: '1000' }, { kind: 'scope', text: 'Blog', price: '500' }], deposit: 30 };
+  assert.equal((await call(seal, { ...body, deposit: 150 })).status, 400, 'over 100% refused');
+  assert.equal((await call(seal, { ...body, deposit: 12.5 })).status, 400, 'whole percent only');
+  assert.equal((await call(seal, { ...body, items: [{ kind: 'scope', text: 'x' }] })).status, 400, 'needs a priced line');
+  assert.equal((await call(seal, { ...body, schedule: [{ label: 'x', amount: 10 }] })).status, 400, 'not with a schedule');
+  const s = await call(seal, { ...body, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+  assert.equal(s.status, 200, JSON.stringify(s.body));
+  const d = (await call(verify, { token: s.body.token })).body.data;
+  assert.equal(d.deposit, 30);
+  // The client rejects the blog: 30% of the approved 1,000 is due now, 700 later.
+  const decisions = { [d.items[0].id]: { status: 'accepted' }, [d.items[1].id]: { status: 'rejected', note: 'Later' } };
+  const r = await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.deepEqual(r.body.due, { pct: 30, base: 1000, now: 300, later: 700, currency: 'THB' });
+  const rec = (await call(verify, { token: r.body.receipt })).body.data;
+  assert.equal(rec.due.now, 300, 'the receipt carries what is due');
+  const doc = store.tables.documents.find((x) => x.id === s.body.documentId);
+  const pays = (store.tables.payments || []).filter((p) => p.document_id === doc.id);
+  assert.deepEqual(pays.map((p) => [p.label, p.amount]), [['Deposit 30%', 300], ['Balance 70%', 700]], 'deposit and balance requested');
+  // Change request: 100% of the approved increase (1,000 → 1,400) is due.
+  const cr = await call(seal, { ...base, title: 'Deposit test', parent: r.body.receipt, deposit: 100, items: [{ id: d.items[0].id, kind: 'scope', text: 'Site', price: '1000' }, { kind: 'scope', text: 'Booking', price: '400' }] });
+  assert.equal(cr.status, 200, JSON.stringify(cr.body));
+  const c = (await call(verify, { token: cr.body.token })).body.data;
+  const r2 = await call(sign, { token: cr.body.token, name: 'Nok', agree: true, decisions: Object.fromEntries(c.items.map((i) => [i.id, { status: 'accepted' }])) });
+  assert.deepEqual(r2.body.due, { pct: 100, base: 400, now: 400, later: 0, currency: 'THB' });
+  // Nothing is due when the change lowers the total.
+  const cut = await call(seal, { ...base, title: 'Deposit test', parent: r.body.receipt, deposit: 50, items: [{ id: d.items[0].id, kind: 'scope', text: 'Site', price: '800' }] });
+  const k = (await call(verify, { token: cut.body.token })).body.data;
+  const r3 = await call(sign, { token: cut.body.token, name: 'Nok', agree: true, decisions: { [k.items[0].id]: { status: 'accepted' } } });
+  assert.equal(r3.body.due, undefined);
+});
+
 test('proposal writer: signed-in only, never asked for prices, input fenced', async () => {
   const proposal = require('../api/proposal');
   const body = { project: 'Café site', client: 'Café Lumi', features: ['Menu', 'Booking'], milestones: ['1. Design (1 week)'], lang: 'th' };

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
-import { payHost, type SealedDoc } from '../../lib/sealed';
+import { payHost, type Due, type SealedDoc } from '../../lib/sealed';
 import { Button, ButtonLink, Card, EmptyState, Icon } from '../../ui';
 
 export function DocParts({ d }: { d: Pick<SealedDoc, 'sections' | 'schedule' | 'currency'> }) {
@@ -37,6 +37,24 @@ export function PayBox({ d, label }: { d: Pick<SealedDoc, 'payLink' | 'payInstru
       </>)}
       {d.payInstructions && <div><h3>{t('doc.howToPay')}</h3><p className="pre">{d.payInstructions}</p></div>}
     </Card>
+  );
+}
+
+/** What is due on signing under a deposit rule, and the balance that follows. `live` = before signing. */
+export function DueBox({ due, currency, live, changeRequest }: { due: Omit<Due, 'currency'>; currency: string; live?: boolean; changeRequest?: boolean }) {
+  const { t } = useTranslation();
+  const { money } = usePrefs();
+  return (
+    <div className="doc-due" aria-live={live ? 'polite' : undefined}>
+      <div className="doc-total-row">
+        <span>{t(live ? 'doc.due.onSigning' : 'doc.due.now', { pct: due.pct })}</span>
+        <b>{money(due.now, currency)}</b>
+      </div>
+      <p className="muted small">
+        {t(changeRequest ? 'doc.due.ofIncrease' : 'doc.due.ofApproved', { pct: due.pct, base: money(due.base, currency) })}
+        {due.later > 0 && <> {t('doc.due.later', { amount: money(due.later, currency) })}</>}
+      </p>
+    </div>
   );
 }
 
