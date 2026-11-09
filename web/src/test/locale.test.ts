@@ -1,5 +1,8 @@
 import { detectLocale, formatDate, formatMoney, formatNumber } from '../lib/locale';
-import en from '../i18n/locales/en.json';
+import enCore from '../i18n/locales/en.json';
+import enPages from '../i18n/locales/en-pages.json';
+
+const en = { ...enCore, ...enPages };
 import bn from '../i18n/locales/bn.json';
 import th from '../i18n/locales/th.json';
 

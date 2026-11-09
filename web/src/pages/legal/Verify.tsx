@@ -7,6 +7,7 @@ import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
 import { Badge, Button, Card, Field, Icon, Input } from '../../ui';
 import './legal.css';
+import '../../i18n/pages';
 
 interface Verified {
   hash: string;
