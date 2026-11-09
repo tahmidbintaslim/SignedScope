@@ -1,6 +1,6 @@
 .site-header { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--ss-bg) 86%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--ss-border); }
 .site-header-row { display: flex; align-items: center; gap: var(--ss-space-4); min-height: 64px; }
-.site-logo { flex: none; text-decoration: none; }
+.site-logo { flex: none; display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; text-decoration: none; }
 .site-nav { display: flex; gap: var(--ss-space-1); margin-left: auto; }
 .site-nav a { padding: 8px 12px; border-radius: var(--ss-radius-md); color: var(--ss-text-muted); font-weight: 600; text-decoration: none; transition: color var(--ss-duration-fast), background var(--ss-duration-fast); }
 .site-nav a:hover { color: var(--ss-text); background: var(--ss-surface); }

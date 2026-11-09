@@ -22,7 +22,7 @@
   .app-main { padding-bottom: calc(160px + env(safe-area-inset-bottom)); }
   .app-side { display: none; }
   .app-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 4px; padding: 8px 12px; background: color-mix(in srgb, var(--ss-surface-raised) 90%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ss-border); }
-  .app-top .app-logo { margin-right: auto; }
+  .app-top .app-logo { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; margin-right: auto; }
   .app-top .app-account-text { display: none; }
   .app-top .app-account { width: auto; min-height: 44px; }
   /* The account menu opens toward the screen's inside edge, not off its right side. */
@@ -59,7 +59,7 @@
 .kpi small { color: var(--ss-text-muted); }
 .kpi .ss-badge { justify-self: start; }
 @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi b { font-size: clamp(1.15rem, 3.4vw, 1.9rem); } }
-@media (max-width: 420px) { .kpis { gap: 10px; } .kpis > .kpi { padding: 14px; } }
+@media (max-width: 420px) { .kpis { gap: 10px; } .kpis > .kpi { padding: 14px; } .kpi b { font-size: clamp(1rem, 4.4vw, 1.25rem); } }
 .cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 @media (max-width: 1100px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 .cols > section { display: grid; gap: 16px; }
