@@ -98,6 +98,15 @@ test('migration applies and RLS isolates users', opts, () => {
   // Payments: amounts cannot be rewritten; status can.
   assert.ok(!as(A, `update payments set amount = 1`).ok, 'amount is fixed');
   assert.ok(as(A, `update payments set reference = 'KBank 7781'`).ok, 'reference can be recorded');
+  // Questions: written by the server only; the owner reads them and may only write the answer.
+  const docId = psql(`insert into documents (owner, project_id, title, token, doc_hash) values ('${A}', '${projectId}', 'Scope', 'v1.x', '${'d'.repeat(64)}') returning id`).out.split('\n').pop();
+  assert.ok(psql(`insert into questions (owner, document_id, item_id, item_text, question) values ('${A}', '${docId}', 'i1', 'Menu', 'Photos?')`).ok);
+  assert.ok(!as(A, `insert into questions (owner, document_id, item_id, item_text, question) values ('${A}', '${docId}', 'i1', 'Menu', 'Fake')`).ok, 'browser cannot ask');
+  assert.equal(as(B, 'select count(*) from questions').out.split('\n').pop(), '0', 'B sees no questions');
+  assert.equal(as(B, `update questions set answer = 'x', answered_at = now() returning id`).out.split('\n').filter(Boolean).length, 0);
+  assert.ok(!as(A, `update questions set question = 'Changed'`).ok, 'question text is fixed');
+  assert.ok(as(A, `update questions set answer = 'Yes, 20 photos', answered_at = now()`).ok, 'owner answers');
+  assert.ok(!as(A, `update questions set answer = 'No date', answered_at = null`).ok, 'answer needs a date');
   // Vault: files must be inside a project folder; no overwrite policy exists.
   assert.ok(!as(A, `insert into storage.objects (bucket_id, name) values ('vault', '${A}/loose.pdf')`).ok, 'no files outside a project');
   assert.equal(as(A, `update storage.objects set name = name || '.x' returning id`).out.split('\n').filter(Boolean).length, 0, 'no overwrite');
@@ -117,5 +126,5 @@ test('migration applies and RLS isolates users', opts, () => {
 
   // Deleting a project removes its estimates, documents and payments.
   assert.ok(as(A, `delete from projects where id = '${projectId}'`, 'aal2').ok);
-  assert.equal(psql(`select (select count(*) from documents) + (select count(*) from payments)`).out, '0');
+  assert.equal(psql(`select (select count(*) from documents) + (select count(*) from payments) + (select count(*) from questions)`).out, '0');
 });

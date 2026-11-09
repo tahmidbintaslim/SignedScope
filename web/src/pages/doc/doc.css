@@ -63,3 +63,9 @@
 }
 .doc-due { display: grid; gap: 4px; padding: 16px 20px; border-radius: var(--ss-radius-md); background: var(--ss-brand-soft); }
 .doc-due .doc-total-row b { font-size: 1.25rem; }
+
+/* Per-line questions */
+.decide-ask { display: grid; gap: 8px; }
+.decide-qs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.decide-qs li { border-inline-start: 3px solid var(--ss-border, currentColor); padding-inline-start: 12px; display: grid; gap: 4px; }
+.decide-qs p { margin: 0; }

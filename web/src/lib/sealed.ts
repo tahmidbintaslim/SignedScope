@@ -22,7 +22,9 @@ export interface SealedReceipt {
 }
 /** What is due on signing under a deposit rule (computed by the server; mirrored by depositDue). */
 export interface Due { pct: number; base: number; now: number; later: number; currency: string }
-export interface Verified<T> { valid: true; hash: string; data: T }
+export interface Verified<T> { valid: true; hash: string; data: T; questions?: LineQuestion[] }
+/** A client's question on one line of a filed link, and the sender's answer. Absent on unfiled links. */
+export interface LineQuestion { id: string; itemId: string; question: string; answer: string | null; answeredAt: string | null; createdAt: string }
 
 export const KINDS: ItemKind[] = ['scope', 'uat', 'out'];
 

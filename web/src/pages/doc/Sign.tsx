@@ -2,12 +2,12 @@
 // with a comment; exclusions are acknowledged), sees the total change live, and signs with their
 // name. The server checks the token, records the decisions and returns a sealed receipt.
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
-import { KINDS, depositDue, diffStatus, useHashToken, proposedTotal, type Decision, type DecisionStatus, type SealedDoc, type SealedItem, type Verified, type Due } from '../../lib/sealed';
-import { Badge, Button, Card, Field, Icon, Input, Skeleton } from '../../ui';
+import { KINDS, depositDue, diffStatus, useHashToken, proposedTotal, type Decision, type DecisionStatus, type SealedDoc, type SealedItem, type Verified, type Due, type LineQuestion } from '../../lib/sealed';
+import { Badge, Button, Card, Field, Icon, Input, Skeleton, Textarea } from '../../ui';
 import { CantOpen, DocParts, DueBox, LinkBox, PayBox } from './parts';
 import './doc.css';
 import '../../i18n/pages';
@@ -22,7 +22,7 @@ export default function Sign() {
     queryFn: async () => {
       const r = await api<Verified<SealedDoc>>('verify', { token, viewed: true }, { auth: false });
       if (r.data.type !== 'doc') throw new Error(t('sign.notDoc'));
-      return r.data;
+      return { doc: r.data, questions: r.questions };
     },
     enabled: Boolean(token),
     retry: false,
@@ -38,16 +38,18 @@ export default function Sign() {
       </div>
     );
   }
-  return <SignForm key={token} token={token!} d={doc.data} />;
+  return <SignForm key={token} token={token!} d={doc.data.doc} initialQuestions={doc.data.questions} />;
 }
 
-function SignForm({ token, d }: { token: string; d: SealedDoc }) {
+function SignForm({ token, d, initialQuestions }: { token: string; d: SealedDoc; initialQuestions?: LineQuestion[] }) {
   const { t } = useTranslation();
   const { money, date } = usePrefs();
   const cur = d.currency || 'USD';
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [who, setWho] = useState({ name: '', email: '', agree: false });
   const [missing, setMissing] = useState(false);
+  // undefined: questions are off for this link (made without an account).
+  const [questions, setQuestions] = useState(initialQuestions);
 
   useEffect(() => {
     if (d.kind && d.kind !== 'scope') document.title = `${t(`doc.kind.${d.kind}`)} · SignedScope`;
@@ -106,7 +108,8 @@ function SignForm({ token, d }: { token: string; d: SealedDoc }) {
             <section key={kind} className="doc-group">
               <h2>{t(`doc.items.${kind}`)}</h2>
               {its.map((it) => <Line key={it.id} it={it} d={d} value={decisions[it.id]} missing={missing && !decisions[it.id]} onDecide={(s) => decide(it.id, s)}
-                onNote={(note) => setDecisions((x) => ({ ...x, [it.id]: { ...x[it.id], note } }))} />)}
+                onNote={(note) => setDecisions((x) => ({ ...x, [it.id]: { ...x[it.id], note } }))}
+                ask={questions && <Ask token={token} itemId={it.id} name={who.name} qs={questions.filter((q) => q.itemId === it.id)} onAsked={setQuestions} />} />)}
             </section>
           );
         })}
@@ -146,7 +149,7 @@ function SignForm({ token, d }: { token: string; d: SealedDoc }) {
   );
 }
 
-function Line({ it, d, value, missing, onDecide, onNote }: { it: SealedItem; d: SealedDoc; value?: Decision; missing: boolean; onDecide: (s: DecisionStatus) => void; onNote: (n: string) => void }) {
+function Line({ it, d, value, missing, onDecide, onNote, ask }: { it: SealedItem; d: SealedDoc; value?: Decision; missing: boolean; onDecide: (s: DecisionStatus) => void; onNote: (n: string) => void; ask?: ReactNode }) {
   const { t } = useTranslation();
   const { money } = usePrefs();
   const diff = diffStatus(it, d.parent);
@@ -175,6 +178,45 @@ function Line({ it, d, value, missing, onDecide, onNote }: { it: SealedItem; d: 
       {value?.status === 'rejected' && (
         <Field label={t('sign.whatChange')}><Input required maxLength={600} value={value.note ?? ''} onChange={(e) => onNote(e.target.value)} autoFocus /></Field>
       )}
+      {ask}
     </fieldset>
+  );
+}
+
+/** Earlier questions on a line with their answers, and a small form to ask one. Filed links only. */
+function Ask({ token, itemId, name, qs, onAsked }: { token: string; itemId: string; name: string; qs: LineQuestion[]; onAsked: (qs: LineQuestion[]) => void }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const send = useMutation({
+    mutationFn: () => api<{ questions: LineQuestion[] }>('verify', { action: 'ask', token, itemId, question: text.trim(), name: name.trim() }, { auth: false }),
+    onSuccess: (r) => { onAsked(r.questions); setText(''); setOpen(false); },
+  });
+  return (
+    <div className="decide-ask">
+      {qs.length > 0 && (
+        <ul className="decide-qs">
+          {qs.map((q) => (
+            <li key={q.id}>
+              <p><b>{t('sign.q.question')}</b> {q.question}</p>
+              {q.answer ? <p><b>{t('sign.q.answer')}</b> <span className="pre">{q.answer}</span></p> : <p className="muted small">{t('sign.q.waiting')}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {send.isSuccess && !open && <p className="muted small" role="status">{t('sign.q.sent')}</p>}
+      {open ? (
+        <div className="stack noprint">
+          <Field label={t('sign.q.label')}><Textarea rows={2} maxLength={600} value={text} onChange={(e) => setText(e.target.value)} autoFocus /></Field>
+          {send.isError && <p className="ss-error" role="alert">{(send.error as Error).message}</p>}
+          <div className="row">
+            <Button size="sm" variant="secondary" icon="message" loading={send.isPending} disabled={!text.trim()} onClick={() => send.mutate()}>{t('sign.q.send')}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>{t('actions.cancel')}</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="noprint"><Button size="sm" variant="ghost" icon="question" onClick={() => setOpen(true)}>{t('sign.q.ask')}</Button></div>
+      )}
+    </div>
   );
 }

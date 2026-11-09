@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { usePrefs } from '../../app/preferences';
 import {
-  MAX_FILE, blockedFile, deleteProject, fileUrl, getProject, keys, listClients, listEstimates, listFiles, listProjectActivity, listProjectDocuments,
-  listProjectPayments, markPaid, projectKeys, removeFile, requestPayment, sumByCurrency, updateProject, uploadFile, type Doc, type Payment, type Project, type VaultFile,
+  MAX_FILE, answerQuestion, blockedFile, deleteProject, fileUrl, getProject, keys, listClients, listEstimates, listFiles, listProjectActivity, listProjectDocuments,
+  listProjectPayments, listQuestions, markPaid, projectKeys, removeFile, requestPayment, sumByCurrency, updateProject, uploadFile, type Doc, type Payment, type Project, type Question, type VaultFile,
 } from '../../lib/db';
 import { linesFromEstimate, saveDraft } from '../../lib/draft';
 import { CURRENCIES } from '../../lib/locale';
-import { Button, ButtonLink, Card, Dialog, EmptyState, Field, Icon, Input, Select, Skeleton, useToast } from '../../ui';
+import { Button, ButtonLink, Card, Dialog, EmptyState, Field, Icon, Input, Select, Skeleton, Textarea, useToast } from '../../ui';
 import { useApp } from './context';
 import { useActivityText } from './Dashboard';
 import { STATUSES } from './Projects';
@@ -129,6 +129,8 @@ export default function ProjectDetail() {
         </Card>
       </section>
 
+      {docs.data && <Questions projectId={p.id} docs={docs.data} />}
+
       <section className="sect">
         <h2>{t('app.proj.payments')}</h2>
         {pays.data && docs.data ? <Payments p={p} pays={pays.data} docs={docs.data} /> : <Card><Skeleton height={48} /></Card>}
@@ -177,6 +179,56 @@ function DocRow({ d, onCopy }: { d: Doc; onCopy: () => void }) {
         </div>
       </td>
     </tr>
+  );
+}
+
+/** Questions clients asked on this project's links. Shown only when there are some. */
+function Questions({ projectId, docs }: { projectId: string; docs: Doc[] }) {
+  const { t } = useTranslation();
+  const ids = docs.map((d) => d.id);
+  const qs = useQuery({ queryKey: [...projectKeys.questions(projectId), ids.join()], queryFn: () => listQuestions(ids), enabled: ids.length > 0 });
+  if (!qs.data?.length) return null;
+  const title = (q: Question) => docs.find((d) => d.id === q.document_id)?.title ?? '';
+  const open = qs.data.filter((q) => !q.answer).length;
+  return (
+    <section className="sect">
+      <h2>{t('app.q.title')}{open > 0 && <span className="muted small"> · {t('app.q.open', { count: open })}</span>}</h2>
+      <Card className="card-flush">
+        <ul className="feed q-list">{qs.data.map((q) => <QuestionRow key={q.id} q={q} title={title(q)} projectId={projectId} />)}</ul>
+      </Card>
+      <p className="muted small">{t('app.q.hint')}</p>
+    </section>
+  );
+}
+
+function QuestionRow({ q, title, projectId }: { q: Question; title: string; projectId: string }) {
+  const { t } = useTranslation();
+  const { date } = usePrefs();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [editing, setEditing] = useState(!q.answer);
+  const [text, setText] = useState(q.answer ?? '');
+  const save = useMutation({
+    mutationFn: () => answerQuestion(q.id, text),
+    onSuccess: () => { setEditing(false); void qc.invalidateQueries({ queryKey: projectKeys.questions(projectId) }); toast({ title: t('app.q.saved'), tone: 'success' }); },
+    onError: (e) => toast({ title: errText(e), tone: 'danger' }),
+  });
+  return (
+    <li className="stack">
+      <div>
+        <div className="muted small">{title} · {t('app.q.line', { text: q.item_text })}</div>
+        <p className="q-text"><b>{q.asker_name || t('app.q.client')}:</b> {q.question}</p>
+        <time className="muted small" dateTime={q.created_at}>{date(q.created_at, 'datetime')}</time>
+      </div>
+      {editing ? (
+        <form className="stack" onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }}>
+          <Field label={t('app.q.answer')}><Textarea rows={2} maxLength={1200} value={text} onChange={(e) => setText(e.target.value)} /></Field>
+          <div><Button type="submit" size="sm" loading={save.isPending} disabled={!text.trim()}>{t('app.q.send')}</Button></div>
+        </form>
+      ) : (
+        <div className="row"><p className="pre q-text">{q.answer}</p><Button variant="ghost" size="sm" onClick={() => setEditing(true)}>{t('app.q.edit')}</Button></div>
+      )}
+    </li>
   );
 }
 

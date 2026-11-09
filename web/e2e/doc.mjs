@@ -26,7 +26,7 @@ const seal = async (body) => {
   return j.token;
 };
 async function page(ctxOpts = {}) {
-  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'], ...ctxOpts });
+  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', bypassCSP: true, permissions: ['clipboard-read', 'clipboard-write'], ...ctxOpts });
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', (e) => p.errors.push(e.message));
@@ -134,6 +134,33 @@ let receipt;
   check(await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'phone: no horizontal scroll');
   await audit(p, 'change request phone');
   if (OUT) await p.screenshot({ path: `${OUT}/sign-cr-phone.png`, fullPage: true });
+}
+
+// Per-line questions: links made without an account have none; on a filed link (the API answer
+// is extended here, as the dev server has no database) the client asks and sees the answer.
+{
+  const p = await page();
+  await p.goto(`${BASE}/sign#${token}`);
+  await visible(p.getByRole('heading', { name: 'Lumen Café website: Phase 1' }));
+  check(await p.getByRole('button', { name: 'Ask about this line' }).count() === 0, 'questions: off on links made without an account');
+  const asked = [{ id: 'q1', itemId: '', question: 'Is the menu bilingual?', answer: 'Yes, Thai and English.', answeredAt: '2026-11-09T00:00:00Z', createdAt: '2026-11-08T00:00:00Z' }];
+  await p.route('**/api/verify', async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    if (body.action === 'ask') return route.fulfill({ json: { ok: true, questions: [...asked, { id: 'q2', itemId: body.itemId, question: body.question, answer: null, answeredAt: null, createdAt: '2026-11-09T01:00:00Z' }] } });
+    const real = await (await route.fetch()).json();
+    asked[0].itemId = real.data.items[0].id;
+    return route.fulfill({ json: { ...real, questions: asked } });
+  });
+  await p.reload();
+  const line = p.getByRole('group', { name: 'Home page with menu' });
+  check(await visible(line.getByText('Yes, Thai and English.')), 'questions: earlier answer shown under its line');
+  await line.getByRole('button', { name: 'Ask about this line' }).click();
+  await line.getByLabel('Your question').fill('Can we add a gallery?');
+  await line.getByRole('button', { name: 'Send question' }).click();
+  check(await visible(line.getByText('Can we add a gallery?')) && await line.getByText('Waiting for an answer from the sender.').isVisible(), 'questions: new question listed, waiting');
+  check(await line.getByRole('status').filter({ hasText: 'Question sent' }).isVisible(), 'questions: sent confirmation');
+  await audit(p, 'sign with questions');
+  check(p.errors.length === 0, `questions: console ${p.errors.join(' | ') || 'clean'}`);
 }
 
 // Broken links get a clear page, not a blank one.

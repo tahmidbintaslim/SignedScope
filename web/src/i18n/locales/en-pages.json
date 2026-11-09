@@ -63,7 +63,8 @@
       "signed_changes": "{{signer}} signed with changes requested “{{title}}”",
       "payment_requested": "Payment requested: {{label}} {{amount}}",
       "payment_paid": "Marked paid: {{label}} {{amount}}",
-      "status_changed": "Status: {{from}} → {{to}}"
+      "status_changed": "Status: {{from}} → {{to}}",
+      "question_asked": "Question on “{{title}}”: {{question}}"
     },
     "onb": {
       "step": "Step {{n}} of {{total}}",
@@ -226,6 +227,18 @@
       "mfaOffBody": "Signing in will only need your email link or Google account.",
       "exportBody": "Download everything in your workspace as a JSON file.",
       "export": "Export my data"
+    },
+    "q": {
+      "title": "Client questions",
+      "open_one": "1 waiting",
+      "open_other": "{{count}} waiting",
+      "hint": "Your client sees your answer under the line when they open the link again. To change the scope itself, send a new revision.",
+      "line": "Line: {{text}}",
+      "client": "Client",
+      "answer": "Your answer",
+      "send": "Save answer",
+      "edit": "Edit",
+      "saved": "Answer saved"
     }
   },
   "auth": {
@@ -314,7 +327,16 @@
     "doneBody": "Save this receipt link. It’s the signed record of your decisions, and the sender gets a copy.",
     "receiptLink": "Receipt link",
     "openReceipt": "Open receipt",
-    "payNow": "Pay now"
+    "payNow": "Pay now",
+    "q": {
+      "ask": "Ask about this line",
+      "label": "Your question",
+      "send": "Send question",
+      "question": "Q:",
+      "answer": "A:",
+      "waiting": "Waiting for an answer from the sender.",
+      "sent": "Question sent. The sender gets an email, and their answer shows here when you open this link again."
+    }
   },
   "receipt": {
     "cantOpen": "This receipt can’t be opened",
