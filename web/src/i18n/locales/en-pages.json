@@ -336,8 +336,17 @@
     "supersedes": "Replaces receipt",
     "na": "not known",
     "notLegal": "A record of what was approved, not a qualified electronic signature.",
-    "print": "Print or save as PDF",
-    "changeRequest": "Start a change request"
+    "print": "Download audit PDF",
+    "changeRequest": "Start a change request",
+    "signer": "Signed by",
+    "signedAt": "Signed at (UTC)",
+    "createdAt": "Link created (UTC)",
+    "outcomeLabel": "Outcome",
+    "revisionN": "revision {{n}}",
+    "preparedBy": "Prepared by",
+    "unverifiedSender": "sender not verified (no account)",
+    "howToVerify": "To check this record, open {{url}} and paste the receipt link. SignedScope confirms the link was issued by it and that nothing in it has changed.",
+    "auditPrinted": "Audit record printed {{when}} UTC."
   },
   "new": {
     "title": "New scope",

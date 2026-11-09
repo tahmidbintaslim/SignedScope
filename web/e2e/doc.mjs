@@ -94,6 +94,15 @@ let receipt;
   const badge = p.getByRole('link', { name: /Signature verified/ });
   check((await badge.getAttribute('href')).startsWith('/verify#v1.'), 'receipt: verify badge links to /verify');
   check(await p.getByRole('link', { name: /Pay approved amount/ }).isVisible(), 'receipt: pay button when something payable was approved');
+  const ev = await p.locator('.doc-evidence').innerText();
+  check(/Signed by\s+Rafi Ahmed/.test(ev) && /Signed at \(UTC\)\s+\d{4}-\d{2}-\d{2}T/.test(ev) && /Link created \(UTC\)/.test(ev) && /\/verify and paste the receipt link/.test(ev), 'receipt: audit record (signer, UTC times, how to verify)');
+  // Print / PDF: the site chrome and buttons drop out, the audit note appears, and a PDF renders.
+  await p.emulateMedia({ media: 'print' });
+  check(!(await p.locator('.site-header').isVisible()) && !(await p.getByRole('button', { name: 'Download audit PDF' }).isVisible()) && await p.getByText(/Audit record printed/).isVisible(), 'receipt: print layout for the audit PDF');
+  const pdf = await p.pdf({ format: 'A4' });
+  check(pdf.length > 20000 && pdf.subarray(0, 4).toString() === '%PDF', `receipt: audit PDF renders (${Math.round(pdf.length / 1024)} KB)`);
+  if (OUT) (await import('node:fs')).writeFileSync(`${OUT}/receipt-audit.pdf`, pdf);
+  await p.emulateMedia({ media: 'screen' });
   await audit(p, 'receipt');
   if (OUT) await p.screenshot({ path: `${OUT}/receipt.png`, fullPage: true });
   await badge.click();
