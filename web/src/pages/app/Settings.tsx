@@ -1,15 +1,17 @@
 // Settings: profile and defaults, where you work, notifications, two-step sign-in, data export
 // and sign out. Saving also updates the language, dates and currency on this device.
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
-import { db, exportAll, keys, ok, updateProfile, type Profile } from '../../lib/db';
+import { clerk } from '../../lib/clerk';
+import { exportAll, keys, updateProfile, type Profile } from '../../lib/db';
+import { clerkAppearance } from '../auth/appearance';
 import { CURRENCIES, LANGUAGES, type Currency, type Language } from '../../lib/locale';
-import { Badge, Button, Card, Field, Input, Select, Skeleton, Textarea, useToast } from '../../ui';
+import { Button, Card, Field, Input, Select, Textarea, useToast } from '../../ui';
 import { useApp } from './context';
 import { COUNTRIES, COUNTRY_ZONE, LANG_NAME, useRegionName, useZones } from './places';
-import { Confirm, errText, today } from './shared';
+import { errText, today } from './shared';
 
 const NOTIFY = [['notify_signed', 'notifySigned'], ['notify_viewed', 'notifyViewed'], ['notify_overdue', 'notifyOverdue']] as const;
 
@@ -94,70 +96,24 @@ function ProfileForm({ profile }: { profile: Profile | null }) {
   );
 }
 
-interface Factor { id: string; status: string; factor_type?: string }
-interface Enrollment { id: string; qr: string; secret: string }
 
-/** Authenticator-app (TOTP) two-step sign-in through Supabase Auth. */
+/** Sign-in methods and two-step sign-in live in Clerk's account panel (Google, GitHub, email,
+ *  authenticator app, backup codes), styled like the rest of the app. */
 function Mfa() {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const toast = useToast();
-  const [enroll, setEnroll] = useState<Enrollment | null>(null);
-  const [code, setCode] = useState('');
-  const [turningOff, setTurningOff] = useState(false);
-  const factors = useQuery({
-    queryKey: ['mfa-factors'],
-    queryFn: async () => ok(await (await db()).auth.mfa.listFactors()) as { all: Factor[]; totp: Factor[] },
-  });
-  const on = (factors.data?.totp ?? []).filter((x) => x.status === 'verified');
-
-  const start = useMutation({
+  const open = useMutation({
     mutationFn: async () => {
-      const sb = await db();
-      // Clear half-finished setups first; Supabase allows only a few unverified factors.
-      for (const x of (factors.data?.all ?? []).filter((y) => y.status !== 'verified')) await sb.auth.mfa.unenroll({ factorId: x.id });
-      const e = ok(await sb.auth.mfa.enroll({ factorType: 'totp' })) as { id: string; totp: { qr_code: string; secret: string } };
-      return { id: e.id, qr: e.totp.qr_code, secret: e.totp.secret };
+      const c = await clerk();
+      if (!c) throw new Error(t('auth.offTitle'));
+      c.openUserProfile({ appearance: clerkAppearance() });
     },
-    onSuccess: setEnroll,
     onError: (e) => toast({ title: errText(e), tone: 'danger' }),
   });
-  const verify = useMutation({
-    mutationFn: async () => ok(await (await db()).auth.mfa.challengeAndVerify({ factorId: enroll!.id, code: code.trim() })),
-    onSuccess: () => { setEnroll(null); setCode(''); toast({ title: t('app.set.mfaOnToast'), tone: 'success' }); void qc.invalidateQueries({ queryKey: ['mfa-factors'] }); },
-    onError: (e) => toast({ title: errText(e), tone: 'danger' }),
-  });
-
-  if (factors.isError) return <Card><p className="text-danger">{(factors.error as Error).message}</p></Card>;
-  if (!factors.data) return <Card><Skeleton height={48} /></Card>;
   return (
     <Card className="stack">
-      {on.length ? (<>
-        <p className="row"><Badge tone="success">{t('app.set.mfaOn')}</Badge>{t('app.set.mfaOnBody')}</p>
-        <div><Button variant="ghost" size="sm" onClick={() => setTurningOff(true)}>{t('app.set.mfaOff')}</Button></div>
-      </>) : enroll ? (
-        <form className="stack mfa-enroll" onSubmit={(e: FormEvent) => { e.preventDefault(); verify.mutate(); }}>
-          <p>{t('app.set.mfaScan')}</p>
-          <img className="mfa-qr" src={enroll.qr} alt={t('app.set.mfaQrAlt')} width={180} height={180} />
-          <p className="muted small">{t('app.set.mfaKey')} <code className="break">{enroll.secret}</code></p>
-          <Field label={t('app.set.mfaCode')}>
-            <Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} pattern="[0-9]{6}" required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} autoFocus />
-          </Field>
-          <div className="row">
-            <Button type="submit" loading={verify.isPending}>{t('app.set.mfaVerify')}</Button>
-            <Button variant="ghost" onClick={() => setEnroll(null)}>{t('actions.cancel')}</Button>
-          </div>
-        </form>
-      ) : (<>
-        <p className="muted">{t('app.set.mfaIntro')}</p>
-        <div><Button icon="shield" loading={start.isPending} onClick={() => start.mutate()}>{t('app.set.mfaStart')}</Button></div>
-      </>)}
-      <Confirm open={turningOff} onClose={() => setTurningOff(false)} title={t('app.set.mfaOffTitle')} body={t('app.set.mfaOffBody')} action={t('app.set.mfaOff')}
-        onConfirm={async () => {
-          const sb = await db();
-          for (const x of on) ok(await sb.auth.mfa.unenroll({ factorId: x.id }));
-          await qc.invalidateQueries({ queryKey: ['mfa-factors'] });
-        }} />
+      <p className="muted">{t('app.set.mfaIntro')}</p>
+      <div><Button icon="shield" loading={open.isPending} onClick={() => open.mutate()}>{t('app.set.security')}</Button></div>
     </Card>
   );
 }

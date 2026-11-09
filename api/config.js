@@ -1,8 +1,9 @@
 'use strict';
-// GET: public browser config: the Supabase project URL and its anon (public) key. Both are safe to
-// expose; Row Level Security protects the data. Returns enabled:false until accounts are set up.
-// POST (signed in): recreates the caller's missing profile row, which the sign-up trigger normally
-// makes. Browsers can't insert profiles, so Settings calls this when its update finds no row.
+// GET: public browser config: the Supabase project URL, its anon (public) key and the Clerk
+// publishable key. All are safe to expose; Row Level Security protects the data. Returns
+// enabled:false until accounts are set up.
+// POST (signed in): creates the caller's profile row on first sign-in (Clerk users have no
+// database trigger), with the email from their verified Clerk session.
 // (Kept in this file to stay within the hosting plan's function limit.)
 const { handler, httpError } = require('./_lib');
 const db = require('./_supabase');
@@ -19,7 +20,9 @@ const repairProfile = handler(async (body, req) => {
 
 module.exports = (req, res) => {
   if (req.method === 'POST') return repairProfile(req, res);
-  const enabled = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const enabled = db.configured();
   res.setHeader('Cache-Control', 'public, max-age=300');
-  res.status(200).json(enabled ? { enabled, supabaseUrl: process.env.SUPABASE_URL, supabaseAnonKey: process.env.SUPABASE_ANON_KEY } : { enabled });
+  res.status(200).json(enabled
+    ? { enabled, supabaseUrl: process.env.SUPABASE_URL, supabaseAnonKey: process.env.SUPABASE_ANON_KEY, clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY }
+    : { enabled });
 };

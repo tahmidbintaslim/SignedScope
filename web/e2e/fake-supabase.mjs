@@ -1,6 +1,7 @@
-// A fake Supabase for browser tests: /api/config points at https://test.supabase.co, a session is
-// placed in localStorage, and PostgREST calls are answered from in-memory tables. No network.
-export const USER = { id: '11111111-1111-4111-8111-111111111111', email: 'mai@studio.test' };
+// A fake Supabase and Clerk for browser tests: /api/config points at https://test.supabase.co, a
+// stand-in Clerk (window.__ssTestClerk) holds the session, and PostgREST calls are answered from
+// in-memory tables. No network.
+export const USER = { id: 'user_2fakeMaiStudio0000000000', email: 'mai@studio.test' };
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 export function fakeJwt(aal = 'aal1') {
@@ -26,13 +27,25 @@ export function seed(overrides = {}) {
 const DEFAULTS = { projects: { status: 'lead', currency: 'USD' }, payments: { status: 'requested' } };
 
 /** Wires the fake into a Playwright page (call before the first goto). Returns the live tables. */
-export async function installFake(page, tables, { signedIn = true, providers = {} } = {}) {
+export async function installFake(page, tables, { signedIn = true } = {}) {
   await page.route('**/api/config', (r) => r.fulfill({ json: { enabled: true, supabaseUrl: 'https://test.supabase.co', supabaseAnonKey: 'anon' } }));
-  if (signedIn) {
-    const session = { access_token: fakeJwt(), refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors: [] } };
-    // Seed once per tab, so signing out really clears it.
-    await page.addInitScript((s) => { if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1'); localStorage.setItem('sb-test-auth-token', JSON.stringify(s)); } }, session);
-  }
+  // Signed in once per tab, so signing out really clears it. mountSignIn draws a marker the
+  // login test looks for; openUserProfile records that the account panel was opened.
+  await page.addInitScript(({ signedIn, user, token }) => {
+    if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1'); sessionStorage.setItem('fake-user', signedIn ? '1' : ''); }
+    const listeners = new Set();
+    const me = () => (sessionStorage.getItem('fake-user') ? { id: user.id, fullName: '', hasImage: false, imageUrl: '', primaryEmailAddress: { emailAddress: user.email } } : null);
+    const fake = {
+      get user() { return me(); },
+      get session() { return me() ? { getToken: async () => token } : null; },
+      addListener(fn) { listeners.add(fn); fn({ user: me() }); return () => listeners.delete(fn); },
+      async signOut() { sessionStorage.setItem('fake-user', ''); listeners.forEach((fn) => fn({ user: null })); },
+      mountSignIn(el) { el.innerHTML = '<p data-testid="clerk-sign-in">Clerk sign-in</p>'; },
+      unmountSignIn(el) { el.innerHTML = ''; },
+      openUserProfile() { window.__ssOpenedProfile = true; },
+    };
+    window.__ssTestClerk = fake;
+  }, { signedIn, user: USER, token: fakeJwt() });
   await page.route('https://test.supabase.co/**', async (route) => {
     const req = route.request();
     const url = new URL(req.url());
@@ -40,26 +53,7 @@ export async function installFake(page, tables, { signedIn = true, providers = {
       const path = url.pathname.slice('/auth/v1'.length);
       if (path === '/logout') return route.fulfill({ status: 204, body: '' });
       if (path === '/otp') return route.fulfill({ json: {} });
-      // Which sign-in providers are switched on (providers option; both off, like production today).
-      if (path === '/settings') return route.fulfill({ json: { external: { email: true, google: false, github: false, ...providers } } });
-      // Authenticator-app factors: enroll, challenge, verify (code 123456), unenroll.
-      const factors = tables._factors ?? (tables._factors = []);
-      if (path === '/factors' && req.method() === 'POST') {
-        const f = { id: crypto.randomUUID(), factor_type: 'totp', status: 'unverified', created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-        factors.push(f);
-        return route.fulfill({ json: { id: f.id, type: 'totp', totp: { qr_code: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>', secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' } } });
-      }
-      const m = path.match(/^\/factors\/([^/]+)(\/challenge|\/verify)?$/);
-      if (m) {
-        const f = factors.find((x) => x.id === m[1]);
-        if (!f) return route.fulfill({ status: 404, json: { code: 'mfa_factor_not_found', msg: 'Factor not found' } });
-        if (req.method() === 'DELETE') { factors.splice(factors.indexOf(f), 1); return route.fulfill({ json: { id: f.id } }); }
-        if (m[2] === '/challenge') return route.fulfill({ json: { id: 'ch-' + f.id, type: 'totp', expires_at: Math.floor(Date.now() / 1000) + 300 } });
-        if (JSON.parse(req.postData() || '{}').code !== '123456') return route.fulfill({ status: 422, json: { code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' } });
-        f.status = 'verified';
-        return route.fulfill({ json: { access_token: fakeJwt('aal2'), refresh_token: 'r2', token_type: 'bearer', expires_in: 3600, user: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors } } });
-      }
-      return route.fulfill({ json: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors } });
+      return route.fulfill({ json: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {} } });
     }
     if (url.pathname.startsWith('/storage/v1/')) return storage(route, req, url, tables);
     const table = url.pathname.replace('/rest/v1/', '');

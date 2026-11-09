@@ -208,25 +208,14 @@
       "deleted": "Client deleted"
     },
     "set": {
-      "mfa": "Two-step sign-in",
+      "mfa": "Sign-in and security",
       "data": "Your data",
       "saved": "Settings saved",
       "save": "Save settings",
-      "mfaOnToast": "Two-step sign-in is on",
-      "mfaOn": "On",
-      "mfaOnBody": "A code from your authenticator app is needed when you sign in.",
-      "mfaOff": "Turn off",
-      "mfaScan": "Scan this with your authenticator app, then enter the code it shows.",
-      "mfaQrAlt": "QR code for your authenticator app",
-      "mfaKey": "Can’t scan? Enter this key:",
-      "mfaCode": "6-digit code from the app",
-      "mfaVerify": "Verify and turn on",
-      "mfaIntro": "Protect your client documents with a 6-digit code from an app like Google Authenticator or 1Password.",
-      "mfaStart": "Set up authenticator app",
-      "mfaOffTitle": "Turn off two-step sign-in?",
-      "mfaOffBody": "Signing in will only need your email link or Google account.",
+      "mfaIntro": "Choose how you sign in (Google, GitHub or email) and turn on two-step sign-in with an authenticator app.",
       "exportBody": "Download everything in your workspace as a JSON file.",
-      "export": "Export my data"
+      "export": "Export my data",
+      "security": "Sign-in and security"
     },
     "q": {
       "title": "Client questions",
@@ -244,24 +233,12 @@
   "auth": {
     "title": "Sign in or create your workspace",
     "lede": "Clients, projects, estimates, signed scopes and payments in one place. Free during the beta.",
-    "google": "Continue with Google",
-    "github": "Continue with GitHub",
-    "or": "or",
-    "email": "Work email",
-    "sendLink": "Email me a sign-in link",
-    "noPassword": "No password to remember. We email a one-time link. You can add an authenticator app in Settings.",
-    "sentTitle": "Check your email",
-    "sentBody": "We sent a sign-in link to {{email}}. Open it on this device. It expires in 1 hour.",
-    "different": "Use a different email",
-    "mfaTitle": "Enter your 6-digit code",
-    "mfaBody": "From your authenticator app.",
-    "code": "Code",
-    "verify": "Verify",
     "offTitle": "Accounts are coming soon",
     "offBody": "You can still use the AI estimator and create a scope link without an account.",
     "agree": "By continuing you agree to how we handle data in the",
     "privacy": "privacy notice",
-    "noFactor": "No authenticator found for this account"
+    "loading": "Loading sign-in",
+    "loadError": "Sign-in could not load. Check your connection and refresh the page."
   },
   "doc": {
     "schedule": "Payment schedule",

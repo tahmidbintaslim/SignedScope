@@ -30,7 +30,7 @@ export async function api<T>(path: string, body: unknown = {}, init: { signal?: 
   return j as T;
 }
 
-export interface PublicConfig { enabled: boolean; supabaseUrl?: string; supabaseAnonKey?: string }
+export interface PublicConfig { enabled: boolean; supabaseUrl?: string; supabaseAnonKey?: string; clerkPublishableKey?: string }
 
 export async function getConfig(signal?: AbortSignal): Promise<PublicConfig> {
   const r = await fetch('/api/config', { signal });

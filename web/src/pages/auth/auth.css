@@ -7,3 +7,5 @@
 .auth-code { font: 600 24px/1 var(--ss-font-mono); letter-spacing: 0.4em; text-align: center; }
 .auth-legal { font-size: 13px; }
 .auth-loading { display: grid; place-items: center; min-height: 160px; color: var(--ss-brand); }
+.auth-clerk { min-height: 320px; }
+.auth-clerk[hidden] { display: none; }

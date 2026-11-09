@@ -34,20 +34,10 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.goto(BASE + '/app/projects');
   await p.waitForURL('**/login?next=*');
   check(new URL(p.url()).searchParams.get('next') === '/app/projects', 'signed out: /app redirects to /login with next');
-  await visible(p.getByLabel('Work email'));
-  await p.waitForTimeout(300);
-  check(await p.getByRole('button', { name: /Continue with/ }).count() === 0, 'login: no buttons for providers that are switched off');
+  check(await visible(p.getByTestId('clerk-sign-in')), 'login: Clerk sign-in mounted (Google, GitHub, email)');
   await audit(p, 'login');
   if (OUT) await p.screenshot({ path: `${OUT}/login.png` });
-  await p.getByLabel('Work email').fill('mai@studio.test');
-  await p.getByRole('button', { name: 'Email me a sign-in link' }).click();
-  check(await visible(p.getByText('We sent a sign-in link to mai@studio.test')), 'login: email link sent');
   check(p.errors.length === 0, `login: console ${p.errors.join(' | ') || 'clean'}`);
-}
-{
-  const p = await page(seed(), { signedIn: false, providers: { google: true, github: true } });
-  await p.goto(BASE + '/login');
-  check(await visible(p.getByRole('button', { name: 'Continue with Google' })) && await p.getByRole('button', { name: 'Continue with GitHub' }).isVisible(), 'login: buttons for providers that are switched on');
 }
 
 // New account: onboarding runs once, saves each step and creates the first project.
@@ -120,7 +110,7 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.getByRole('menuitem', { name: 'Sign out' }).click();
   await p.waitForURL((u) => u.pathname === '/', { waitUntil: 'commit' }).catch(() => {});
   await p.waitForLoadState('load');
-  check(await p.evaluate(() => !localStorage.getItem('sb-test-auth-token')), 'sign out: session cleared');
+  check(await p.evaluate(() => !sessionStorage.getItem('fake-user')), 'sign out: session cleared');
   check(p.errors.length === 0, `dashboard: console ${p.errors.join(' | ') || 'clean'}`);
 
   const m = await page(t, {}, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

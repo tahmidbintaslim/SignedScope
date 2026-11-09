@@ -40,8 +40,14 @@ export const keys = {
   activity: (n: number) => ['activity', n] as const,
 };
 
+/** The user's profile; on first sign-in the server creates it (with their verified email). */
 export async function getProfile(userId: string): Promise<Profile | null> {
-  return ok(await (await db()).from('profiles').select('*').eq('id', userId).maybeSingle());
+  const sb = await db();
+  const row = ok(await sb.from('profiles').select('*').eq('id', userId).maybeSingle()) as Profile | null;
+  if (row) return row;
+  const { api } = await import('./api');
+  await api('config', {});
+  return ok(await sb.from('profiles').select('*').eq('id', userId).maybeSingle());
 }
 // Columns added by migration 20261108030000_onboarding.sql. Until it is applied, saves skip them
 // instead of failing (PostgREST answers PGRST204 for an unknown column).
@@ -57,7 +63,7 @@ export async function updateProfile(userId: string, patch: ProfilePatch): Promis
   }
   const row = ok(r) as Profile | null;
   if (row) return row;
-  // No profile row (the sign-up trigger failed): the server recreates it, then save again.
+  // No profile row yet: the server creates it, then save again.
   const { api } = await import('./api');
   await api('config', {});
   return ok(await sb.from('profiles').update(patch).eq('id', userId).select('*').single());

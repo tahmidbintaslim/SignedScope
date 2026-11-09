@@ -7,7 +7,12 @@ process.env.SIGNING_SECRET = 'test-secret-test-secret-test-secret-123';
 process.env.SUPABASE_URL = 'https://x.supabase.co';
 process.env.SUPABASE_ANON_KEY = 'anon';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'service';
+process.env.CLERK_PUBLISHABLE_KEY = 'pk_test_' + Buffer.from('test.clerk.accounts.dev$').toString('base64');
 const fake = require('./fake-supabase');
+// Clerk session tokens are checked in test/clerk.test.js; here "fake-token-<user id>" stands in.
+require.cache[require.resolve('../api/_clerk')] = { loaded: true, id: 'clerk', exports: {
+  verify: async (t) => { const u = fake.__store.users.find((x) => t === 'fake-token-' + x.id); return u ? { id: u.id, email: u.email } : null; },
+} };
 require.cache[require.resolve('@supabase/supabase-js')] = { exports: fake, loaded: true, id: 'supabase' };
 const store = fake.__store;
 const seal = require('../api/seal');
@@ -30,7 +35,7 @@ const base = { title: 'Café site', agency: 'A Studio', client: 'Café', currenc
 
 test('config exposes only public keys', async () => {
   const r = await call(config, {}, {}, 'GET');
-  assert.deepEqual(r.body, { enabled: true, supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'anon' });
+  assert.deepEqual(r.body, { enabled: true, supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'anon', clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY });
 });
 
 test('POST config recreates a missing profile row for the signed-in user only', async () => {
@@ -222,20 +227,16 @@ test('security: one-time signing, sender flag, two-step sessions, verified email
   const signedIn = (await call(seal, base, { authorization: 'Bearer fake-token-' + A.id })).body.token;
   assert.equal((await call(verify, { token: signedIn })).body.data.anon, undefined, 'signed-in senders are verified without a project');
 
-  // A user with a verified authenticator needs a two-step session for the API too.
-  store.factors = [{ id: 'f1', user_id: A.id, status: 'verified', factor_type: 'totp' }];
-  require('../api/_supabase').clearFactorCache(); // the earlier calls cached "no factor" for 30s
-  try {
-    const r = await call(seal, { ...base, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
-    assert.equal(r.status, 401, 'aal1 token refused');
-  } finally { store.factors = []; require('../api/_supabase').clearFactorCache(); }
+  // A token that doesn't verify is refused when filing into a project.
+  assert.equal((await call(seal, { ...base, projectId: P }, { authorization: 'Bearer fake-token-nobody-at-all' })).status, 401, 'bad token refused');
 
-  // Notification email goes to the verified sign-in address, not the editable profile field.
+  // Notification email goes to the profile address (set from the verified Clerk email), and
+  // header injection in the title is stripped from the subject.
   process.env.RESEND_API_KEY = 're_test'; process.env.EMAIL_FROM = 'SignedScope <hi@signedscope.app>';
   const mails = []; const realFetch = global.fetch;
   global.fetch = async (url, opts) => { mails.push(JSON.parse(opts.body)); return { ok: true, text: async () => '' }; };
   try {
-    store.tables.profiles = [{ id: A.id, email: 'victim@corp.com', notify_signed: true, notify_viewed: false, notify_overdue: true }];
+    store.tables.profiles = [{ id: A.id, email: A.email, notify_signed: true, notify_viewed: false, notify_overdue: true }];
     const t = await call(seal, { ...base, title: 'Spam\r\nBcc: x', projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
     const iid = (await call(verify, { token: t.body.token })).body.data.items[0].id;
     await call(sign, { token: t.body.token, name: 'Nok', agree: true, decisions: { [iid]: { status: 'accepted' } } });
