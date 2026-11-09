@@ -8,13 +8,18 @@ const { render, PRERENDER, SHELLS, META } = await import(pathToFileURL(resolve('
 const template = readFileSync('dist/index.html', 'utf8');
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+// Public address for canonical links and the sitemap (set SITE_URL when the custom domain is live).
+const SITE = (process.env.SITE_URL || 'https://signedscope.vercel.app').replace(/\/$/, '');
+const indexable = (url) => !(META[url] ?? META['/']).noindex;
+
 const head = (url) => {
   const meta = META[url] ?? META['/'];
+  const canonical = indexable(url) && PRERENDER.includes(url) ? `\n    <link rel="canonical" href="${SITE}${url === '/' ? '/' : url}" />` : '';
   return template
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(meta.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${esc(meta.description)}" />`
       + `\n    <meta property="og:title" content="${esc(meta.title)}" />\n    <meta property="og:description" content="${esc(meta.description)}" />`
-      + (meta.noindex ? '\n    <meta name="robots" content="noindex" />' : ''));
+      + (meta.noindex ? '\n    <meta name="robots" content="noindex" />' : '') + canonical);
 };
 
 for (const url of PRERENDER) {
@@ -31,4 +36,9 @@ for (const url of SHELLS) {
   writeFileSync(`dist${url}.html`, head(url));
   console.log(`shell ${url} -> dist${url}.html`);
 }
+// Search engines: every indexable pre-rendered page in the sitemap; private areas kept out.
+const urls = PRERENDER.filter(indexable);
+writeFileSync('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
+writeFileSync('dist/robots.txt', `User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /login\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`);
+console.log(`sitemap.xml (${urls.length} pages) and robots.txt`);
 rmSync('dist-ssr', { recursive: true, force: true });

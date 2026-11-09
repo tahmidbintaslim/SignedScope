@@ -22,7 +22,8 @@ function Header() {
   return (
     <header className="site-header">
       <div className="container site-header-row">
-        <AppLink to="/" className="site-logo" aria-label={t('nav.home')}><Logo size={28} /></AppLink>
+        {/* The name starts with the visible text ("SignedScope") so voice control can target it. */}
+        <AppLink to="/" className="site-logo" aria-label={`SignedScope, ${t('nav.home')}`}><Logo size={28} /></AppLink>
         <nav aria-label={t('nav.main')} className="site-nav">
           <AppNavLink to="/estimate">{t('nav.estimate')}</AppNavLink>
           <AppNavLink to="/#pricing">{t('nav.pricing')}</AppNavLink>
