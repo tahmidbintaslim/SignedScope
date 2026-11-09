@@ -1,15 +1,15 @@
 // Link that preloads its page on intent (hover, focus, touch) so navigation feels instant.
-// Links to pages still on the old site, to #anchors (the browser scrolls) and to other origins are plain <a>.
+// Links with a #hash (anchors, tokens) and to other origins are plain <a>: a normal page load.
 import type { AnchorHTMLAttributes } from 'react';
 import { Link, NavLink, type LinkProps, type NavLinkProps } from 'react-router';
-import { isLegacy, preloadPage } from './routes';
+import { preloadPage } from './routes';
 
 const pathOf = (to: LinkProps['to']) => (typeof to === 'string' ? to : to.pathname ?? '/');
 const intent = (path: string) => {
   const go = () => preloadPage(path);
   return { onMouseEnter: go, onFocus: go, onTouchStart: go };
 };
-const plain = (to: string) => !to.startsWith('/') || to.startsWith('//') || to.includes('#') || isLegacy(to);
+const plain = (to: string) => !to.startsWith('/') || to.startsWith('//') || to.includes('#');
 
 export function AppLink({ to, ...props }: LinkProps) {
   const path = pathOf(to);

@@ -42,9 +42,19 @@ export const keys = {
 export async function getProfile(userId: string): Promise<Profile | null> {
   return ok(await (await db()).from('profiles').select('*').eq('id', userId).maybeSingle());
 }
+// Columns added by migration 20261108030000_onboarding.sql. Until it is applied, saves skip them
+// instead of failing (PostgREST answers PGRST204 for an unknown column).
+const ONBOARDING_COLUMNS = ['country', 'time_zone', 'onboarded_at'] as const;
+
 export async function updateProfile(userId: string, patch: ProfilePatch): Promise<Profile> {
   const sb = await db();
-  const row = ok(await sb.from('profiles').update(patch).eq('id', userId).select('*').maybeSingle()) as Profile | null;
+  let r = await sb.from('profiles').update(patch).eq('id', userId).select('*').maybeSingle();
+  if (r.error?.code === 'PGRST204' && ONBOARDING_COLUMNS.some((c) => c in patch)) {
+    patch = Object.fromEntries(Object.entries(patch).filter(([k]) => !(ONBOARDING_COLUMNS as readonly string[]).includes(k)));
+    if (!Object.keys(patch).length) { const cur = await getProfile(userId); if (cur) return cur; }
+    r = await sb.from('profiles').update(patch).eq('id', userId).select('*').maybeSingle();
+  }
+  const row = ok(r) as Profile | null;
   if (row) return row;
   // No profile row (the sign-up trigger failed): the server recreates it, then save again.
   const { api } = await import('./api');

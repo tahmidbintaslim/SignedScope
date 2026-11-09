@@ -118,8 +118,9 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   // "New scope from estimate" hands a draft to /new.
   await p.getByRole('button', { name: 'New scope from estimate' }).click();
   await p.waitForURL(/\/new\?project=/);
-  const draft = await p.evaluate(() => JSON.parse(sessionStorage.getItem('ss-draft') || 'null'));
-  check(draft?.items?.[0]?.price === 5400 && draft.items[1]?.kind === 'out' && draft.client === 'Lumen Café', `detail: draft from estimate (${JSON.stringify(draft?.items?.[0])})`);
+  // /new picks the draft up: lines priced from the estimate, exclusions unpriced, client filled in.
+  await p.getByText('Filled in from your AI estimate.').waitFor({ timeout: 8000 }).catch(() => {});
+  check(await p.getByLabel('Line 1 price').inputValue() === '5400' && await p.getByLabel('Line 2 price').isDisabled() && await p.getByLabel('Client name').inputValue() === 'Lumen Café', 'detail: new scope filled from the estimate');
   check(p.errors.length === 0, `detail: console ${p.errors.join(' | ') || 'clean'}`);
 }
 
@@ -220,6 +221,19 @@ t.estimates.push({ id: 'e1', project_id: P, currency: 'THB', rate: 900, buffer_p
   check(sealed && sealed.kind === 'agreement' && sealed.projectId === P && sealed.schedule.length === 3 && sealed.items.some((i) => i.kind === 'out') && sealed.sections.some((x) => x.heading === 'Terms' && /Governing law/.test(x.body)), 'compose: sealed payload (kind, project, schedule, lines, terms)');
   check(!sealed.items.find((i) => i.kind === 'out').price, 'compose: exclusions sent without a price');
   check(p.errors.length === 0, `compose: console ${p.errors.join(' | ') || 'clean'}`);
+}
+
+// Before the onboarding migration is applied: settings still save, without the new columns.
+{
+  const t2 = seed({ profile: { name: 'Mai', onboarded_at: undefined } });
+  delete t2.profiles[0].country; delete t2.profiles[0].time_zone; delete t2.profiles[0].onboarded_at;
+  t2._missing = ['country', 'time_zone', 'onboarded_at'];
+  const p = await page(t2);
+  await p.goto(BASE + '/app/settings');
+  check(await visible(p.getByLabel('Business or studio name')) && new URL(p.url()).pathname === '/app/settings', 'no migration: no onboarding redirect');
+  await p.getByLabel('Business or studio name').fill('Mai Studio');
+  await p.getByRole('button', { name: 'Save settings' }).click();
+  check(await visible(p.getByText('Settings saved')) && t2.profiles[0].business_name === 'Mai Studio' && !('country' in t2.profiles[0]), 'no migration: settings save without the new columns');
 }
 
 // Phone: detail page fits.

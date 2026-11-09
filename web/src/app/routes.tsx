@@ -1,7 +1,5 @@
 // Every page of the site, at the same URL as today. React pages load on demand (code splitting);
 // <AppLink> starts loading a page's code when the visitor hovers, focuses or touches a link to it.
-// Pages not moved to React yet are "legacy": links to them do a normal page load, and in
-// production the old HTML file still serves that URL.
 import type { ComponentType } from 'react';
 import type { RouteObject } from 'react-router';
 
@@ -20,15 +18,13 @@ export const pages: Record<string, Loader> = {
   '/kit': () => import('../pages/Kit'),
 };
 
-/** URLs still served by the old pages in public/ until phases D and E move them. */
-export const LEGACY = ['/login', '/app'];
-export const isLegacy = (to: string) => {
-  const path = to.split(/[?#]/)[0] || '/';
-  return LEGACY.some((p) => path === p || path.startsWith(p + '/'));
-};
-
 /** URLs pre-rendered to HTML at build time. */
 export const PRERENDER = Object.keys(pages);
+/**
+ * Signed-in pages get an HTML shell with an empty root instead: the browser renders whichever
+ * URL was asked for (Vercel sends every /app/* URL to app.html).
+ */
+export const SHELLS = ['/login', '/app'];
 
 /** Title and description per page: written into the pre-rendered HTML and set on navigation. */
 export const META: Record<string, { title: string; description: string; noindex?: boolean }> = {
@@ -40,15 +36,15 @@ export const META: Record<string, { title: string; description: string; noindex?
   '/sign': { title: 'Review and sign · SignedScope', description: 'Review each line, then approve and sign.', noindex: true },
   '/receipt': { title: 'Sign-off receipt · SignedScope', description: 'A signed record of who approved what and when.', noindex: true },
   '/thanks': { title: 'Thank you · SignedScope', description: 'Your early access is active.', noindex: true },
+  '/login': { title: 'Sign in · SignedScope', description: 'Sign in to your SignedScope workspace.', noindex: true },
+  '/app': { title: 'Workspace · SignedScope', description: 'Your projects, clients and sign-offs.', noindex: true },
+  '/404': { title: 'Page not found · SignedScope', description: 'This page does not exist.', noindex: true },
   '/kit': { title: 'Design system · SignedScope', description: 'Components of the SignedScope app.', noindex: true },
 };
 
 const lazyPage = (load: Loader): RouteObject['lazy'] => async () => ({ Component: (await load()).default });
 
-/**
- * Account pages and the workspace, built in React but still served by the old pages in
- * production (they stay in LEGACY) until all of /app has moved over. Not pre-rendered.
- */
+/** Account pages and the workspace. Rendered in the browser only (see SHELLS). */
 export const accountRoutes: RouteObject[] = [
   { path: 'login', lazy: lazyPage(() => import('../pages/auth/Login')) },
   {
@@ -63,17 +59,14 @@ export const accountRoutes: RouteObject[] = [
       { path: 'clients', lazy: lazyPage(() => import('../pages/app/Clients')) },
       { path: 'clients/:id', lazy: lazyPage(() => import('../pages/app/ClientDetail')) },
       { path: 'settings', lazy: lazyPage(() => import('../pages/app/Settings')) },
-      { path: '*', lazy: lazyPage(() => import('../pages/Placeholder')) },
+      { path: '*', lazy: lazyPage(() => import('../pages/NotFound')) },
     ],
   },
 ];
-const ACCOUNT_PATHS = ['/login', '/app'];
 
 export const childRoutes: RouteObject[] = [
   ...Object.entries(pages).map(([path, load]): RouteObject => (path === '/' ? { index: true, lazy: lazyPage(load) } : { path: path.slice(1), lazy: lazyPage(load) })),
   ...accountRoutes,
-  // In dev, other legacy URLs show a placeholder; in production their HTML files answer first.
-  ...LEGACY.filter((p) => !ACCOUNT_PATHS.includes(p)).map((p): RouteObject => ({ path: p.slice(1), lazy: lazyPage(() => import('../pages/Placeholder')) })),
   { path: '*', lazy: lazyPage(() => import('../pages/NotFound')) },
 ];
 

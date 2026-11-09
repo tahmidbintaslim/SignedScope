@@ -86,7 +86,7 @@ for (const [path, heading] of [['/privacy', 'Privacy'], ['/thanks', 'You’re in
   check(await p.getByRole('heading', { level: 1 }).filter({ hasText: 'Paste a brief' }).waitFor({ timeout: 5000 }).then(() => true, () => false), 'navigation: /privacy -> /estimate in-app');
   await p.getByRole('link', { name: 'Sign in' }).click();
   await p.waitForURL('**/login');
-  check(!(await p.locator('#root').count()), 'navigation: /login loads the old page');
+  check(await p.getByRole('heading', { name: /Sign in or create your workspace|Accounts are coming soon/ }).first().waitFor({ timeout: 8000 }).then(() => true, () => false), 'navigation: /login opens the sign-in page');
 }
 await b.close();
 process.exit(failed ? 1 : 0);
