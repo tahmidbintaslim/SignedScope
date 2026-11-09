@@ -47,14 +47,13 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Scope approval and change requests",
       "title1": "Get the scope signed.",
       "title2": "Get the extras paid.",
-      "sub": "Send one link. Your client approves each line and signs. Every extra ask becomes a priced change they approve in one tap.",
+      "sub": "Your client approves each line and signs. When they ask for more, you send a price and they approve it in one tap.",
       "cta": "Create a free scope",
       "demo": "Try the live demo",
-      "note": "Free during the beta. No card. Your client never signs up.",
-      "brief": "Start from a brief: paste a client message, get priced lines",
+      "note": "Free during the beta. No card needed.",
+      "brief": "Or paste a client brief and get priced lines",
       "art": "Example: a client approves scope lines on a phone, then approves a priced extra and pays."
     },
     "phone": {
@@ -76,7 +75,6 @@
     },
     "payRow": "Clients pay through your own link",
     "problem": {
-      "label": "The problem",
       "title": "Small asks add up fast.",
       "sub": "Each one feels too small to charge for. Together, they eat your margin.",
       "a1": "Quick one, can the banner rotate?",
@@ -89,9 +87,8 @@
       "source": "PMI Pulse of the Profession, 2018"
     },
     "demo": {
-      "label": "Live demo",
-      "title": "Try it. It takes 30 seconds.",
-      "sub": "Add the ask, set a price, then sign as the client. Example data, nothing is sent.",
+      "title": "Try it.",
+      "sub": "Add the ask, set a price, then sign as the client. Nothing is sent.",
       "steps": [
         "Catch the ask",
         "Price it",
@@ -133,8 +130,7 @@
       "real": "Do this with a real client"
     },
     "how": {
-      "label": "How it works",
-      "title": "Three steps. One link.",
+      "title": "How it works",
       "s1t": "Write the scope",
       "s1b": "Paste a brief or a client message. AI drafts priced lines, and you edit them.",
       "s2t": "Send one link",
@@ -142,28 +138,9 @@
       "s3t": "Approve, sign, get paid",
       "s3b": "Your client says yes or no to each line, signs once, and pays through your link."
     },
-    "why": {
-      "label": "Why it works",
-      "title": "The price is already on the page.",
-      "sub": "So you never have to bring it up.",
-      "t1t": "Extras become priced changes",
-      "t1b": "Paste their message, set a price, send. They see exactly what changed and tap Approve.",
-      "t2t": "Line by line, not all or nothing",
-      "t2b": "Every item gets a yes, or a no with a reason. Questions come up now, not at handover.",
-      "t3t": "A record both sides trust",
-      "t3b": "Who approved what and when, with a fingerprint anyone can verify.",
-      "t4t": "Paid on the same screen",
-      "t4b": "Add your own pay link. SignedScope never holds or moves your money."
-    },
-    "client": {
-      "label": "For your client",
-      "title": "No account. No app. Just a link.",
-      "sub": "You see every scope, change and payment in one place. Your client opens a link, approves each line and signs with a finger."
-    },
     "pricing": {
-      "label": "Pricing",
       "title": "Free during the beta.",
-      "sub": "Everything is free while we are in beta. Starter stays free after. No per-seat fees.",
+      "sub": "Starter stays free after the beta.",
       "month": "/month",
       "soon": "Soon",
       "starter": "Starter",
@@ -202,8 +179,7 @@
       "soonNote": "Items marked Soon are being built."
     },
     "faq": {
-      "label": "FAQ",
-      "title": "Good questions.",
+      "title": "Questions",
       "items": [
         {
           "q": "Is the signature legally binding?",

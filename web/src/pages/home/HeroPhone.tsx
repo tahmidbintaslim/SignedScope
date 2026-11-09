@@ -11,7 +11,6 @@ export function HeroPhone() {
   const lines = [[t('home.phone.l1'), t('home.phone.l1s'), 1800], [t('home.phone.l2'), t('home.phone.l2s'), 1100], [t('home.phone.l3'), t('home.phone.l3s'), 300]] as const;
   return (
     <div className="hp" role="img" aria-label={t('home.hero.art')}>
-      <div className="hp-glow" aria-hidden="true" />
       <div className="hp-device" aria-hidden="true">
         <div className="hp-screen">
           <div className="hp-status"><span>9:41</span><span className="hp-island" /><span className="hp-batt" /></div>

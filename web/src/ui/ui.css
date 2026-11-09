@@ -25,8 +25,8 @@
 .ss-btn--lg { min-height: 52px; padding: 0 24px; font-size: 16px; }
 .ss-btn--block { width: 100%; }
 .ss-btn--icon { padding: 0; aspect-ratio: 1; }
-.ss-btn--primary { background: var(--ss-gradient-mark); color: #fff; box-shadow: var(--ss-shadow-brand); }
-.ss-btn--primary:hover { box-shadow: 0 14px 36px rgb(124 58 237 / 36%); }
+.ss-btn--primary { background: #6D28D9; color: #fff; } /* fixed violet: white text is 7:1 in both themes */
+.ss-btn--primary:hover { background: #5B21B6; }
 .ss-btn--secondary { background: var(--ss-surface-raised); color: var(--ss-text); border-color: var(--ss-border); box-shadow: var(--ss-shadow-sm); }
 .ss-btn--secondary:hover { background: var(--ss-surface); }
 .ss-btn--ghost { background: transparent; color: var(--ss-text); }

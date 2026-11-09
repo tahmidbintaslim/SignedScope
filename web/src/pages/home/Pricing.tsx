@@ -21,7 +21,7 @@ function Plan({ id, price, items, highlight, children }: { id: 'starter' | 'pro'
       </header>
       <ul>
         {list.map((f, i) => (
-          <li key={f}><Icon name="check" size={18} />{f}{SOON[items]?.includes(i) && <Badge tone="neutral">{t('home.pricing.soon')}</Badge>}</li>
+          <li key={f}><Icon name="check" size={18} /><span>{f}{SOON[items]?.includes(i) && <> <Badge tone="neutral">{t('home.pricing.soon')}</Badge></>}</span></li>
         ))}
       </ul>
       {children}
