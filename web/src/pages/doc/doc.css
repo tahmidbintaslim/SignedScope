@@ -29,7 +29,7 @@
 .doc-total-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600; }
 .doc-total-row b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 .doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-.doc-agree { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.doc-agree { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; cursor: pointer; }
 .doc-agree input { width: 18px; height: 18px; margin-top: 3px; flex: none; accent-color: var(--ss-brand); }
 .doc-share { display: flex; gap: 8px; }
 .doc-share input { flex: 1; min-width: 0; }
@@ -47,6 +47,8 @@
   .doc-evidence dl { grid-template-columns: 1fr; }
   .doc-evidence dd { margin-bottom: 6px; }
   .doc-share { flex-direction: column; }
+  /* The sign button spans the screen so it is easy to reach with a thumb. */
+  .doc form button[type=submit].ss-btn--lg { width: 100%; }
 }
 /* Print / PDF: the receipt prints as an audit record (all decisions, hashes, verify steps). */
 .print-only { display: none; }

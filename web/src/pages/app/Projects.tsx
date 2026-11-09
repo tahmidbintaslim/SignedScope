@@ -1,7 +1,6 @@
 // All projects with a status filter. "?new=1" (from the dashboard and old links) opens the
 // new-project dialog.
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import { usePrefs } from '../../app/preferences';
@@ -16,11 +15,13 @@ export default function Projects() {
   const { t } = useTranslation();
   const { date } = usePrefs();
   const [params, setParams] = useSearchParams();
-  const [filter, setFilter] = useState('');
   const projects = useQuery({ queryKey: keys.projects, queryFn: listProjects });
   const clients = useQuery({ queryKey: keys.clients, queryFn: listClients });
   const open = params.get('new') === '1';
-  const setOpen = (v: boolean) => setParams((p) => { if (v) p.set('new', '1'); else p.delete('new'); return p; }, { replace: true });
+  const setOpen = (v: boolean) => setParams((p) => { const n = new URLSearchParams(p); if (v) n.set('new', '1'); else n.delete('new'); return n; }, { replace: true });
+  // The status filter lives in the URL, so Back, reload and shared links keep it.
+  const filter = params.get('status') ?? '';
+  const setFilter = (v: string) => setParams((p) => { const n = new URLSearchParams(p); if (v) n.set('status', v); else n.delete('status'); return n; }, { replace: true });
 
   const clientName = Object.fromEntries((clients.data ?? []).map((c) => [c.id, c.name]));
   const rows = (projects.data ?? []).filter((p) => !filter || p.status === filter);

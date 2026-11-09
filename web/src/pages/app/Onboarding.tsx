@@ -2,14 +2,14 @@
 // keeps what you entered. Everything can be changed later in Settings.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'motion/react';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { usePrefs } from '../../app/preferences';
 import { createClient, createProject, keys, updateProfile, type Profile, type ProfilePatch } from '../../lib/db';
-import { CURRENCIES, LANGUAGES, detectLocale, type Currency, type Language } from '../../lib/locale';
+import { COUNTRY_CURRENCY, CURRENCIES, LANGUAGES, detectLocale, type Currency, type Language } from '../../lib/locale';
 import { duration, ease } from '../../motion/tokens';
-import { Button, ButtonLink, Card, Field, Input, Logo, Select, Textarea, useToast } from '../../ui';
+import { Button, Card, Field, Input, Logo, Select, Textarea, useToast } from '../../ui';
 import { useApp } from './context';
 import './onboarding.css';
 import { COUNTRIES, COUNTRY_ZONE, LANG_NAME, useRegionName, useZones } from './places';
@@ -27,7 +27,7 @@ export default function Onboarding() {
   const guess = useMemo(() => detectLocale(), []);
   const [step, setStep] = useState(1);
   const [f, setF] = useState(() => ({
-    name: profile?.name ?? (user.user_metadata?.full_name as string | undefined) ?? '',
+    name: profile?.name ?? user.name ?? '',
     business_name: profile?.business_name ?? '',
     country: profile?.country ?? guess.country ?? '',
     time_zone: profile?.time_zone ?? guess.timeZone,
@@ -49,20 +49,25 @@ export default function Onboarding() {
     mutationFn: async (patch: ProfilePatch) => updateProfile(user.id, patch),
     onSuccess: (p: Profile) => qc.setQueryData(keys.profile, p),
   });
+  // Where the person was going before onboarding (AppShell passes it); defaults to the dashboard.
+  const from = (useLocation().state as { from?: string } | null)?.from;
+  // Rows already created, so pressing Finish again after an error doesn't create them twice.
+  const made = useRef<{ client?: string | null; project?: string }>({});
   const finish = useMutation({
-    mutationFn: async () => {
-      if (f.projectTitle.trim()) {
-        const c = f.clientName.trim() ? await createClient({ name: f.clientName.trim().slice(0, 120) }) : null;
-        await createProject({ title: f.projectTitle.trim().slice(0, 160), client_id: c?.id ?? null, currency: f.currency });
+    mutationFn: async ({ skip = false, to }: { skip?: boolean; to?: string } = {}) => {
+      if (!skip && f.projectTitle.trim() && !made.current.project) {
+        if (made.current.client === undefined) made.current.client = f.clientName.trim() ? (await createClient({ name: f.clientName.trim().slice(0, 120) })).id : null;
+        made.current.project = (await createProject({ title: f.projectTitle.trim().slice(0, 160), client_id: made.current.client, currency: f.currency })).id;
       }
-      return updateProfile(user.id, { onboarded_at: new Date().toISOString() });
+      return { profile: await updateProfile(user.id, { onboarded_at: new Date().toISOString() }), to };
     },
-    onSuccess: (p) => {
+    onSuccess: ({ profile: p, to }) => {
       qc.setQueryData(keys.profile, p);
       void qc.invalidateQueries({ queryKey: keys.projects });
       void qc.invalidateQueries({ queryKey: keys.clients });
+      if (to) { window.location.assign(to); return; }
       toast({ title: t('app.onb.doneToast'), tone: 'success' });
-      navigate('/app', { replace: true });
+      navigate(made.current.project ? `/app/projects/${made.current.project}` : from && from !== '/app/welcome' ? from : '/app', { replace: true });
     },
     onError: (e) => toast({ title: (e as Error).message, tone: 'danger' }),
   });
@@ -79,7 +84,7 @@ export default function Onboarding() {
       try { await save.mutateAsync(patchFor(step)); } catch (err) { toast({ title: (err as Error).message, tone: 'danger' }); return; }
       if (step === 2) setLocale({ language: f.lang, country: f.country, timeZone: f.time_zone, currency: f.currency });
       setStep(step + 1);
-    } else finish.mutate();
+    } else finish.mutate({});
   };
 
   return (
@@ -98,13 +103,13 @@ export default function Onboarding() {
               {step === 1 && (<>
                 <h1>{t('app.onb.s1t')}</h1><p className="muted">{t('app.onb.s1b')}</p>
                 <Field label={t('app.onb.name')}><Input autoComplete="name" value={f.name} onChange={(e) => set('name', e.target.value)} maxLength={120} autoFocus /></Field>
-                <Field label={t('app.onb.business')} hint={t('app.onb.businessHint')}><Input autoComplete="organization" value={f.business_name} onChange={(e) => set('business_name', e.target.value)} maxLength={120} /></Field>
+                <Field label={t('app.onb.business')} hint={t('app.onb.businessHint')}><Input autoComplete="organization" required value={f.business_name} onChange={(e) => set('business_name', e.target.value)} maxLength={120} /></Field>
               </>)}
               {step === 2 && (<>
                 <h1>{t('app.onb.s2t')}</h1><p className="muted">{t('app.onb.s2b')}</p>
                 <div className="onb-grid">
                   <Field label={t('app.onb.country')}>
-                    <Select value={f.country} onChange={(e) => { const c = e.target.value; setF((x) => ({ ...x, country: c, time_zone: COUNTRY_ZONE[c] ?? x.time_zone })); }} autoComplete="country">
+                    <Select value={f.country} onChange={(e) => { const c = e.target.value; setF((x) => ({ ...x, country: c, time_zone: COUNTRY_ZONE[c] ?? x.time_zone, currency: COUNTRY_CURRENCY[c] ?? x.currency })); }} autoComplete="country">
                       <option value="">—</option>
                       {COUNTRIES.map((c) => <option key={c} value={c}>{regionName?.of(c) ?? c}</option>)}
                     </Select>
@@ -135,14 +140,14 @@ export default function Onboarding() {
                 <h1>{t('app.onb.s4t')}</h1><p className="muted">{t('app.onb.s4b')}</p>
                 <Field label={t('app.onb.clientName')} optional><Input value={f.clientName} onChange={(e) => set('clientName', e.target.value)} maxLength={120} placeholder="Lumen Café" /></Field>
                 <Field label={t('app.onb.projectTitle')} optional><Input value={f.projectTitle} onChange={(e) => set('projectTitle', e.target.value)} maxLength={160} placeholder={t('app.onb.projectPh')} /></Field>
-                <ButtonLink to="/estimate" variant="ghost" icon="spark">{t('app.onb.fromBrief')}</ButtonLink>
+                <Button variant="ghost" icon="spark" disabled={finish.isPending} onClick={() => finish.mutate({ skip: true, to: '/estimate' })}>{t('app.onb.fromBrief')}</Button>
               </>)}
             </m.div>
           </AnimatePresence>
           <div className="onb-actions">
             {step > 1 ? <Button variant="ghost" icon="arrow" className="onb-back" onClick={() => setStep(step - 1)}>{t('app.onb.back')}</Button> : <span />}
             <div className="row">
-              {step === TOTAL && <Button variant="ghost" onClick={() => finish.mutate()} disabled={finish.isPending}>{t('app.onb.skip')}</Button>}
+              {step === TOTAL && <Button variant="ghost" onClick={() => finish.mutate({ skip: true })} disabled={finish.isPending}>{t('app.onb.skip')}</Button>}
               <Button type="submit" loading={save.isPending || finish.isPending} iconEnd={step < TOTAL ? 'arrow' : undefined}>{step < TOTAL ? t('app.onb.next') : t('app.onb.finish')}</Button>
             </div>
           </div>

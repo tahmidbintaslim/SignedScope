@@ -34,7 +34,9 @@
     "loading": "Loading…",
     "empty": "Nothing here yet",
     "error": "Something went wrong",
-    "offline": "You're offline. Changes will be sent when you reconnect."
+    "offline": "You're offline. Changes will be sent when you reconnect.",
+    "crashTitle": "Something went wrong on this page",
+    "crashBody": "Reload to try again. If you opened a link, it may have been cut off when it was copied."
   },
   "notFound": {
     "title": "Page not found",

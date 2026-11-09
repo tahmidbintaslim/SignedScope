@@ -9,7 +9,12 @@ import { CURRENCIES } from '../../lib/locale';
 import { Badge, Button, Dialog, Field, Input, Select, Textarea, useToast } from '../../ui';
 import { useApp } from './context';
 
-export const today = () => new Date().toISOString().slice(0, 10);
+/** YYYY-MM-DD for a moment in the user's time zone (not UTC), so "today" and "this month" match their calendar. */
+export const dayIn = (timeZone: string, at: Date | string = new Date()) => {
+  try { return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(at)); }
+  catch { return new Date(at).toISOString().slice(0, 10); }
+};
+export const today = (timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') => dayIn(timeZone);
 export const fmtSize = (n: number) => (n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
 export const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 

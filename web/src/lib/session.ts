@@ -10,17 +10,19 @@ export function useSession() {
   const qc = useQueryClient();
   useEffect(() => {
     let off = () => {};
+    let cancelled = false;
     let last: string | null | undefined;
     clerk().then((c) => {
-      if (!c) return;
+      if (!c || cancelled) return;
       // Fires on sign-in, sign-out, user switch and token refresh; only the user change matters.
+      // A different account must never see the last one's cached rows, so the cache is dropped.
       off = c.addListener(({ user }) => {
         const id = user?.id ?? null;
-        if (last !== undefined && id !== last) void qc.invalidateQueries({ queryKey: SESSION_KEY });
+        if (last !== undefined && id !== last) { qc.clear(); void qc.invalidateQueries({ queryKey: SESSION_KEY }); }
         last = id;
       });
     }).catch(() => {});
-    return () => off();
+    return () => { cancelled = true; off(); };
   }, [qc]);
   return useQuery({ queryKey: SESSION_KEY, queryFn: fullySignedIn, staleTime: Infinity });
 }

@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
+import { safeDecode } from '../../lib/sealed';
 import { Badge, Button, Card, Field, Icon, Input } from '../../ui';
 import './legal.css';
 import '../../i18n/pages';
@@ -17,7 +18,7 @@ interface Verified {
 /** Accepts a full link (…/receipt#v1.…, …/new#cr=…) or a bare token. */
 export const tokenFrom = (v: string) => {
   const s = v.trim();
-  return decodeURIComponent(s.includes('#') ? s.slice(s.indexOf('#') + 1) : s).replace(/^cr=/, '');
+  return safeDecode(s.includes('#') ? s.slice(s.indexOf('#') + 1) : s).replace(/^cr=/, '');
 };
 
 export default function Verify() {

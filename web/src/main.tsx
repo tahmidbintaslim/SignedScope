@@ -5,6 +5,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import { createBrowserRouter, matchRoutes, RouterProvider, type RouteObject } from 'react-router';
 import { Layout } from './app/Layout';
 import { Root } from './app/Root';
+import { RouteError } from './app/RouteError';
 import { childRoutes } from './app/routes';
 import { initI18n } from './i18n';
 import { DEFAULT_LOCALE, loadLocale } from './lib/locale';
@@ -16,7 +17,7 @@ import './app/app.css';
 // Lets CSS hide below-the-fold content for scroll reveals only when JavaScript runs.
 document.documentElement.classList.add('js');
 
-const routes: RouteObject[] = [{ path: '/', Component: Layout, children: childRoutes }];
+const routes: RouteObject[] = [{ path: '/', Component: Layout, ErrorBoundary: RouteError, HydrateFallback: () => null, children: childRoutes }];
 const container = document.getElementById('root')!;
 const prerendered = container.hasChildNodes();
 const queryClient = makeQueryClient();

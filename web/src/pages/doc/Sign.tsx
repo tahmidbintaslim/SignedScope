@@ -68,7 +68,8 @@ function SignForm({ token, d, initialQuestions }: { token: string; d: SealedDoc;
   });
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (undecided) { setMissing(true); document.querySelector<HTMLElement>('.decide.is-missing input')?.focus(); return; }
+    // Focus after React has marked the missing lines (the class isn't there until the next frame).
+    if (undecided) { setMissing(true); requestAnimationFrame(() => document.querySelector<HTMLElement>('.decide.is-missing input')?.focus()); return; }
     sign.mutate();
   };
   const decide = (id: string, status: DecisionStatus) => setDecisions((x) => ({ ...x, [id]: { status, note: status === 'rejected' ? x[id]?.note ?? '' : undefined } }));
