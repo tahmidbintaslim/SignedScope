@@ -6,6 +6,19 @@ import { resolve } from 'node:path';
 
 const { render, PRERENDER, SHELLS, META } = await import(pathToFileURL(resolve('dist-ssr/entry-server.js')).href);
 const template = readFileSync('dist/index.html', 'utf8');
+// Each pre-rendered page links its own CSS, so the first paint is already styled (the lazy route would otherwise add its CSS a second or two later).
+const manifest = JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8'));
+const routesSrc = readFileSync('src/app/routes.tsx', 'utf8');
+const source = Object.fromEntries([...routesSrc.matchAll(/'(\/[\w-]*)': \(\) => import\('\.\.\/(pages\/[^']+)'\)/g)].map(([, url, file]) => [url, `src/${file}.tsx`]));
+function assets(key, seen = new Set()) {
+  const e = manifest[key];
+  if (!e || e.isEntry || seen.has(key)) return []; // the entry's CSS is already in index.html
+  seen.add(key);
+  return [...(e.css ?? []), ...(e.imports ?? []).flatMap((k) => assets(k, seen))];
+}
+// After the main stylesheet, so page rules keep their cascade order.
+const pageLinks = (url) => [...new Set(source[url] ? assets(source[url]) : [])]
+  .map((f) => `<link rel="stylesheet" crossorigin href="/${f}" />\n  `).join('');
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 // Public address for canonical links and the sitemap (set SITE_URL when the custom domain is live).
@@ -19,7 +32,8 @@ const head = (url) => {
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(meta.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${esc(meta.description)}" />`
       + `\n    <meta property="og:title" content="${esc(meta.title)}" />\n    <meta property="og:description" content="${esc(meta.description)}" />`
-      + (meta.noindex ? '\n    <meta name="robots" content="noindex" />' : '') + canonical);
+      + (meta.noindex ? '\n    <meta name="robots" content="noindex" />' : '') + canonical)
+    .replace('</head>', `${pageLinks(url)}</head>`);
 };
 
 for (const url of PRERENDER) {
@@ -42,3 +56,4 @@ writeFileSync('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urls
 writeFileSync('dist/robots.txt', `User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /login\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`sitemap.xml (${urls.length} pages) and robots.txt`);
 rmSync('dist-ssr', { recursive: true, force: true });
+rmSync('dist/.vite', { recursive: true, force: true });

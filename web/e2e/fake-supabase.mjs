@@ -26,7 +26,7 @@ export function seed(overrides = {}) {
 const DEFAULTS = { projects: { status: 'lead', currency: 'USD' }, payments: { status: 'requested' } };
 
 /** Wires the fake into a Playwright page (call before the first goto). Returns the live tables. */
-export async function installFake(page, tables, { signedIn = true } = {}) {
+export async function installFake(page, tables, { signedIn = true, providers = {} } = {}) {
   await page.route('**/api/config', (r) => r.fulfill({ json: { enabled: true, supabaseUrl: 'https://test.supabase.co', supabaseAnonKey: 'anon' } }));
   if (signedIn) {
     const session = { access_token: fakeJwt(), refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: USER.id, email: USER.email, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, factors: [] } };
@@ -40,6 +40,8 @@ export async function installFake(page, tables, { signedIn = true } = {}) {
       const path = url.pathname.slice('/auth/v1'.length);
       if (path === '/logout') return route.fulfill({ status: 204, body: '' });
       if (path === '/otp') return route.fulfill({ json: {} });
+      // Which sign-in providers are switched on (providers option; both off, like production today).
+      if (path === '/settings') return route.fulfill({ json: { external: { email: true, google: false, github: false, ...providers } } });
       // Authenticator-app factors: enroll, challenge, verify (code 123456), unenroll.
       const factors = tables._factors ?? (tables._factors = []);
       if (path === '/factors' && req.method() === 'POST') {
