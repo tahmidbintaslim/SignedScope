@@ -9,6 +9,7 @@ import { KINDS, useHashToken, isPayable, type SealedReceipt, type Verified } fro
 import { Badge, Button, ButtonLink, Card, Icon, Skeleton } from '../../ui';
 import { CantOpen, DocParts, PayBox } from './parts';
 import './doc.css';
+import '../../i18n/pages';
 
 export default function Receipt() {
   const { t } = useTranslation();

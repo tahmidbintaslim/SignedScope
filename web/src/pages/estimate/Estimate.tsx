@@ -16,6 +16,7 @@ import { featurePrice, toDraft, totals } from './math';
 import { SAMPLE_BRIEF, SAMPLE_ESTIMATE } from './sample';
 import type { Estimate as Est, Story } from './types';
 import './estimate.css';
+import '../../i18n/pages';
 
 const LOCAL_CURRENCY: Record<string, Currency> = { th: 'THB', bn: 'BDT' };
 

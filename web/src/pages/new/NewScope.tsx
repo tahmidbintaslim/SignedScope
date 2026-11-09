@@ -18,6 +18,7 @@ import { Button, Card, Field, Icon, Input, Select, Textarea } from '../../ui';
 import { LinkBox } from '../doc/parts';
 import { ItemsEditor, newItem, toSealItems, type EditItem } from './ItemsEditor';
 import './new.css';
+import '../../i18n/pages';
 
 interface Form { title: string; client: string; agency: string; agencyEmail: string; currency: string; payLink: string; payInstructions: string; notes: string }
 type Banner = { tone: 'info' | 'warn'; text: string } | null;

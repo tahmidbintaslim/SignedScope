@@ -9,6 +9,7 @@ import { SESSION_KEY, safeNext } from '../../lib/session';
 import { supabase } from '../../lib/supabase';
 import { Button, Card, EmptyState, Field, Input, Logo, Spinner } from '../../ui';
 import './auth.css';
+import '../../i18n/pages';
 
 type Step = 'loading' | 'start' | 'sent' | 'mfa' | 'off';
 

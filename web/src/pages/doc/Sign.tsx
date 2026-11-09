@@ -10,6 +10,7 @@ import { KINDS, diffStatus, useHashToken, proposedTotal, type Decision, type Dec
 import { Badge, Button, Card, Field, Icon, Input, Skeleton } from '../../ui';
 import { CantOpen, DocParts, LinkBox, PayBox } from './parts';
 import './doc.css';
+import '../../i18n/pages';
 
 interface Signed { receipt: string; outcome: 'approved' | 'changes_requested'; payable: boolean }
 

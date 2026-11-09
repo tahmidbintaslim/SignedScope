@@ -11,6 +11,7 @@ import { getProfile, keys, listActivity, listClients, listDocuments, listPayment
 import { signOut, useSession } from '../../lib/session';
 import { ButtonLink, Icon, IconButton, Logo, Menu, Spinner, type IconName } from '../../ui';
 import './app.css';
+import '../../i18n/pages';
 
 const NAV: { to: string; icon: IconName; key: string; end?: boolean }[] = [
   { to: '/app', icon: 'home', key: 'home', end: true },
