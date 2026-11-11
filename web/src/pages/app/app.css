@@ -121,3 +121,22 @@
 /* Destructive actions at the end of a page: set apart and easy to hit. */
 .detail > .sect:has(> .ss-btn:only-child) { padding-top: 20px; border-top: 1px solid var(--ss-border); }
 .detail > .sect:has(> .ss-btn:only-child) > .ss-btn { width: fit-content; min-height: 44px; color: var(--ss-danger); }
+
+/* Getting started checklist (dashboard) */
+.gs { display: grid; gap: 12px; margin-bottom: 24px; border-color: color-mix(in srgb, var(--ss-brand) 30%, var(--ss-border)); }
+.gs-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.gs-head h2 { font-size: 20px; margin: 0; }
+.gs-bar { height: 6px; border-radius: 3px; background: var(--ss-surface); overflow: hidden; }
+.gs-bar span { display: block; height: 100%; border-radius: 3px; background: var(--ss-brand); transition: width var(--ss-duration-slow) var(--ss-ease-standard); }
+.gs-steps { display: grid; margin: 0; padding: 0; list-style: none; }
+.gs-steps li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--ss-border); }
+.gs-steps li:first-child { border-top: 0; }
+.gs-check { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ss-border); color: #fff; }
+.gs-steps li.is-done .gs-check { background: var(--ss-success); border-color: var(--ss-success); }
+.gs-steps li.is-next .gs-check { border-color: var(--ss-brand); }
+.gs-text { display: grid; gap: 2px; }
+.gs-steps li.is-done .gs-text b { color: var(--ss-text-muted); text-decoration: line-through; font-weight: 600; }
+@media (max-width: 520px) {
+  .gs-steps li { grid-template-columns: 28px minmax(0, 1fr); }
+  .gs-steps li .ss-btn { grid-column: 2; justify-self: start; }
+}
