@@ -7,6 +7,7 @@ import { usePrefs } from '../../app/preferences';
 import { keys, listActivity, listClients, listDocuments, listPayments, listProjects, sumByCurrency, type Activity, type Project } from '../../lib/db';
 import { Badge, ButtonLink, Card, EmptyState, Skeleton } from '../../ui';
 import { useApp } from './context';
+import { GettingStarted } from './GettingStarted';
 
 const STATUS_TONE: Record<string, 'neutral' | 'brand' | 'success' | 'warning'> = { lead: 'neutral', estimating: 'neutral', proposal_sent: 'brand', approved: 'success', in_progress: 'warning', completed: 'success', cancelled: 'neutral' };
 import { dayIn, today } from './shared';
@@ -29,7 +30,7 @@ export function useActivityText() {
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const { profile } = useApp();
+  const { profile, user } = useApp();
   const { money, date, locale } = usePrefs();
   const projects = useQuery({ queryKey: keys.projects, queryFn: listProjects });
   const docs = useQuery({ queryKey: keys.documents, queryFn: listDocuments });
@@ -81,6 +82,7 @@ export default function Dashboard() {
   return (
     <>
       {head}
+      <GettingStarted userId={user.id} profile={profile} projects={projects.data} docs={docs.data} />
       <div className="kpis">
         <Card className="kpi"><small>{t('app.dash.active')}</small><b>{active.length}</b></Card>
         <Card className="kpi"><small>{t('app.dash.waiting')}</small><b>{waiting.length}</b></Card>

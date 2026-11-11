@@ -228,6 +228,27 @@
       "send": "Save answer",
       "edit": "Edit",
       "saved": "Answer saved"
+    },
+    "gs": {
+      "title": "Get your first scope signed",
+      "progress": "{{done}} of {{total}} done",
+      "hide": "Hide",
+      "done": "Done",
+      "todo": "Not done yet",
+      "business": "Add your business name",
+      "businessHint": "Clients see it on every scope.",
+      "businessGo": "Add it",
+      "pay": "Say how clients pay you",
+      "payHint": "Bank, PromptPay, bKash or a pay link. Shown after they sign.",
+      "payGo": "Add payment details",
+      "project": "Create a project",
+      "projectHint": "One per client job.",
+      "projectGo": "New project",
+      "send": "Send a scope link",
+      "sendHint": "List what's in and out, price each line, and send one link.",
+      "sendGo": "Write a scope",
+      "signed": "Get it signed",
+      "signedHint": "Your client approves each line and signs. You'll get an email."
     }
   },
   "auth": {

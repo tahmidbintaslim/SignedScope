@@ -40,7 +40,7 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   check(p.errors.length === 0, `login: console ${p.errors.join(' | ') || 'clean'}`);
 }
 
-// New account: onboarding runs once, saves each step and creates the first project.
+// New account: two short onboarding steps, then the dashboard checklist leads to the first signed scope.
 {
   const t = seed();
   const p = await page(t);
@@ -55,27 +55,22 @@ async function page(tables, opts = {}, ctxOpts = {}) {
   await p.getByRole('heading', { name: 'Where you work' }).waitFor();
   check(t.profiles[0].name === 'Mai Tanaka' && t.profiles[0].business_name === 'Mai Studio', 'onboarding: step 1 saved');
   await p.getByLabel('Country').selectOption('TH');
-  await p.getByLabel('Default currency').selectOption('THB');
+  check(await p.getByLabel('Default currency').inputValue() === 'THB', 'onboarding: currency follows the country');
   if (OUT) await p.screenshot({ path: `${OUT}/onboarding-2.png` });
-  await p.getByRole('button', { name: 'Continue' }).click();
-  await p.getByRole('heading', { name: 'How you charge' }).waitFor();
-  check(t.profiles[0].country === 'TH' && t.profiles[0].currency === 'THB' && t.profiles[0].time_zone === 'Asia/Bangkok', `onboarding: step 2 saved (country, currency, time zone ${t.profiles[0].time_zone})`);
-  await p.getByLabel('Hourly rate (THB)').fill('900');
-  await p.getByRole('button', { name: 'Continue' }).click();
-  await p.getByRole('heading', { name: 'Your first project' }).waitFor();
-  check(Number(t.profiles[0].hourly_rate) === 900, 'onboarding: step 3 saved');
-  await p.getByLabel('Client name').fill('Lumen Café');
-  await p.getByLabel('Project title').fill('Café website');
   await p.getByRole('button', { name: 'Go to my workspace' }).click();
-  // With a first project, onboarding opens it; the dashboard then lists it.
-  await p.waitForURL(/\/app\/projects\/[^/]+$/);
-  check(await visible(p.getByRole('heading', { name: 'Café website' })), 'onboarding: opens the new project');
-  await p.locator('.app-tabs, .app-side').first().getByRole('link', { name: 'Home' }).click();
   await p.waitForURL(/\/app$/);
+  check(t.profiles[0].country === 'TH' && t.profiles[0].currency === 'THB' && t.profiles[0].time_zone === 'Asia/Bangkok', 'onboarding: step 2 saved (country, currency, time zone)');
   check(!!t.profiles[0].onboarded_at, 'onboarding: marked done');
-  check(t.projects.length === 1 && t.clients.length === 1 && t.projects[0].client_id === t.clients[0].id && t.projects[0].currency === 'THB', 'onboarding: client and project created');
   check(await visible(p.getByRole('heading', { name: 'Hi, Mai' })), 'dashboard: greets by first name');
-  check(await visible(p.getByRole('link', { name: 'Café website' })), 'dashboard: lists the new project');
+  // Checklist: business name already done (1 of 5); the next step is how clients pay.
+  const gs = p.getByRole('region', { name: 'Get your first scope signed' });
+  check(await visible(gs) && await gs.getByText('1 of 5 done').first().isVisible(), 'checklist: shown with progress');
+  check(await gs.getByRole('link', { name: 'Add payment details' }).isVisible(), 'checklist: next step has an action');
+  await audit(p, 'dashboard with checklist');
+  await gs.getByRole('button', { name: 'Hide' }).click();
+  check(await gs.count() === 0, 'checklist: can be hidden');
+  await p.reload();
+  check(await visible(p.getByRole('heading', { name: 'Hi, Mai' })) && await p.getByRole('region', { name: 'Get your first scope signed' }).count() === 0, 'checklist: stays hidden');
   check(p.errors.length === 0, `onboarding: console ${p.errors.join(' | ') || 'clean'}`);
 }
 
