@@ -379,7 +379,7 @@ function Files({ userId, projectId }: { userId: string; projectId: string }) {
                 </tr>
               ))}
             </tbody></table>
-          ) : <EmptyState art="inbox" title={t('app.files.none')} body={t('app.files.noneBody')} />}
+          ) : <EmptyState compact art="inbox" title={t('app.files.none')} body={t('app.files.noneBody')} />}
       </Card>
       <Confirm open={Boolean(removing)} onClose={() => setRemoving(null)} title={t('app.files.deleteNamed', { name: removing?.shown ?? '' })} body={t('app.files.deleteBody')} action={t('app.files.delete')}
         onConfirm={async () => { if (removing) { await removeFile(removing.path); await refresh(); } }} />

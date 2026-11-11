@@ -94,6 +94,7 @@ export default function AppShell() {
       )}
       align="end"
       items={[
+        { label: t('app.nav.estimate'), icon: 'spark', onSelect: () => navigate('/estimate') },
         { label: t('app.nav.settings'), icon: 'settings', onSelect: () => navigate('/app/settings') },
         { label: t('app.nav.signOut'), icon: 'logout', onSelect: leave },
       ]}
