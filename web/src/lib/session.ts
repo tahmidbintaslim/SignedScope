@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { fullySignedIn } from './auth';
 import { clerk } from './clerk';
+import { setSignedInHint } from './signedInHint';
 
 export const SESSION_KEY = ['session'] as const;
 
@@ -18,6 +19,7 @@ export function useSession() {
       // A different account must never see the last one's cached rows, so the cache is dropped.
       off = c.addListener(({ user }) => {
         const id = user?.id ?? null;
+        setSignedInHint(Boolean(id));
         if (last !== undefined && id !== last) { qc.clear(); void qc.invalidateQueries({ queryKey: SESSION_KEY }); }
         last = id;
       });
@@ -31,6 +33,7 @@ export function useSession() {
 export async function signOut(qc?: { clear: () => void }) {
   const c = await clerk().catch(() => null);
   await c?.signOut();
+  setSignedInHint(false);
   qc?.clear();
 }
 

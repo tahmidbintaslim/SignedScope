@@ -1,12 +1,13 @@
 // Page frame: skip link, header with navigation and preferences, animated page changes,
 // and focus moved to the new page's heading so keyboard and screen-reader users know it changed.
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, ScrollRestoration, useLocation, useNavigation } from 'react-router';
 import { page } from '../motion/tokens';
 import { Logo, Menu, IconButton, Select } from '../ui';
 import { LANGUAGES, type Language } from '../lib/locale';
+import { readSignedInHint } from '../lib/signedInHint';
 import { AppLink, AppNavLink } from './AppLink';
 import { usePrefs, type Theme } from './preferences';
 import { META } from './routes';
@@ -16,6 +17,9 @@ const LANG_NAME: Record<Language, string> = { en: 'English', bn: 'বাংল�
 function Header() {
   const { t } = useTranslation();
   const { locale, setLocale, theme, setTheme } = usePrefs();
+  // Read after hydration (pre-rendered HTML always says "Sign in").
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => setSignedIn(readSignedInHint()), []);
   const themes: { id: Theme; label: string }[] = [
     { id: 'system', label: t('settings.themeSystem') }, { id: 'light', label: t('settings.themeLight') }, { id: 'dark', label: t('settings.themeDark') },
   ];
@@ -27,10 +31,10 @@ function Header() {
         <nav aria-label={t('nav.main')} className="site-nav">
           <AppNavLink to="/estimate">{t('nav.estimate')}</AppNavLink>
           <AppNavLink to="/#pricing">{t('nav.pricing')}</AppNavLink>
-          <AppNavLink to="/login">{t('nav.signIn')}</AppNavLink>
+          <AppNavLink to={signedIn ? '/app' : '/login'}>{t(signedIn ? 'nav.dashboard' : 'nav.signIn')}</AppNavLink>
         </nav>
         <div className="site-tools">
-          <AppLink to="/login" className="site-signin">{t('nav.signIn')}</AppLink>
+          <AppLink to={signedIn ? '/app' : '/login'} className="site-signin">{t(signedIn ? 'nav.dashboard' : 'nav.signIn')}</AppLink>
           <label className="visually-hidden" htmlFor="lang">{t('settings.language')}</label>
           <Select id="lang" value={locale.language} onChange={(e) => setLocale({ language: e.target.value as Language })} className="site-lang">
             {LANGUAGES.map((l) => <option key={l} value={l}>{LANG_NAME[l]}</option>)}

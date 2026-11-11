@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
 import { fullySignedIn } from '../../lib/auth';
-import { getProfile } from '../../lib/db';
+import { getProfile, getProject, getClient } from '../../lib/db';
 import { takeDraft } from '../../lib/draft';
 import { safeDecode } from '../../lib/sealed';
 import { CURRENCIES } from '../../lib/locale';
@@ -83,6 +83,17 @@ export default function NewScope() {
       ...x, agency: x.agency || p?.business_name || p?.name || '', agencyEmail: x.agencyEmail || p?.email || s.user.email || '', payInstructions: x.payInstructions || p?.pay_instructions || '',
     }))).catch(() => undefined);
   }, [session.data]);
+  // Opened from a project: start with its title, client and currency (only into empty fields).
+  useEffect(() => {
+    if (!session.data || !projectId) return;
+    (async () => {
+      const pr = await getProject(projectId);
+      if (!pr) return;
+      const cl = pr.client_id ? await getClient(pr.client_id) : null;
+      setF((x) => ({ ...x, title: x.title || pr.title, client: x.client || cl?.company || cl?.name || '', currency: currencySet.current ? x.currency : pr.currency || x.currency }));
+      currencySet.current = true;
+    })().catch(() => undefined);
+  }, [session.data, projectId]);
 
   const draft = useMutation({
     mutationFn: () => api<{ items: { kind: EditItem['kind']; text: string }[]; source: string }>('draft', { text: paste.trim() }, { auth: false }),
