@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { usePrefs } from '../../app/preferences';
 import { keys, listActivity, listClients, listDocuments, listPayments, listProjects, sumByCurrency, type Activity, type Project } from '../../lib/db';
-import { Badge, ButtonLink, Card, EmptyState, Skeleton } from '../../ui';
+import { Badge, ButtonLink, Card, EmptyState, Icon, Skeleton } from '../../ui';
 import { useApp } from './context';
 import { GettingStarted } from './GettingStarted';
 
@@ -75,8 +75,8 @@ export default function Dashboard() {
   const overdue = open.filter((p) => p.due_date && p.due_date < now);
   const paidMonth = pays.data.filter((p) => p.status.startsWith('paid') && p.paid_at && dayIn(locale.timeZone, p.paid_at).slice(0, 7) === now.slice(0, 7));
   const todo = [
-    ...overdue.map((p) => ({ id: 'p' + p.id, text: t('app.dash.overdueItem', { label: p.label, amount: money(Number(p.amount), p.currency) }), project: p.project_id })),
-    ...waiting.map((d) => ({ id: 'd' + d.id, text: t(d.status === 'viewed' ? 'app.dash.openedItem' : 'app.dash.waitingItem', { title: d.title }), project: d.project_id })),
+    ...overdue.map((p) => ({ id: 'p' + p.id, icon: 'alert' as const, tone: 'danger', text: t('app.dash.overdueItem', { label: p.label, amount: money(Number(p.amount), p.currency) }), project: p.project_id })),
+    ...waiting.map((d) => ({ id: 'd' + d.id, icon: d.status === 'viewed' ? 'eye' as const : 'clock' as const, tone: 'wait', text: t(d.status === 'viewed' ? 'app.dash.openedItem' : 'app.dash.waitingItem', { title: d.title }), project: d.project_id })),
   ].slice(0, 8);
 
   return (
@@ -94,7 +94,13 @@ export default function Dashboard() {
           <h2>{t('app.dash.attention')}</h2>
           <Card className="card-flush">
             {todo.length ? (
-              <ul className="feed">{todo.map((x) => <li key={x.id}>{x.project ? <Link to={`/app/projects/${x.project}`}>{x.text}</Link> : <span>{x.text}</span>}<small>{x.project && byId[x.project]?.title}</small></li>)}</ul>
+              <ul className="feed feed--icons">{todo.map((x) => (
+                <li key={x.id} className={`is-${x.tone}`}>
+                  <span className="feed-icon" aria-hidden="true"><Icon name={x.icon} size={18} /></span>
+                  {x.project ? <Link to={`/app/projects/${x.project}`}>{x.text}</Link> : <span>{x.text}</span>}
+                  <small>{x.project && byId[x.project]?.title}</small>
+                </li>
+              ))}</ul>
             ) : <p className="muted" style={{ padding: '12px 0' }}>{t('app.dash.allClear')}</p>}
           </Card>
           <h2>{t('app.dash.recent')}</h2>

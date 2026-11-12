@@ -75,6 +75,9 @@
 /* Empty state */
 .ss-empty { display: grid; justify-items: center; gap: var(--ss-space-3); padding: var(--ss-space-10) var(--ss-space-4); text-align: center; }
 .ss-empty p { max-width: 42ch; }
+.ss-empty--compact { gap: var(--ss-space-2); padding: var(--ss-space-6) var(--ss-space-4); }
+.ss-empty--compact h3 { font-size: 17px; }
+.ss-empty--compact p { font-size: 15px; }
 
 /* Dialog and sheet */
 .ss-overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
