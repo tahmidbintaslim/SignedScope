@@ -58,24 +58,23 @@ export default function Home() {
     <div className="home">
       {/* Hero */}
       <section className="hero" aria-labelledby="hero-h">
-        <div className="container hero-grid">
-          <div className="hero-copy">
-            <h1 id="hero-h">{t('home.hero.title1')} <span className="hl">{t('home.hero.title2')}</span></h1>
-            <p className="hero-sub">{t('home.hero.sub')}</p>
-            <div className="row hero-ctas">
-              <ButtonLink to="/new" size="lg" iconEnd="arrow">{t('home.hero.cta')}</ButtonLink>
-              <ButtonLink to="#demo" size="lg" variant="secondary" icon="play">{t('home.hero.demo')}</ButtonLink>
-            </div>
-            <p className="hero-note muted">{t('home.hero.note')}</p>
-            <AppLink to="/estimate" className="hero-brief"><Icon name="spark" size={18} />{t('home.hero.brief')}<Icon name="arrow" size={16} /></AppLink>
+        <div className="container hero-copy">
+          <h1 id="hero-h">{t('home.hero.title1')} <em className="hl">{t('home.hero.title2')}</em></h1>
+          <p className="hero-sub">{t('home.hero.sub')}</p>
+          <div className="row hero-ctas">
+            <ButtonLink to="/new" size="lg" iconEnd="arrow">{t('home.hero.cta')}</ButtonLink>
+            <ButtonLink to="#demo" size="lg" variant="secondary" icon="play">{t('home.hero.demo')}</ButtonLink>
           </div>
-          <HeroPhone />
-        </div>
-        <div className="container pay-row">
-          <span className="muted">{t('home.payRow')}</span>
-          <ul>{PAY.map((p) => <li key={p}>{p}</li>)}</ul>
+          <p className="hero-note">{t('home.hero.note')} <AppLink to="/estimate">{t('home.hero.brief')}</AppLink></p>
         </div>
       </section>
+      <div className="container hero-stage">
+        <HeroPhone />
+      </div>
+      <div className="container pay-row">
+        <span className="muted">{t('home.payRow')}</span>
+        <ul>{PAY.map((p) => <li key={p}>{p}</li>)}</ul>
+      </div>
 
       {/* Problem */}
       <section className="sec" aria-labelledby="prob-h">
