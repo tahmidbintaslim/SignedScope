@@ -1,11 +1,8 @@
 .home {
-  /* Marketing palette: ink band, warm paper sections, a lime marker for the one phrase that matters. */
-  --mk-ink: #16122E; --mk-ink-2: #241D4A; --mk-on-ink: #F7F3EC; --mk-on-ink-muted: #C8C2DD;
-  --mk-paper: #F7F3EC; --mk-paper-line: #E7DFD0; --mk-mark: #D7F171;
-  margin-block: calc(-1 * var(--ss-space-12)) 0; background: var(--mk-paper);
+  /* Brand ink band for the hero and closing CTA; everything else uses the brand surfaces. */
+  --mk-ink: #0B1230; --mk-ink-2: #1E1650; --mk-on-ink: #FFFFFF; --mk-on-ink-muted: #C9CFDF;
+  margin-block: calc(-1 * var(--ss-space-12)) 0;
 }
-:root[data-theme="dark"] .home { --mk-paper: var(--ss-bg); --mk-paper-line: var(--ss-border); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .home { --mk-paper: var(--ss-bg); --mk-paper-line: var(--ss-border); } }
 
 /* Scroll reveal (only when JavaScript runs; content is visible without it). */
 .js [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity 600ms var(--ss-ease-enter), transform 600ms var(--ss-ease-enter); }
@@ -14,20 +11,20 @@
 
 /* Sections */
 .sec { padding-block: clamp(64px, 10vw, 120px); }
-.sec--tint { background: var(--ss-surface-raised); border-block: 1px solid var(--mk-paper-line); }
+.sec--tint { background: var(--ss-surface); }
 .sec-head { display: grid; gap: 12px; max-width: 720px; margin-bottom: clamp(32px, 5vw, 56px); }
-.sec-head h2, .cta-band h2 { font-family: var(--ss-font-display); font-weight: 400; font-size: clamp(2.5rem, 5.6vw, 4.25rem); line-height: 1.02; letter-spacing: -0.02em; }
+.sec-head h2, .cta-band h2 { font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.035em; }
 .sec-sub { font-size: 18px; max-width: 60ch; }
 
 /* Hero: centered copy on the ink band; the product sits on a stage that overlaps the band's edge. */
 .hero { position: relative; overflow: hidden; padding-block: clamp(64px, 10vw, 128px) clamp(180px, 22vw, 260px); background: radial-gradient(120% 80% at 50% 0%, var(--mk-ink-2), var(--mk-ink) 70%); color: var(--mk-on-ink); }
 .hero-copy { display: grid; gap: 24px; justify-items: center; text-align: center; max-width: 980px; }
-.hero h1 { font-family: var(--ss-font-display); font-weight: 400; font-size: clamp(3rem, 8.4vw, 6.75rem); line-height: 0.98; letter-spacing: -0.025em; text-wrap: balance; }
-.hero h1 .hl { display: inline; font-style: italic; color: var(--mk-ink); background: linear-gradient(transparent 12%, var(--mk-mark) 12%, var(--mk-mark) 92%, transparent 92%); padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.hero h1 { font-size: clamp(2.75rem, 7.2vw, 5.75rem); font-weight: 800; line-height: 0.98; letter-spacing: -0.045em; text-wrap: balance; }
+.hero h1 .hl { display: block; font-style: normal; color: #A78BFA; } /* brand violet, dark-surface tone */
 .hero-sub { font-size: clamp(1.05rem, 1.7vw, 1.3rem); color: var(--mk-on-ink-muted); max-width: 36em; }
 .hero-ctas { justify-content: center; margin-top: 4px; }
-.hero .ss-btn--secondary { background: transparent; color: var(--mk-on-ink); border-color: rgb(247 243 236 / 35%); }
-.hero .ss-btn--secondary:hover { background: rgb(247 243 236 / 8%); }
+.hero .ss-btn--secondary { background: transparent; color: var(--mk-on-ink); border-color: rgb(255 255 255 / 35%); }
+.hero .ss-btn--secondary:hover { background: rgb(255 255 255 / 8%); }
 .hero-note { font-size: 14px; color: var(--mk-on-ink-muted); }
 .hero-note a { color: var(--mk-on-ink); font-weight: 600; }
 .hero-stage { position: relative; display: grid; place-items: center; margin-top: clamp(-220px, -18vw, -150px); padding-block: clamp(32px, 5vw, 56px); border-radius: var(--ss-radius-2xl); background: linear-gradient(160deg, #EDE4FF, #FBE9F1 55%, #FFF1DC); box-shadow: 0 40px 80px -40px rgb(22 18 46 / 45%); }
