@@ -68,7 +68,7 @@ export default function NewScope() {
       currencySet.current = true;
       setF((x) => ({ ...x, title: draft.title, client: draft.client ?? x.client, notes: draft.notes, currency: (CURRENCIES as readonly string[]).includes(draft.currency) ? draft.currency : x.currency }));
       setItems(draft.items.map((it) => newItem(it.kind, it.text, it.price)));
-      setBanner({ tone: 'info', text: t('new.fromEstimate') });
+      setBanner({ tone: 'info', text: t(draft.source === 'template' ? 'new.fromTemplate' : 'new.fromEstimate') });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

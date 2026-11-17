@@ -217,7 +217,9 @@
       "built": "Open source (MIT). Built in Bangkok.",
       "privacy": "Privacy",
       "verify": "Verify a link",
-      "source": "Source code"
+      "source": "Source code",
+      "templates": "Templates",
+      "compare": "Compare"
     }
   },
   "thanks": {

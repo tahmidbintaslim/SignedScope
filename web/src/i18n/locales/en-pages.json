@@ -419,7 +419,8 @@
     "depositHintCr": "A share of the increase your client approves over the signed scope.",
     "depositNeedsPrice": "Add a price to a line to ask for a deposit.",
     "secWho": "Who it's for",
-    "secPay": "Getting paid"
+    "secPay": "Getting paid",
+    "fromTemplate": "Filled in from a template. Set your own prices and currency."
   },
   "compose": {
     "type": "Document type",

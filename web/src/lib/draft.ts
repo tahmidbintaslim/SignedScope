@@ -4,7 +4,7 @@ import type { EstimateRow } from './db';
 import type { ItemKind } from './sealed';
 
 export interface DraftItem { kind: ItemKind; text: string; price?: number }
-export interface ScopeDraft { title: string; currency: string; notes: string; items: DraftItem[]; client?: string }
+export interface ScopeDraft { title: string; currency: string; notes: string; items: DraftItem[]; client?: string; source?: 'estimate' | 'template' }
 
 /** One priced scope line per estimated feature (midpoint hours × rate × buffer), then exclusions. */
 export function linesFromEstimate(e: Pick<EstimateRow, 'rate' | 'buffer_pct' | 'data'>): DraftItem[] {
@@ -29,6 +29,7 @@ export function takeDraft(): ScopeDraft | null {
     return {
       title: String(d.title || '').slice(0, 160), currency: String(d.currency || ''), notes: String(d.notes || '').slice(0, 2000),
       client: d.client ? String(d.client).slice(0, 120) : undefined,
+      source: d.source === 'template' ? 'template' : 'estimate',
       items: d.items.slice(0, 100).map((it: Partial<DraftItem>): DraftItem => {
         const kind = (['scope', 'uat', 'out'] as const).find((k) => k === it.kind) ?? 'scope';
         return { kind, text: String(it.text || '').slice(0, 600), price: kind !== 'out' && it.price != null && Number.isFinite(Number(it.price)) ? Number(it.price) : undefined };

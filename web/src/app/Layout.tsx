@@ -58,6 +58,8 @@ function Footer() {
         <p className="muted">{t('home.footer.built')}</p>
         <nav aria-label="Footer" className="row">
           <AppLink to="/privacy">{t('home.footer.privacy')}</AppLink>
+          <AppLink to="/templates">{t('home.footer.templates')}</AppLink>
+          <AppLink to="/compare">{t('home.footer.compare')}</AppLink>
           <AppLink to="/verify">{t('home.footer.verify')}</AppLink>
           <a href="https://github.com/tahmidbintaslim/SignedScope">{t('home.footer.source')}</a>
         </nav>

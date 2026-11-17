@@ -1,15 +1,15 @@
 // Writes static HTML for each React page into dist/ (e.g. dist/index.html, dist/kit.html),
 // using the SSR build of src/entry-server.tsx and the client index.html as the template.
-import { readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 const { render, PRERENDER, SHELLS, META } = await import(pathToFileURL(resolve('dist-ssr/entry-server.js')).href);
 const template = readFileSync('dist/index.html', 'utf8');
 // Each pre-rendered page links its own CSS, so the first paint is already styled (the lazy route would otherwise add its CSS a second or two later).
 const manifest = JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8'));
 const routesSrc = readFileSync('src/app/routes.tsx', 'utf8');
-const source = Object.fromEntries([...routesSrc.matchAll(/'(\/[\w-]*)': \(\) => import\('\.\.\/(pages\/[^']+)'\)/g)].map(([, url, file]) => [url, `src/${file}.tsx`]));
+const source = Object.fromEntries([...routesSrc.matchAll(/'(\/[\w/-]*)': \(\) => import\('\.\.\/(pages\/[^']+)'\)/g)].map(([, url, file]) => [url, `src/${file}.tsx`]));
 function assets(key, seen = new Set()) {
   const e = manifest[key];
   if (!e || e.isEntry || seen.has(key)) return []; // the entry's CSS is already in index.html
@@ -39,6 +39,7 @@ const head = (url) => {
 for (const url of PRERENDER) {
   const page = head(url).replace('<div id="root"></div>', `<div id="root">${await render(url)}</div>`);
   const file = url === '/' ? 'dist/index.html' : `dist${url}.html`;
+  mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, page);
   console.log(`prerendered ${url} -> ${file} (${(page.length / 1024).toFixed(1)} KB)`);
 }
