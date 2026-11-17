@@ -1,0 +1,26 @@
+/* /templates and /templates/<slug> */
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1040px; margin-inline: auto; }
+.tpl-card { display: block; color: inherit; text-decoration: none; border-radius: var(--ss-radius-xl); }
+.tpl-card-in { display: grid; gap: 10px; height: 100%; transition: transform var(--ss-duration-base) var(--ss-ease-standard), box-shadow var(--ss-duration-base); }
+.tpl-card:hover .tpl-card-in { transform: translateY(-2px); box-shadow: var(--ss-shadow-lg); }
+.tpl-card h2 { font-size: 20px; }
+.tpl-meta { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; color: var(--ss-brand); font-weight: 700; font-size: 14px; }
+.tpl-doc { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; max-width: 1040px; margin-inline: auto; }
+@media (max-width: 860px) { .tpl-doc { grid-template-columns: 1fr; } }
+.tpl-sheet { display: grid; gap: 24px; }
+.tpl-intro { font-size: 18px; }
+.tpl-group h2 { font-size: 16px; margin-bottom: 8px; }
+.tpl-group ul { display: grid; margin: 0; padding: 0; list-style: none; border-left: 4px solid var(--ss-brand); border-radius: 4px; }
+.tpl-group.is-uat ul { border-left-color: var(--ss-success); }
+.tpl-group.is-out ul { border-left-color: var(--ss-text-muted); }
+.tpl-group li { display: flex; justify-content: space-between; gap: 16px; padding: 10px 14px; border-bottom: 1px solid var(--ss-border); }
+.tpl-group li:last-child { border-bottom: 0; }
+.tpl-group.is-out li span { color: var(--ss-text-muted); }
+.tpl-group b { flex: none; font-weight: 600; }
+.tpl-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; border-top: 2px solid var(--ss-text); }
+.tpl-total b { font-size: 24px; font-variant-numeric: tabular-nums; }
+.tpl-side { display: grid; gap: 16px; }
+.tpl-side-h { font-size: 16px; }
+.tpl-steps { display: grid; gap: 8px; margin: 0; padding-left: 20px; }
+.tpl-more { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tpl-cmp { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }

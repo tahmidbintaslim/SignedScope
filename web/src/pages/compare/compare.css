@@ -1,0 +1,24 @@
+/* /compare */
+.cmp { display: grid; gap: 24px; max-width: 1040px; margin-inline: auto; }
+.cmp-card { padding: 0; overflow-x: auto; }
+.cmp-tbl { width: 100%; border-collapse: collapse; }
+.cmp-tbl th, .cmp-tbl td { padding: 16px 20px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--ss-border); }
+.cmp-tbl tr:last-child th, .cmp-tbl tr:last-child td { border-bottom: 0; }
+.cmp-tbl thead th { font-size: 14px; color: var(--ss-text-muted); }
+.cmp-tbl thead th:last-child { color: var(--ss-brand); }
+.cmp-tbl tbody th { width: 26%; font-weight: 700; }
+.cmp-tbl td:last-child { font-weight: 600; }
+.cmp-ok { color: var(--ss-success); margin-right: 8px; vertical-align: -3px; }
+.cmp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cmp-cols h2 { font-size: 18px; }
+.cmp-ctas { justify-content: center; }
+@media (max-width: 760px) {
+  .cmp-cols { grid-template-columns: 1fr; }
+  /* Phones: each row becomes a block, topic on top. */
+  .cmp-tbl thead { display: none; }
+  .cmp-tbl tr { display: grid; padding: 14px 16px; border-bottom: 1px solid var(--ss-border); gap: 6px; }
+  .cmp-tbl th, .cmp-tbl td { padding: 0; border: 0; }
+  .cmp-tbl tbody th { width: auto; }
+  .cmp-tbl td:nth-of-type(1)::before { content: "PDF quote: "; color: var(--ss-text-muted); font-weight: 600; }
+  .cmp-tbl td:nth-of-type(2)::before { content: "SignedScope: "; color: var(--ss-brand); }
+}

@@ -88,5 +88,22 @@ for (const [path, heading] of [['/privacy', 'Privacy'], ['/thanks', 'You’re in
   await p.waitForURL('**/login');
   check(await p.getByRole('heading', { name: /Sign in or create your workspace|Accounts are coming soon/ }).first().waitFor({ timeout: 8000 }).then(() => true, () => false), 'navigation: /login opens the sign-in page');
 }
+// Templates: index links to a template, "Use this template" fills /new with its lines; compare page is clean.
+{
+  const p = await page();
+  await p.goto(BASE + '/templates');
+  await audit(p, '/templates');
+  await p.getByRole('link', { name: /Website design/ }).click();
+  await p.waitForURL('**/templates/website-design');
+  await p.goto(BASE + '/templates/website-design'); // audit the settled page, not the route-change fade
+  await audit(p, '/templates/website-design');
+  await p.getByRole('button', { name: 'Use this template' }).click();
+  await p.waitForURL('**/new');
+  check(await p.locator('.item').nth(13).waitFor({ timeout: 5000 }).then(() => true, () => false), 'templates: lines copied into /new');
+  check(/from a template/i.test(await p.locator('.doc-banner').first().innerText().catch(() => '')), 'templates: /new says where the lines came from');
+  await p.goto(BASE + '/compare');
+  await audit(p, '/compare');
+  check(p.errors.length === 0, `templates/compare: console ${p.errors.join(' | ') || 'clean'}`);
+}
 await b.close();
 process.exit(failed ? 1 : 0);
