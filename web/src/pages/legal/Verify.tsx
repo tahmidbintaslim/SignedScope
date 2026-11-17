@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { usePrefs } from '../../app/preferences';
 import { api } from '../../lib/api';
 import { safeDecode } from '../../lib/sealed';
-import { Badge, Button, Card, Field, Icon, Input } from '../../ui';
+import { Badge, Button, Card, Field, Icon, Input, PageHero } from '../../ui';
 import './legal.css';
 import '../../i18n/pages';
 
@@ -37,10 +37,10 @@ export default function Verify() {
 
   const d = check.data?.data;
   return (
+    <>
+    <PageHero title={t('verify.title')} lede={t('verify.lede')} />
     <section className="container legal">
-      <h1>{t('verify.title')}</h1>
-      <p className="muted">{t('verify.lede')}</p>
-      <Card>
+      <Card className="page-lift">
         <form onSubmit={submit} className="stack">
           <Field label={t('verify.label')}><Input value={link} onChange={(e) => setLink(e.target.value)} required placeholder="https://…/receipt#v1.…" autoComplete="off" spellCheck={false} /></Field>
           <div><Button type="submit" icon="shield" loading={check.isPending}>{t('verify.go')}</Button></div>
@@ -61,5 +61,6 @@ export default function Verify() {
         )}
       </div>
     </section>
+    </>
   );
 }
