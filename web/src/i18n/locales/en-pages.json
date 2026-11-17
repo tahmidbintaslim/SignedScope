@@ -417,7 +417,9 @@
     "depositPct": "{{pct}}% deposit",
     "depositHint": "A share of the total your client approves. The rest becomes a balance request.",
     "depositHintCr": "A share of the increase your client approves over the signed scope.",
-    "depositNeedsPrice": "Add a price to a line to ask for a deposit."
+    "depositNeedsPrice": "Add a price to a line to ask for a deposit.",
+    "secWho": "Who it's for",
+    "secPay": "Getting paid"
   },
   "compose": {
     "type": "Document type",

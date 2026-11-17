@@ -26,7 +26,7 @@ type Banner = { tone: 'info' | 'warn'; text: string } | null;
 
 export default function NewScope() {
   const { t } = useTranslation();
-  const { locale, date } = usePrefs();
+  const { locale, date, money } = usePrefs();
   const [f, setF] = useState<Form>({ title: '', client: '', agency: '', agencyEmail: '', currency: locale.currency, payLink: '', payInstructions: '', notes: '' });
   // The stored locale arrives after hydration; follow it until the currency is chosen or set by a
   // draft or change request.
@@ -140,27 +140,31 @@ export default function NewScope() {
       {banner && <p className={'doc-banner' + (banner.tone === 'warn' ? ' is-warn' : '')} role={banner.tone === 'warn' ? 'alert' : 'status'}><Icon name={banner.tone === 'warn' ? 'alert' : 'info'} size={18} />{banner.text}</p>}
       {projectId && session.isSuccess && !session.data && <p className="doc-banner is-warn" role="status"><Icon name="alert" size={18} />{t('new.signInToFile')}</p>}
       <form className="stack" onSubmit={submit}>
+        <Card className="stack new-sec">
+        <h2 className="new-sec-h"><span className="new-step" aria-hidden="true">1</span>{t('new.secWho')}</h2>
         <div className="new-grid">
           <Field label={t('new.titleLabel')}><Input required maxLength={160} value={f.title} onChange={set('title')} placeholder={t('new.titlePh')} /></Field>
           <Field label={t('new.client')}><Input required maxLength={120} value={f.client} onChange={set('client')} placeholder="Acme Co." /></Field>
           <Field label={t('new.agency')}><Input required maxLength={120} value={f.agency} onChange={set('agency')} autoComplete="organization" /></Field>
           <Field label={t('new.agencyEmail')} optional><Input type="email" maxLength={254} value={f.agencyEmail} onChange={set('agencyEmail')} autoComplete="email" /></Field>
         </div>
+        </Card>
 
+        <Card className="stack new-sec">
+        <div><h2 className="new-sec-h"><span className="new-step" aria-hidden="true">2</span>{t('new.items')}</h2><p className="muted small">{t('new.itemsHint')}</p></div>
         {!parent && (
-          <Card className="stack">
+          <div className="stack new-paste">
             <Field label={t('new.paste')} optional hint={draftNote || t('new.pasteHint')}>
               <Textarea rows={3} maxLength={6000} value={paste} onChange={(e) => setPaste(e.target.value)} placeholder={t('new.pastePh')} />
             </Field>
             <div><Button variant="secondary" size="sm" icon="spark" loading={draft.isPending} disabled={!paste.trim()} onClick={() => draft.mutate()}>{t('new.draft')}</Button></div>
-          </Card>
+          </div>
         )}
+        <ItemsEditor items={items} onChange={setItems} kinds={['scope', 'uat', 'out']} currency={f.currency} />
+        </Card>
 
-        <section className="stack">
-          <div><h2>{t('new.items')}</h2><p className="muted small">{t('new.itemsHint')}</p></div>
-          <ItemsEditor items={items} onChange={setItems} kinds={['scope', 'uat', 'out']} currency={f.currency} />
-        </section>
-
+        <Card className="stack new-sec">
+        <h2 className="new-sec-h"><span className="new-step" aria-hidden="true">3</span>{t('new.secPay')}</h2>
         <div className="new-grid">
           <Field label={t('new.currency')} hint={parent ? t('new.currencyLocked') : undefined}>
             <Select value={f.currency} onChange={(e) => { currencySet.current = true; set('currency')(e); }} disabled={Boolean(parent)}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</Select>
@@ -179,8 +183,13 @@ export default function NewScope() {
           <Textarea rows={2} maxLength={800} value={f.payInstructions} onChange={set('payInstructions')} placeholder={t('app.onb.payInsPh')} />
         </Field>
         <Field label={t('new.notes')} optional><Textarea rows={3} maxLength={2000} value={f.notes} onChange={set('notes')} /></Field>
+        </Card>
         {seal.isError && <p className="ss-error" role="alert">{(seal.error as Error).message}</p>}
-        <div><Button type="submit" size="lg" icon="link" loading={seal.isPending}>{t('new.create')}</Button></div>
+        {/* Sticky bar: the running total and the send button stay in view while editing. */}
+        <div className="new-bar">
+          <span className="new-bar-total">{itemsTotal(items) > 0 ? t('new.total', { amount: money(itemsTotal(items), f.currency) }) : null}</span>
+          <Button type="submit" size="lg" icon="link" loading={seal.isPending}>{t('new.create')}</Button>
+        </div>
       </form>
     </div>
   );
