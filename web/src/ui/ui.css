@@ -139,3 +139,11 @@
   .ss-tooltip { transform: translate(-50%, 0); }
 }
 .ss-art { display: block; } .ss-art svg { display: block; width: 100%; height: auto; }
+
+/* Page hero: brand ink band shared by the homepage and the public pages. */
+.page-hero { margin-top: calc(-1 * var(--ss-space-12)); padding-block: clamp(48px, 7vw, 88px) clamp(96px, 11vw, 136px); background: radial-gradient(120% 90% at 50% 0%, #1E1650, #0B1230 70%); color: #FFFFFF; }
+.page-hero-inner { display: grid; gap: 14px; justify-items: center; text-align: center; max-width: 820px; }
+.page-hero h1 { font-size: clamp(2.25rem, 5.4vw, 3.75rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.04em; text-wrap: balance; }
+.page-hero-lede { font-size: clamp(1rem, 1.6vw, 1.2rem); color: #C9CFDF; max-width: 40em; }
+.page-hero .ss-badge--brand { background: rgb(167 139 250 / 18%); color: #C4B5FD; }
+.page-lift { position: relative; margin-top: clamp(-96px, -8vw, -64px); }

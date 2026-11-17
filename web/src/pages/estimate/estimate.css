@@ -1,7 +1,7 @@
-.est { display: grid; gap: var(--ss-space-8); max-width: 960px; }
-.est-head { display: grid; gap: 12px; justify-items: start; }
-.est-head h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; max-width: 18ch; }
-.est-lede { font-size: 18px; max-width: 60ch; }
+.est { display: grid; gap: var(--ss-space-8); max-width: 960px; margin-inline: auto; }
+
+
+
 .est-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
 .est-loading { display: grid; gap: 16px; }
 .est-out { display: grid; gap: var(--ss-space-6); scroll-margin-top: 80px; }

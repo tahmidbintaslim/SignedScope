@@ -1,13 +1,14 @@
 // Privacy notice. Kept in English only until a lawyer has reviewed it (docs/PLAN.md phase G);
 // translations of legal text must not drift from the reviewed original.
 import { AppLink } from '../../app/AppLink';
+import { PageHero } from '../../ui';
 import './legal.css';
 
 export default function Privacy() {
   return (
-    <article className="container legal" lang="en">
-      <h1>Privacy</h1>
-      <p className="muted">This notice is in English only.</p>
+    <article lang="en">
+      <PageHero title="Privacy" lede="What SignedScope stores, why, for how long, and your rights. This notice is in English only." />
+      <div className="container legal legal-body page-lift">
       <p>On the free tier, SignedScope stores no documents, signatures or receipts. Each one is encoded in the link and signed by the server, which keeps no copy. The data sits in the URL fragment (after the <code>#</code>), so it is not sent when the page loads. When you open a link, the page sends the full document to the server so it can check the signature. The server handles it in memory and does not store it.</p>
       <p>I store waitlist emails, plus the plan and note you give me, so I can contact you about SignedScope. To rate-limit sign-ups, the waitlist form also keeps a keyed hash of your IP address, not the address itself. If paid plans open, Stripe will process the payments.</p>
       <p>If you arrive from a link with a <code>?ref=</code> tag (for example from a launch post), the server stores one anonymous marker with that tag and the date, so I can see which channels work. It stores no IP address, cookie or browser details. The tag is also saved with a waitlist sign-up.</p>
@@ -31,6 +32,7 @@ export default function Privacy() {
       <p>You can ask to see, correct, export or delete your data, object to its use, or withdraw consent. Use the contact form; requests are answered within 30 days. In Thailand you can also complain to the Personal Data Protection Committee (PDPC).</p>
       <p>If you sign a link someone sent you, the sender is the one who decides how your receipt is used; contact them first. To remove your waitlist entry, use the contact form and ask me to delete it.</p>
       <p className="muted">Last updated 8 November 2026.</p>
+      </div>
     </article>
   );
 }

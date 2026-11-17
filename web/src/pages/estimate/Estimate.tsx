@@ -11,7 +11,7 @@ import { api, ApiError } from '../../lib/api';
 import { fullySignedIn } from '../../lib/auth';
 import { CURRENCIES, type Currency } from '../../lib/locale';
 import { supabase } from '../../lib/supabase';
-import { Badge, Button, Card, Field, Icon, IconButton, Input, Select, Skeleton, Textarea, useToast } from '../../ui';
+import { Badge, Button, Card, Field, Icon, IconButton, Input, Select, Skeleton, Textarea, useToast, PageHero } from '../../ui';
 import { featurePrice, toDraft, totals } from './math';
 import { SAMPLE_BRIEF, SAMPLE_ESTIMATE } from './sample';
 import type { Estimate as Est, Story } from './types';
@@ -94,14 +94,10 @@ export default function Estimate() {
   };
 
   return (
+    <>
+    <PageHero badge={<Badge tone="brand"><Icon name="spark" size={14} />{t('estimate.beta')}</Badge>} title={t('estimate.h1')} lede={t('estimate.lede')} />
     <div className="container est">
-      <header className="est-head">
-        <Badge tone="brand"><Icon name="spark" size={14} />{t('estimate.beta')}</Badge>
-        <h1>{t('estimate.h1')}</h1>
-        <p className="est-lede muted">{t('estimate.lede')}</p>
-      </header>
-
-      <Card className="est-form">
+      <Card className="est-form page-lift">
         <form onSubmit={submit} className="stack">
           <Field label={t('estimate.briefLabel')} hint={t('estimate.privacy')}>
             <Textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder={t('estimate.briefPh')} rows={7} required minLength={20} maxLength={12000} />
@@ -202,6 +198,7 @@ export default function Estimate() {
         </section>
       )}
     </div>
+    </>
   );
 }
 
