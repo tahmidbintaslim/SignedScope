@@ -46,8 +46,14 @@ for (const url of PRERENDER) {
 writeFileSync('dist/404.html', head('/404').replace('<div id="root"></div>', `<div id="root">${await render('/404')}</div>`));
 console.log('prerendered not found -> dist/404.html');
 // Signed-in pages: the head only; the browser renders the page (an empty root means no hydration).
+// They always need Clerk, so its two large files start downloading with the HTML.
+const clerkPreload = Object.entries(manifest)
+  // Only the two entry files (clerk-js and @clerk/ui); @clerk/ui's own lazy screens load when used.
+  .filter(([src, e]) => e.isDynamicEntry && /node_modules\/@clerk\/(clerk-js|ui)\//.test(src) && /^assets\/(clerk\.)?no-rhc-[\w-]+\.js$/.test(e.file))
+  .map(([, e]) => `<link rel="modulepreload" crossorigin href="/${e.file}" />\n  `).join('');
+if (!clerkPreload) throw new Error('prerender: Clerk files not found in the Vite manifest');
 for (const url of SHELLS) {
-  writeFileSync(`dist${url}.html`, head(url));
+  writeFileSync(`dist${url}.html`, head(url).replace('</head>', `${clerkPreload}</head>`));
   console.log(`shell ${url} -> dist${url}.html`);
 }
 // Search engines: every indexable pre-rendered page in the sitemap; private areas kept out.
