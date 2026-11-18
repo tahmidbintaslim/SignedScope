@@ -40,7 +40,7 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [x] Pre-rendering and the Vercel build (`npm run build:site` → `site/`): React pages replace their old HTML, other URLs keep the old pages
 - [x] Homepage per the blueprint: hero with phone mockup, the quick-ask problem, interactive demo, how it works, benefits, client view, pricing with waitlist, FAQ (pre-rendered, hydrated, en/bn/th)
 - [x] `/estimate` as the main free tool, with its own SEO metadata (also `/verify`, `/privacy`, `/thanks` in React)
-- [ ] `/templates/[slug]` (5 seed templates) and `/compare/[slug]` pages
+- [x] `/templates` with 4 templates (website, logo, mobile app, social media; "Use this template" fills /new) and `/compare` (vs a PDF quote by email); all in the sitemap
 - [ ] `/verify` as a trust badge and growth loop on receipts (`/verify#token` checks on open; badge on receipts comes with E)
 - [ ] One domain and repo name everywhere; 301s from old URLs
 
@@ -48,14 +48,14 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [x] Sign up / sign in (email link, Google, GitHub), two-step code step (React; ships with the rest of /app)
 - [x] First-run onboarding: name, business, country, time zone, language, currency, rate, payment details, alerts, first client and project (needs migration 20261108030000_onboarding.sql on Supabase)
 - [x] Dashboard (React)
-- [ ] Projects, clients, settings, composer, vault in React
-- [ ] Client sign and receipt pages, /new, then switch /login and /app to React in production
+- [x] Projects, clients, settings, composer, vault in React
+- [x] Client sign and receipt pages, /new, then switch /login and /app to React in production (sign-in moved to Clerk: Google, GitHub, email code, two-step)
 
 ### F. Product
 - [ ] Starter limit of 3 active scopes; email alerts on every plan
-- [ ] Deposit and change-request billing rules (e.g. 50% deposit, 100% on change requests)
-- [ ] "Ask a question" per line item on the client page
-- [ ] PDF audit export (signature, time, fingerprint)
+- [x] Deposit and change-request billing rules (25/30/50/100% deposit; change requests default to 100%; enforced in api/seal)
+- [x] "Ask a question" per line item on the client page (answered from the project page)
+- [x] PDF audit export from the receipt (print to PDF with signer, time and fingerprint)
 - [ ] Billing for Pro/Agency (Stripe) after the beta
 
 ### G. Quality and launch
