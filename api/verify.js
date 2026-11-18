@@ -1,6 +1,7 @@
 'use strict';
-const { open, str, handler, httpError } = require('./_lib');
+const { str, handler, httpError } = require('./_lib');
 const db = require('./_supabase');
+const { openIssued } = require('./_tokens');
 const notify = require('./_notify');
 const { limited, clientIp } = require('./_limit');
 
@@ -11,7 +12,7 @@ const { limited, clientIp } = require('./_limit');
 // function: the Hobby plan allows 12.)
 module.exports = handler(async (body, req) => {
   if (body.action === 'ask') return ask(body, req);
-  const { obj, hash } = open(body.token);
+  const { obj, hash } = await openIssued(body.token);
   if (body.viewed === true && obj.type === 'doc' && db.configured()) {
     // The check itself never fails because the database is down.
     const row = await filed(hash).catch((e) => { console.error('filed', e.message); return null; });
@@ -45,7 +46,7 @@ async function markViewed(row) {
 }
 
 async function ask(body, req) {
-  const { obj: doc, hash } = open(body.token, 'doc');
+  const { obj: doc, hash } = await openIssued(body.token, 'doc');
   const item = doc.items.find((i) => i.id === body.itemId);
   if (!item) throw httpError(400, 'That line is not in this document');
   const question = str(body.question, 600, 'Your question');

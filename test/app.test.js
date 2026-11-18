@@ -273,3 +273,30 @@ test('per-line questions: only on filed, unsigned links; answers come back to th
   await call(sign, { token: s.body.token, name: 'Nok', agree: true, decisions: { [itemId]: { status: 'accepted' } } });
   assert.equal((await call(verify, { action: 'ask', token: s.body.token, itemId, question: 'Late?' })).status, 409, 'closed once signed');
 });
+
+test('key rotation: old-key links work only if SignedScope filed them; new links use the new key', async () => {
+  const oldKey = process.env.SIGNING_SECRET;
+  const filed = await call(seal, { ...base, projectId: P }, { authorization: 'Bearer fake-token-' + A.id });
+  const unfiled = await call(seal, base);
+  assert.equal(filed.status, 200); assert.equal(unfiled.status, 200);
+  const newKey = 'rotated-secret-rotated-secret-1234567';
+  process.env.SIGNING_SECRET = newKey;
+  try {
+    // Without the previous key listed, every old link fails.
+    assert.equal((await call(verify, { token: filed.body.token })).status, 400);
+    process.env.SIGNING_SECRET_PREVIOUS = oldKey;
+    const ok = await call(verify, { token: filed.body.token });
+    assert.equal(ok.status, 200, 'filed link signed with the old key still verifies');
+    const bad = await call(verify, { token: unfiled.body.token });
+    assert.equal(bad.status, 400, 'an old-key link with no record is refused (a leaked key cannot forge links)');
+    assert.match(bad.body.error, /retired key/);
+    // The client can still sign the filed link, and the receipt comes out under the new key.
+    const id = ok.body.data.items[0].id;
+    const r = await call(sign, { token: filed.body.token, name: 'Nok', agree: true, decisions: { [id]: { status: 'accepted' } } });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    delete process.env.SIGNING_SECRET_PREVIOUS;
+    const rv = await call(verify, { token: r.body.receipt });
+    assert.equal(rv.status, 200, 'new receipt verifies with the new key alone: ' + JSON.stringify(rv.body).slice(0, 200));
+    assert.equal((await call(verify, { token: (await call(seal, base)).body.token })).status, 200, 'new links use the new key');
+  } finally { process.env.SIGNING_SECRET = oldKey; delete process.env.SIGNING_SECRET_PREVIOUS; }
+});
