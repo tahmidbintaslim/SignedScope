@@ -14,9 +14,13 @@ export function clerk(): Promise<ClerkType | null> {
   if (typeof window !== 'undefined' && window.__ssTestClerk) return Promise.resolve(window.__ssTestClerk);
   if (!loading) {
     loading = (async () => {
+      // Download Clerk while the config request is in flight, not after it (the HTML of /app and
+      // /login also preloads these files, see prerender).
+      const code = Promise.all([import('@clerk/clerk-js/no-rhc'), import('@clerk/ui/no-rhc')]);
+      code.catch(() => undefined); // a failed download surfaces below, only if accounts are on
       const cfg = await getConfig();
       if (!cfg.enabled || !cfg.clerkPublishableKey) return null;
-      const [{ Clerk }, { ui }] = await Promise.all([import('@clerk/clerk-js/no-rhc'), import('@clerk/ui/no-rhc')]);
+      const [{ Clerk }, { ui }] = await code;
       const c = new Clerk(cfg.clerkPublishableKey);
       await c.load({ ui, signInUrl: '/login', signUpUrl: '/login', afterSignOutUrl: '/' });
       return c as unknown as ClerkType;
