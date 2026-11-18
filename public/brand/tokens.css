@@ -35,7 +35,7 @@
   --ss-shadow-brand: 0 12px 32px rgb(124 58 237 / 28%);
 
   /* Type */
-  --ss-font-sans: "Plus Jakarta Sans", "Anek Bangla", "IBM Plex Sans Thai", system-ui, sans-serif;
+  --ss-font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --ss-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   /* Motion */
