@@ -25,7 +25,7 @@ The brand gradient (violet → pink → coral) appears once per view: the logo, 
 
 ## Type
 - Plus Jakarta Sans for words; JetBrains Mono for amounts, codes and fingerprints. Both self-hosted.
-- Bengali: Anek Bangla. Thai: IBM Plex Sans Thai. Both OFL; self-host the subsets when those locales ship.
+- Bengali: Anek Bangla. Thai: Kanit (chosen by a native Thai reviewer). Both OFL, self-hosted, loaded only for their own script (unicode-range).
 - Scale (size/line height): Display 64/67, H1 48/53, H2 36/41, H3 24/30, Body L 18/29, Body 16/26, Small 14/21, Label 13/18 (+2% tracking), Mono 13/20.
 
 ## Space, radius, depth
