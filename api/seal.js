@@ -1,6 +1,7 @@
 'use strict';
-const { seal, open, str, email, items, currency, payLink, sections, schedule, depositPct, handler, httpError, sha256 } = require('./_lib');
+const { seal, str, email, items, currency, payLink, sections, schedule, depositPct, handler, httpError, sha256 } = require('./_lib');
 const db = require('./_supabase');
+const { openIssued } = require('./_tokens');
 const { limited, clientIp } = require('./_limit');
 
 // Agency creates a scope, proposal or agreement. Returns a signed share token for the client.
@@ -31,7 +32,7 @@ module.exports = handler(async (body, req) => {
   if (!doc.deposit) delete doc.deposit;
   if (body.parent) {
     // Change request: link to the previously signed receipt (baseline).
-    const { obj: r, hash } = open(body.parent, 'receipt');
+    const { obj: r, hash } = await openIssued(body.parent, 'receipt');
     doc.parent = { receiptHash: hash, docHash: r.docHash, title: r.doc.title, signedAt: r.signedAt, signer: r.signer.name, items: r.doc.items };
     if (r.totals) {
       // Totals are only comparable in one currency, so a change request keeps the baseline's.

@@ -17,6 +17,9 @@ function secret() {
   if (!s || s.length < 32) throw httpError(500, 'Server is not configured');
   return s;
 }
+// Key rotation: links signed with an earlier key still check out while it is listed here
+// (comma-separated). Such links come back marked `legacy`; see _tokens.openIssued.
+const previousSecrets = () => (process.env.SIGNING_SECRET_PREVIOUS || '').split(',').map((s) => s.trim()).filter((s) => s.length >= 32);
 
 function httpError(status, message) {
   const e = new Error(message);
@@ -38,16 +41,21 @@ function open(token, expectedType) {
   if (typeof token !== 'string' || token.length > 200_000) throw httpError(400, 'Invalid token');
   const [v, payload, sig] = token.split('.');
   if (v !== 'v1' || !payload || !sig) throw httpError(400, 'Invalid token');
-  const want = crypto.createHmac('sha256', secret()).update('v1.' + payload).digest();
   const got = Buffer.from(sig, 'base64url');
   // The last base64url character of a 32-byte MAC carries unused bits, so also require
   // the canonical encoding. Otherwise a link string with a changed final character still verifies.
-  if (got.length !== want.length || b64(got) !== sig || !crypto.timingSafeEqual(got, want)) {
-    throw httpError(400, 'Signature check failed: this link was modified or not issued by SignedScope');
+  const matches = (key) => {
+    const want = crypto.createHmac('sha256', key).update('v1.' + payload).digest();
+    return got.length === want.length && b64(got) === sig && crypto.timingSafeEqual(got, want);
+  };
+  let legacy = false;
+  if (!matches(secret())) {
+    if (!previousSecrets().some(matches)) throw httpError(400, 'Signature check failed: this link was modified or not issued by SignedScope');
+    legacy = true;
   }
   const obj = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
   if (expectedType && obj.type !== expectedType) throw httpError(400, `Expected a ${expectedType} token`);
-  return { obj, hash: sha256(payload) };
+  return { obj, hash: sha256(payload), legacy };
 }
 
 function str(v, max, field, required = true) {

@@ -1,13 +1,14 @@
 'use strict';
 const crypto = require('crypto');
-const { seal, open, str, email, acceptedTotal, payable, amountDue, handler, httpError } = require('./_lib');
+const { seal, str, email, acceptedTotal, payable, amountDue, handler, httpError } = require('./_lib');
 const db = require('./_supabase');
+const { openIssued } = require('./_tokens');
 const notify = require('./_notify');
 const { limited, clientIp } = require('./_limit');
 
 // Client signs off a document. Returns a signed receipt token.
 module.exports = handler(async (body, req) => {
-  const { obj: doc, hash: docHash } = open(body.token, 'doc');
+  const { obj: doc, hash: docHash } = await openIssued(body.token, 'doc');
   if (await limited('sign', clientIp(req), { windowMs: 10 * 60 * 1000, max: 20 })) throw httpError(429, 'Too many tries. Wait a few minutes and try again.');
   if (await limited('sign-doc', docHash, { windowMs: 60 * 60 * 1000, max: 10 })) throw httpError(429, 'This link was signed too many times in the last hour.');
   // A filed document is signed once. Refuse before issuing a receipt, so no valid receipt can
