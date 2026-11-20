@@ -90,7 +90,8 @@ function ProfileForm({ profile }: { profile: Profile | null }) {
           <legend className="ss-label">{t('app.onb.notifyTitle')}</legend>
           {NOTIFY.map(([k, label]) => <label key={k}><input type="checkbox" checked={f[k]} onChange={(e) => set(k, e.target.checked)} />{t(`app.onb.${label}`)}</label>)}
         </fieldset>
-        <div><Button type="submit" loading={save.isPending}>{t('app.set.save')}</Button></div>
+        {/* Stays in view while scrolling the long form (above the tab bar on phones). */}
+        <div className="save-bar"><Button type="submit" loading={save.isPending}>{t('app.set.save')}</Button></div>
       </form>
     </Card>
   );
