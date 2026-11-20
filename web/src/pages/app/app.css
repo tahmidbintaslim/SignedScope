@@ -149,3 +149,12 @@
   .gs-steps li { grid-template-columns: 28px minmax(0, 1fr); }
   .gs-steps li .ss-btn { grid-column: 2; justify-self: start; }
 }
+
+/* Sticky save bar for long forms (Settings). On phones it sits just above the bottom tab bar. */
+.save-bar { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: flex-end; margin: 0 calc(-1 * var(--ss-space-6)) calc(-1 * var(--ss-space-6)); padding: 12px var(--ss-space-6); background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--ss-border); border-radius: 0 0 var(--ss-radius-lg) var(--ss-radius-lg); }
+@media (max-width: 900px) {
+  .save-bar { bottom: calc(67px + env(safe-area-inset-bottom)); }
+  .save-bar .ss-btn { flex: 1; }
+  /* The floating New button would cover the save bar. */
+  body:has(.save-bar) .app-fab { display: none; }
+}
