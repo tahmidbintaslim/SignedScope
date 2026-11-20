@@ -81,9 +81,12 @@ module.exports = handler(async (body, req) => {
 
 // Starter plan: at most N filed links waiting for a signature at once (sent or viewed). Off unless
 // STARTER_SCOPE_LIMIT is set, so the beta stays unlimited; signed and changed links don't count.
+// Pro and Agency accounts (profiles.plan) have no limit.
 async function checkOpenLimit(owner) {
   const max = Number(process.env.STARTER_SCOPE_LIMIT || 0);
   if (!Number.isInteger(max) || max <= 0) return;
+  const { data: profile } = await db.admin().from('profiles').select('plan').eq('id', owner).maybeSingle();
+  if (profile && profile.plan && profile.plan !== 'starter') return;
   const { data } = await db.admin().from('documents').select('id').eq('owner', owner).in('status', ['sent', 'viewed']);
   if ((data || []).length >= max) {
     throw httpError(402, `Your plan includes ${max} open sign-off links at a time. When a client signs one, you can send the next.`);

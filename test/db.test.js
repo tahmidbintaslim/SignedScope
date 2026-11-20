@@ -78,6 +78,8 @@ test('migration applies and RLS isolates users', opts, () => {
   assert.ok(as(A, `insert into activity (project_id, kind) values ('${projectId}', 'note')`).ok);
   assert.ok(!as(B, `insert into activity (project_id, kind) values ('${projectId}', 'note')`).ok);
   assert.ok(as(A, `update profiles set business_name = 'A Studio', hourly_rate = 40`).ok);
+  assert.ok(!as(A, `update profiles set plan = 'pro'`).ok, 'users cannot change their own plan');
+  assert.equal(psql(`select plan from profiles where id = '${A}'`).out, 'starter', 'everyone starts on Starter');
   assert.equal(psql(`select coalesce(business_name, '-') from profiles where id = '${B}'`).out, '-');
 
   // Vault: own folder and own project only.

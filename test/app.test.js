@@ -145,6 +145,13 @@ test('Starter limit: off by default; when set, counts only links still waiting f
     const d = (await call(verify, { token: last.body.token })).body.data;
     await call(sign, { token: last.body.token, name: 'Nok', agree: true, decisions: { [d.items[0].id]: { status: 'accepted' } } });
     assert.equal((await call(seal, { ...base, projectId: P }, auth)).status, 200, 'a signed link frees a slot');
+    assert.equal((await call(seal, { ...base, projectId: P }, auth)).status, 402, 'full again');
+    // Pro and Agency have no limit.
+    const saved = store.tables.profiles;
+    store.tables.profiles = [...(saved || []).filter((p) => p.id !== A.id), { id: A.id, email: A.email, plan: 'pro' }];
+    try {
+      assert.equal((await call(seal, { ...base, projectId: P }, auth)).status, 200, 'pro is not limited');
+    } finally { store.tables.profiles = saved; }
   } finally { delete process.env.STARTER_SCOPE_LIMIT; }
 });
 
