@@ -56,7 +56,7 @@ Decisions behind this plan: React + Vite frontend, brand evolved from v4 (violet
 - [x] Deposit and change-request billing rules (25/30/50/100% deposit; change requests default to 100%; enforced in api/seal)
 - [x] "Ask a question" per line item on the client page (answered from the project page)
 - [x] PDF audit export from the receipt (print to PDF with signer, time and fingerprint)
-- [ ] Billing for Pro/Agency (Stripe) after the beta
+- [ ] Billing for Pro/Agency (Stripe) after the beta. Webhook and plan sync are built (`api/checkout.js`, POST); switch on by setting the `STRIPE_*` env vars, then `STARTER_SCOPE_LIMIT=3`
 
 ### G. Quality and launch
 - [ ] Playwright e2e for every page, axe scans, Lighthouse budgets in CI
